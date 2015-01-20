@@ -45,6 +45,8 @@ var _ = Describe("OpsManager object", func() {
 				}
 				f, _ := osutils.SafeCreate(opsManager.TargetDir, opsManager.OpsmanagerBackupDir, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
 				f.Close()
+				f, _ = osutils.SafeCreate(opsManager.TargetDir, opsManager.OpsmanagerBackupDir, OPSMGR_INSTALLATION_ASSETS_FILENAME)
+				f.Close()
 			})
 
 			It("Should yield nil error", func() {

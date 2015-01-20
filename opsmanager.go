@@ -16,6 +16,7 @@ const (
 	OPSMGR_INSTALLATION_SETTINGS_FILENAME       string = "installation.json"
 	OPSMGR_INSTALLATION_SETTINGS_POSTFIELD_NAME string = "installation[file]"
 	OPSMGR_INSTALLATION_ASSETS_FILENAME         string = "installation.zip"
+	OPSMGR_INSTALLATION_ASSETS_POSTFIELD_NAME   string = "installation[file]"
 	OPSMGR_DEPLOYMENTS_FILENAME                 string = "deployments.tar.gz"
 	OPSMGR_ENCRYPTIONKEY_FILENAME               string = "cc_db_encryption_key.txt"
 	OPSMGR_BACKUP_DIR                           string = "opsmanager"
@@ -93,20 +94,23 @@ func (context *OpsManager) Restore() (err error) {
 }
 
 func (context *OpsManager) importInstallation() (err error) {
-	err = context.importInstallationSettings()
+
+	if err = context.importInstallationPart(OPSMGR_INSTALLATION_SETTINGS_FILENAME, OPSMGR_INSTALLATION_SETTINGS_POSTFIELD_NAME, context.SettingsUploader); err == nil {
+		err = context.importInstallationPart(OPSMGR_INSTALLATION_ASSETS_FILENAME, OPSMGR_INSTALLATION_ASSETS_POSTFIELD_NAME, context.AssetsUploader)
+	}
 	return
 }
 
-func (context *OpsManager) importInstallationSettings() (err error) {
+func (context *OpsManager) importInstallationPart(filename, fieldname string, uploader httpUploader) (err error) {
 	var (
 		fileRef *os.File
 		res     *http.Response
 	)
-	filePath := path.Join(context.TargetDir, context.OpsmanagerBackupDir, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
+	filePath := path.Join(context.TargetDir, context.OpsmanagerBackupDir, filename)
 
 	if fileRef, err = os.Open(filePath); err == nil {
 
-		if res, err = context.SettingsUploader.Upload(OPSMGR_INSTALLATION_SETTINGS_POSTFIELD_NAME, OPSMGR_INSTALLATION_SETTINGS_FILENAME, fileRef, nil); err == nil && res.StatusCode != 200 {
+		if res, err = uploader.Upload(fieldname, filename, fileRef, nil); err == nil && res.StatusCode != 200 {
 			err = fmt.Errorf(fmt.Sprintf("Bad Response from Gateway: %v", res))
 		}
 	}
