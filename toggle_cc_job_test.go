@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	. "github.com/pivotalservices/cfbackup"
-	"github.com/pivotalservices/cfops/command"
+	"github.com/pivotalservices/beergut/command"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

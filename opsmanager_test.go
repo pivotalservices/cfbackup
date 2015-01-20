@@ -11,7 +11,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/pivotalservices/cfbackup"
-	"github.com/pivotalservices/cfops/osutils"
+	"github.com/pivotalservices/beergut/osutils"
 )
 
 var _ = Describe("OpsManager object", func() {

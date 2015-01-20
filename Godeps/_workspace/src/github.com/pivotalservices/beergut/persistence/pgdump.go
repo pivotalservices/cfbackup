@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/pivotalservices/cfops/command"
+	"github.com/pivotalservices/beergut/command"
 )
 
 type PgDump struct {
