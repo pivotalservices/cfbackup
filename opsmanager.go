@@ -1,14 +1,15 @@
 package cfbackup
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path"
 
-	cfhttp "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/command"
+	cfhttp "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/osutils"
 )
 
@@ -94,10 +95,20 @@ func (context *OpsManager) Restore() (err error) {
 }
 
 func (context *OpsManager) importInstallation() (err error) {
+	defer func() {
+		err = context.removeExistingDeploymentFiles()
+	}()
 
 	if err = context.importInstallationPart(OPSMGR_INSTALLATION_SETTINGS_FILENAME, OPSMGR_INSTALLATION_SETTINGS_POSTFIELD_NAME, context.SettingsUploader); err == nil {
 		err = context.importInstallationPart(OPSMGR_INSTALLATION_ASSETS_FILENAME, OPSMGR_INSTALLATION_ASSETS_POSTFIELD_NAME, context.AssetsUploader)
 	}
+	return
+}
+
+func (context *OpsManager) removeExistingDeploymentFiles() (err error) {
+	var w bytes.Buffer
+	command := "sudo rm /var/tempest/workspaces/default/deployments/bosh-deployments.yml"
+	err = context.Executer.Execute(&w, command)
 	return
 }
 
