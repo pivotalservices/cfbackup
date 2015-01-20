@@ -96,7 +96,9 @@ func (context *OpsManager) Restore() (err error) {
 
 func (context *OpsManager) importInstallation() (err error) {
 	defer func() {
-		err = context.removeExistingDeploymentFiles()
+		if err == nil {
+			err = context.removeExistingDeploymentFiles()
+		}
 	}()
 
 	if err = context.importInstallationPart(OPSMGR_INSTALLATION_SETTINGS_FILENAME, OPSMGR_INSTALLATION_SETTINGS_POSTFIELD_NAME, context.SettingsUploader); err == nil {
