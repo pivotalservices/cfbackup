@@ -5,7 +5,7 @@ import (
 	"os"
 	"path"
 
-	. "github.com/pivotalservices/beergut/osutils"
+	. "github.com/pivotalservices/gtils/osutils"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

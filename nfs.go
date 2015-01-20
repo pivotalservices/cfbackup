@@ -3,7 +3,7 @@ package cfbackup
 import (
 	"io"
 
-	"github.com/pivotalservices/beergut/command"
+	"github.com/pivotalservices/gtils/command"
 )
 
 func BackupNfs(password, ip string, dest io.Writer) (err error) {

@@ -5,8 +5,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/pivotalservices/beergut/persistence"
-	"github.com/pivotalservices/beergut/osutils"
+	"github.com/pivotalservices/gtils/persistence"
+	"github.com/pivotalservices/gtils/osutils"
 )
 
 const (

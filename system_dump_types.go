@@ -3,8 +3,8 @@ package cfbackup
 import (
 	"fmt"
 
-	"github.com/pivotalservices/beergut/persistence"
-	"github.com/pivotalservices/beergut/command"
+	"github.com/pivotalservices/gtils/persistence"
+	"github.com/pivotalservices/gtils/command"
 	"github.com/xchapter7x/goutil"
 )
 
