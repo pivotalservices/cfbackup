@@ -7,9 +7,9 @@ import (
 	"os"
 	"path"
 
-	cfhttp "github.com/pivotalservices/cfbackup/modules/http"
-	"github.com/pivotalservices/cfops/command"
-	"github.com/pivotalservices/cfops/osutils"
+	cfhttp "github.com/pivotalservices/beergut/http"
+	"github.com/pivotalservices/beergut/command"
+	"github.com/pivotalservices/beergut/osutils"
 )
 
 const (

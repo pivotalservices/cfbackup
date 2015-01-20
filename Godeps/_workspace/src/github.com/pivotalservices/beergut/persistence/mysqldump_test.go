@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	. "github.com/pivotalservices/cfbackup/modules/persistence"
+	. "github.com/pivotalservices/beergut/persistence"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

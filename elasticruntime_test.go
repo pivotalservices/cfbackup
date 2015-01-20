@@ -10,8 +10,8 @@ import (
 	"path"
 
 	. "github.com/pivotalservices/cfbackup"
-	"github.com/pivotalservices/cfbackup/modules/persistence"
-	"github.com/pivotalservices/cfops/osutils"
+	"github.com/pivotalservices/beergut/persistence"
+	"github.com/pivotalservices/beergut/osutils"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

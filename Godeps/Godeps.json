@@ -1,9 +1,6 @@
 {
 	"ImportPath": "github.com/pivotalservices/cfbackup",
-	"GoVersion": "go1.3.3",
-	"Packages": [
-		"./..."
-	],
+	"GoVersion": "go1.4",
 	"Deps": [
 		{
 			"ImportPath": "github.com/onsi/ginkgo",
@@ -16,14 +13,20 @@
 			"Rev": "dc751ce5f266d83c26fae5c0a9093973b29cb61d"
 		},
 		{
-			"ImportPath": "github.com/pivotalservices/cfops/command",
-			"Comment": "pre-refactor-for-backup-127-g2697d6f",
-			"Rev": "2697d6ff10ff4c680950cc8f82a5995636a787d8"
+			"ImportPath": "github.com/pivotalservices/beergut/command",
+			"Rev": "b8f9217423e26b01c946b7645dbbc94b93e41cf2"
 		},
 		{
-			"ImportPath": "github.com/pivotalservices/cfops/osutils",
-			"Comment": "pre-refactor-for-backup-127-g2697d6f",
-			"Rev": "2697d6ff10ff4c680950cc8f82a5995636a787d8"
+			"ImportPath": "github.com/pivotalservices/beergut/http",
+			"Rev": "b8f9217423e26b01c946b7645dbbc94b93e41cf2"
+		},
+		{
+			"ImportPath": "github.com/pivotalservices/beergut/osutils",
+			"Rev": "b8f9217423e26b01c946b7645dbbc94b93e41cf2"
+		},
+		{
+			"ImportPath": "github.com/pivotalservices/beergut/persistence",
+			"Rev": "b8f9217423e26b01c946b7645dbbc94b93e41cf2"
 		},
 		{
 			"ImportPath": "github.com/xchapter7x/goutil",
