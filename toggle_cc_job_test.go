@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	. "github.com/pivotalservices/cfbackup"
-	"github.com/pivotalservices/gtils/command"
+	. "github.com/pivotalservices/gtils/http"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -16,23 +16,47 @@ import (
 var (
 	successControlOuput string = "successful execute"
 	failureControlOuput string = "failed to execute"
+	redirectUrl         string = "mysite.com"
 	successWaitCalled   int
 	failureWaitCalled   int
 )
 
-type MockSuccessCall struct{}
+type MockSuccessGateway struct{ Handler HandleRespFunc }
 
-func (s MockSuccessCall) Execute(destination io.Writer, command string) (err error) {
-	destination.Write([]byte(successControlOuput))
-	return
+func makeResponse(location string, statusCode int) *http.Response {
+	header := make(map[string][]string)
+	locations := []string{redirectUrl}
+	header["Location"] = locations
+	response := &http.Response{StatusCode: 301,
+		Header: header,
+	}
+	return response
 }
 
-type MockFailCall struct{}
+func (gateway *MockSuccessGateway) Execute(method string) (val interface{}, err error) {
+	return gateway.Handler(makeResponse(redirectUrl, 301))
+}
 
-func (s MockFailCall) Execute(destination io.Writer, command string) (err error) {
-	destination.Write([]byte(failureControlOuput))
-	err = fmt.Errorf("random mock error")
-	return
+func (gateway *MockSuccessGateway) Upload(paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error) {
+	return nil, nil
+}
+
+func (gateway *MockSuccessGateway) ExecuteFunc(method string, handler HandleRespFunc) (interface{}, error) {
+	return nil, nil
+}
+
+type MockFailerGateway struct{ Handler HandleRespFunc }
+
+func (gateway *MockFailerGateway) Execute(method string) (val interface{}, err error) {
+	return gateway.Handler(makeResponse(redirectUrl, 200))
+}
+
+func (gateway *MockFailerGateway) Upload(paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error) {
+	return nil, nil
+}
+
+func (gateway *MockFailerGateway) ExecuteFunc(method string, handler HandleRespFunc) (interface{}, error) {
+	return nil, nil
 }
 
 type ClosingBuffer struct {
@@ -104,12 +128,12 @@ var _ = Describe("toggle cc job", func() {
 		return
 	}
 
-	successJobToggleMock := func(serverUrl, username, password string, exec command.Executer) (res string, err error) {
+	successJobToggleMock := func(serverUrl, username, password string) (res string, err error) {
 		successToggleCalled++
 		return
 	}
 
-	failureJobToggleMock := func(serverUrl, username, password string, exec command.Executer) (res string, err error) {
+	failureJobToggleMock := func(serverUrl, username, password string) (res string, err error) {
 		failureToggleCalled++
 		return
 	}
@@ -331,10 +355,20 @@ var _ = Describe("toggle cc job", func() {
 				password  string = "passwrdtest"
 				serverUrl string = "someurl.com"
 			)
-			It("Should return nil error and pass through the cmd output", func() {
-				msg, err := ToggleCCJobRunner(username, password, serverUrl, &MockSuccessCall{})
+			It("Should return nil error", func() {
+				NewToggleGateway = func(serverUrl, username, password string) HttpGateway {
+					return &MockSuccessGateway{Handler: ToggleCCHandler}
+				}
+				_, err := ToggleCCJobRunner(username, password, serverUrl)
 				Ω(err).Should(BeNil())
-				Ω(msg).Should(Equal(successControlOuput))
+			})
+
+			It("Should return redirectUrl", func() {
+				NewToggleGateway = func(serverUrl, username, password string) HttpGateway {
+					return &MockSuccessGateway{Handler: ToggleCCHandler}
+				}
+				msg, _ := ToggleCCJobRunner(username, password, serverUrl)
+				Ω(msg).Should(Equal(redirectUrl))
 			})
 		})
 
@@ -344,10 +378,12 @@ var _ = Describe("toggle cc job", func() {
 				password  string = "passwrdtest"
 				serverUrl string = "someurl.com"
 			)
-			It("Should return non nil error and pass through the cmd output", func() {
-				msg, err := ToggleCCJobRunner(username, password, serverUrl, &MockFailCall{})
-				Ω(err).ShouldNot(BeNil())
-				Ω(msg).Should(Equal(failureControlOuput))
+			It("Should return error on non 301 http code", func() {
+				NewToggleGateway = func(serverUrl, username, password string) HttpGateway {
+					return &MockFailerGateway{Handler: ToggleCCHandler}
+				}
+				_, err := ToggleCCJobRunner(username, password, serverUrl)
+				Ω(err).Should(BeNil())
 			})
 		})
 	})
