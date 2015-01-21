@@ -3,20 +3,21 @@ package cfbackup
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"strconv"
 	"strings"
 
-	"github.com/pivotalservices/gtils/command"
+	. "github.com/pivotalservices/gtils/http"
 )
 
 type CloudControllerJobs []string
 
 type RestAdapter func(method, connectionURL, username, password string, isYaml bool) (*http.Response, error)
 
-type JobTogglerAdapter func(serverUrl, username, password string, exec command.Executer) (res string, err error)
+type JobTogglerAdapter func(serverUrl, username, password string) (res string, err error)
 
 type EvenTaskCreaterAdapter func(method, url, username, password string, isYaml bool) (task EventTasker)
 
@@ -39,6 +40,7 @@ type CloudController struct {
 	state               string
 	JobToggler          JobTogglerAdapter
 	NewEventTaskCreater EvenTaskCreaterAdapter
+	httpGateway         HttpGateway
 }
 
 type Task struct {
@@ -50,6 +52,23 @@ type Task struct {
 	RestRunner RestAdapter
 }
 
+func ToggleCCHandler(response *http.Response) (redirectUrl interface{}, err error) {
+	if response.StatusCode != 301 {
+		err = errors.New("The response code from toggle request should return 301")
+		return
+	}
+	redirectUrls := response.Header["Location"]
+	if redirectUrls == nil || len(redirectUrls) < 1 {
+		err = errors.New("Could not find redirect url for bosh tasks")
+		return
+	}
+	return redirectUrls[0], nil
+}
+
+var NewToggleGateway = func(serverUrl, username, password string) HttpGateway {
+	return NewHttpGateway(serverUrl, username, password, "Content-Type:text/yaml", ToggleCCHandler)
+}
+
 func (restAdapter RestAdapter) Run(method, connectionURL, username, password string, isYaml bool) (statusCode int, body io.Reader, err error) {
 	res, err := restAdapter(method, connectionURL, username, password, isYaml)
 	defer res.Body.Close()
@@ -58,13 +77,10 @@ func (restAdapter RestAdapter) Run(method, connectionURL, username, password str
 	return
 }
 
-func ToggleCCJobRunner(serverUrl, username, password string, exec command.Executer) (res string, err error) {
-	var b bytes.Buffer
-	formatString := `curl -v -XPUT -u "%s:%s" %s --insecure -H "Content-Type:text/yaml" -i -s | grep Location: | grep Location: | cut -d ' ' -f 2`
-	cmd := fmt.Sprintf(formatString, username, password, serverUrl)
-	err = exec.Execute(&b, cmd)
-	res = b.String()
-	return
+func ToggleCCJobRunner(serverUrl, username, password string) (redirectUrl string, err error) {
+	httpGateway := NewToggleGateway(serverUrl, username, password)
+	ret, err := httpGateway.Execute("PUT")
+	return ret.(string), err
 }
 
 func NewCloudController(ip, username, password, deploymentName, state string) *CloudController {
@@ -74,7 +90,7 @@ func NewCloudController(ip, username, password, deploymentName, state string) *C
 		password:            password,
 		deploymentName:      deploymentName,
 		state:               state,
-		JobToggler:          JobTogglerAdapter(ToggleCCJobRunner),
+		JobToggler:          ToggleCCJobRunner,
 		NewEventTaskCreater: EvenTaskCreaterAdapter(NewTask),
 	}
 }
@@ -95,7 +111,7 @@ func (s *CloudController) ToggleJob(ccjob, serverURL string, ccjobindex int) (er
 		connectionURL string = newConnectionURL(serverURL, s.deploymentName, ccjob, s.state, ccjobindex)
 	)
 
-	if originalUrl, err := s.JobToggler(connectionURL, s.username, s.password, command.NewLocalExecuter()); err == nil {
+	if originalUrl, err := s.JobToggler(connectionURL, s.username, s.password); err == nil {
 		task := s.NewEventTaskCreater("GET", modifyUrl(s.ip, serverURL, originalUrl), s.username, s.password, false)
 		err = task.WaitForEventStateDone(contents, &eventObject)
 	}
