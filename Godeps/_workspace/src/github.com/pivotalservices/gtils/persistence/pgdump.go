@@ -17,11 +17,7 @@ type PgDump struct {
 	Caller   command.Executer
 }
 
-type Dumper interface {
-	Dump(io.Writer) error
-}
-
-func NewPgDump(ip string, port int, database, username, password string) Dumper {
+func NewPgDump(ip string, port int, database, username, password string) *PgDump {
 	return &PgDump{
 		Ip:       ip,
 		Port:     port,
@@ -32,7 +28,7 @@ func NewPgDump(ip string, port int, database, username, password string) Dumper 
 	}
 }
 
-func NewPgRemoteDump(port int, database, username, password string, sshCfg command.SshConfig) (Dumper, error) {
+func NewPgRemoteDump(port int, database, username, password string, sshCfg command.SshConfig) (*PgDump, error) {
 	remoteExecuter, err := command.NewRemoteExecutor(sshCfg)
 	return &PgDump{
 		Ip:       "localhost",
@@ -42,6 +38,11 @@ func NewPgRemoteDump(port int, database, username, password string, sshCfg comma
 		Password: password,
 		Caller:   remoteExecuter,
 	}, err
+}
+
+func (s *PgDump) Import(io.Reader) (err error) {
+	panic("you need to implement this")
+	return
 }
 
 func (s *PgDump) Dump(dest io.Writer) (err error) {

@@ -36,6 +36,11 @@ func NewRemoteMysqlDump(username, password string, sshCfg command.SshConfig) (*M
 	}, err
 }
 
+func (s *MysqlDump) Import(io.Reader) (err error) {
+	panic("you need to implement this")
+	return
+}
+
 func (s *MysqlDump) Dump(dest io.Writer) (err error) {
 	err = s.Caller.Execute(dest, s.getDumpCommand())
 	return

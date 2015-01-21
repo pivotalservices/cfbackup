@@ -8,21 +8,33 @@ import (
 	"net/http"
 )
 
-type HttpGateway struct {
-	endpoint    string
-	username    string
-	password    string
-	contentType string
-	handler     HttpResponseHandler
+type HttpGateway interface {
+	Execute(method string) (interface{}, error)
+	Upload(paramName, filename string, fileRef io.Reader, params map[string]string) (*http.Response, error)
 }
 
-func NewHttpGateway(endpoint, username, password, contentType string, handler HttpResponseHandler) *HttpGateway {
-	return &HttpGateway{
-		endpoint:    endpoint,
-		username:    username,
-		password:    password,
-		contentType: contentType,
-		handler:     handler,
+type DefaultHttpGateway struct {
+	endpoint       string
+	username       string
+	password       string
+	contentType    string
+	handleResponse HandleRespFunc
+}
+
+type HandleRespFunc func(response *http.Response) (interface{}, error)
+
+func NewHttpGateway(endpoint, username, password, contentType string, handler HandleRespFunc) HttpGateway {
+	if handler == nil {
+		handler = func(response *http.Response) (interface{}, error) {
+			return nil, nil
+		}
+	}
+	return &DefaultHttpGateway{
+		endpoint:       endpoint,
+		username:       username,
+		password:       password,
+		contentType:    contentType,
+		handleResponse: handler,
 	}
 }
 
@@ -32,7 +44,7 @@ var NewRoundTripper = func() http.RoundTripper {
 	}
 }
 
-func (gateway *HttpGateway) Execute(method string) (val interface{}, err error) {
+func (gateway *DefaultHttpGateway) Execute(method string) (val interface{}, err error) {
 	transport := NewRoundTripper()
 	req, err := http.NewRequest(method, gateway.endpoint, nil)
 	if err != nil {
@@ -44,10 +56,10 @@ func (gateway *HttpGateway) Execute(method string) (val interface{}, err error) 
 	if err != nil {
 		return
 	}
-	return gateway.handler.Handle(resp)
+	return gateway.handleResponse(resp)
 }
 
-func (gateway *HttpGateway) Upload(paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error) {
+func (gateway *DefaultHttpGateway) Upload(paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error) {
 	var part io.Writer
 
 	body := &bytes.Buffer{}
@@ -68,7 +80,7 @@ func (gateway *HttpGateway) Upload(paramName, filename string, fileRef io.Reader
 	return
 }
 
-func (gateway *HttpGateway) makeRequest(body *bytes.Buffer) (res *http.Response, err error) {
+func (gateway *DefaultHttpGateway) makeRequest(body *bytes.Buffer) (res *http.Response, err error) {
 	var req *http.Request
 	transport := NewRoundTripper()
 

@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 
-	"github.com/pivotalservices/gtils/persistence"
 	"github.com/pivotalservices/gtils/osutils"
 )
 
@@ -180,9 +179,9 @@ func (context *ElasticRuntime) openWriterAndDump(dbInfo SystemDump, databaseDir 
 }
 
 func (context *ElasticRuntime) dump(dest io.Writer, s SystemDump) (err error) {
-	var dumper persistence.Dumper
+	var dumper PersistanceBackup
 
-	if dumper, err = s.GetDumper(); err == nil {
+	if dumper, err = s.GetPersistanceBackup(); err == nil {
 		err = dumper.Dump(dest)
 	}
 	return
