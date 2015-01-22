@@ -111,10 +111,11 @@ func (s *CloudController) ToggleJob(ccjob, serverURL string, ccjobindex int) (er
 	var (
 		contents      bytes.Buffer
 		eventObject   EventObject
+		originalUrl   string
 		connectionURL string = newConnectionURL(serverURL, s.deploymentName, ccjob, s.state, ccjobindex)
 	)
 
-	if originalUrl, err := s.JobToggler(connectionURL, s.username, s.password); err == nil {
+	if originalUrl, err = s.JobToggler(connectionURL, s.username, s.password); err == nil {
 		task := s.NewEventTaskCreater("GET", modifyUrl(s.ip, serverURL, originalUrl), s.username, s.password, false)
 		err = task.WaitForEventStateDone(contents, &eventObject)
 	}
