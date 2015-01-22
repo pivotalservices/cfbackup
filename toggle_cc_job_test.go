@@ -79,6 +79,7 @@ type FailureMockEventTasker struct {
 }
 
 func (s FailureMockEventTasker) WaitForEventStateDone(contents bytes.Buffer, eventObject *EventObject) (err error) {
+	err = fmt.Errorf("this is an error")
 	failureWaitCalled++
 	return
 }
@@ -257,6 +258,17 @@ var _ = Describe("toggle cc job", func() {
 			})
 
 			Context("ToggleJob method", func() {
+				Context("when a call to task.WaitForEventStateDone internally returns error", func() {
+					BeforeEach(func() {
+						cc.NewEventTaskCreater = EvenTaskCreaterAdapter(failureTaskCreater)
+					})
+
+					It("should return an error from ToggleJob", func() {
+						err := cc.ToggleJob("jobA", "someurl.com", 1)
+						Ω(err).ShouldNot(BeNil())
+					})
+				})
+
 				It("Should call through the entire chain if there is no error", func() {
 					cc.ToggleJob("jobA", "someurl.com", 1)
 					Ω(successToggleCalled).Should(BeNumerically(">", 0))
