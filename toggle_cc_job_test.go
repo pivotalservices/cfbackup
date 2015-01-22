@@ -27,14 +27,14 @@ func makeResponse(location string, statusCode int) *http.Response {
 	header := make(map[string][]string)
 	locations := []string{redirectUrl}
 	header["Location"] = locations
-	response := &http.Response{StatusCode: 301,
+	response := &http.Response{StatusCode: statusCode,
 		Header: header,
 	}
 	return response
 }
 
 func (gateway *MockSuccessGateway) Execute(method string) (val interface{}, err error) {
-	return gateway.Handler(makeResponse(redirectUrl, 301))
+	return gateway.Handler(makeResponse(redirectUrl, 302))
 }
 
 func (gateway *MockSuccessGateway) Upload(paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error) {
@@ -378,12 +378,12 @@ var _ = Describe("toggle cc job", func() {
 				password  string = "passwrdtest"
 				serverUrl string = "someurl.com"
 			)
-			It("Should return error on non 301 http code", func() {
+			It("Should return error on non 302 http code", func() {
 				NewToggleGateway = func(serverUrl, username, password string) HttpGateway {
 					return &MockFailerGateway{Handler: ToggleCCHandler}
 				}
 				_, err := ToggleCCJobRunner(username, password, serverUrl)
-				Ω(err).Should(BeNil())
+				Ω(err).ShouldNot(BeNil())
 			})
 		})
 	})
