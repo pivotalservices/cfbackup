@@ -53,8 +53,8 @@ type Task struct {
 }
 
 func ToggleCCHandler(response *http.Response) (redirectUrl interface{}, err error) {
-	if response.StatusCode != 301 {
-		err = errors.New("The response code from toggle request should return 301")
+	if response.StatusCode != 302 {
+		err = errors.New("The response code from toggle request should return 302")
 		return
 	}
 	redirectUrls := response.Header["Location"]
@@ -66,7 +66,7 @@ func ToggleCCHandler(response *http.Response) (redirectUrl interface{}, err erro
 }
 
 var NewToggleGateway = func(serverUrl, username, password string) HttpGateway {
-	return NewHttpGateway(serverUrl, username, password, "Content-Type:text/yaml", ToggleCCHandler)
+	return NewHttpGateway(serverUrl, username, password, "text/yaml", ToggleCCHandler)
 }
 
 func (restAdapter RestAdapter) Run(method, connectionURL, username, password string, isYaml bool) (statusCode int, body io.Reader, err error) {
@@ -80,6 +80,9 @@ func (restAdapter RestAdapter) Run(method, connectionURL, username, password str
 func ToggleCCJobRunner(serverUrl, username, password string) (redirectUrl string, err error) {
 	httpGateway := NewToggleGateway(serverUrl, username, password)
 	ret, err := httpGateway.Execute("PUT")
+	if err != nil {
+		return
+	}
 	return ret.(string), err
 }
 
