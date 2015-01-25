@@ -28,16 +28,17 @@ const (
 )
 
 type httpUploader interface {
-	Upload(paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error)
+	Upload(paramName, filename string, fileRef io.Reader, params map[string]string) (*http.Response, error)
 }
 
-type httpExecuter interface {
-	Execute(method string) (val interface{}, err error)
+type httpRequestor interface {
+	Execute(method string) (interface{}, error)
+	ExecuteFunc(method string, handler cfhttp.HandleRespFunc) (interface{}, error)
 }
 
 type httpGateway interface {
 	httpUploader
-	httpExecuter
+	httpRequestor
 }
 
 // OpsManager contains the location and credentials of a Pivotal Ops Manager instance
@@ -48,10 +49,12 @@ type OpsManager struct {
 	Password            string
 	TempestPassword     string
 	DbEncryptionKey     string
-	RestRunner          RestAdapter
 	Executer            command.Executer
 	SettingsUploader    httpUploader
 	AssetsUploader      httpUploader
+	SettingsRequestor   httpRequestor
+	AssetsRequestor     httpRequestor
+	HttpResponseHandler cfhttp.HandleRespFunc
 	DeploymentDir       string
 	OpsmanagerBackupDir string
 }
@@ -65,6 +68,8 @@ var NewOpsManager = func(hostname string, username string, password string, temp
 		context = &OpsManager{
 			SettingsUploader: settingsGateway,
 			AssetsUploader:   assetsGateway,
+			SettingsRequestor:    settingsGateway,
+			AssetsRequestor:      assetsGateway,
 			DeploymentDir:    path.Join(target, OPSMGR_BACKUP_DIR, OPSMGR_DEPLOYMENTS_DIR),
 			Hostname:         hostname,
 			Username:         username,
@@ -72,7 +77,6 @@ var NewOpsManager = func(hostname string, username string, password string, temp
 			BackupContext: BackupContext{
 				TargetDir: target,
 			},
-			RestRunner:          RestAdapter(invoke),
 			Executer:            remoteExecuter,
 			OpsmanagerBackupDir: OPSMGR_BACKUP_DIR,
 		}
@@ -150,18 +154,20 @@ func (context *OpsManager) exportUrlToFile(urlFormat string, filename string) (e
 	defer settingsFileRef.Close()
 
 	if settingsFileRef, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, filename); err == nil {
-		err = context.exportUrlToWriter(urlFormat, settingsFileRef)
+		err = context.exportUrlToWriter(urlFormat, settingsFileRef, context.SettingsRequestor)
 	}
 	return
 }
 
-func (context *OpsManager) exportUrlToWriter(urlFormat string, dest io.Writer) (err error) {
-	var body io.Reader
-	connectionURL := fmt.Sprintf(urlFormat, context.Hostname)
-
-	if _, body, err = context.RestRunner.Run("GET", connectionURL, context.Username, context.Password, false); err == nil {
-		_, err = io.Copy(dest, body)
+func (context *OpsManager) exportUrlToWriter(urlFormat string, dest io.Writer, requestor httpRequestor) (err error) {
+	var responseHandler = context.HttpResponseHandler
+	if responseHandler == nil {
+		responseHandler = func(resp *http.Response) (interface{}, error) {
+			defer resp.Body.Close()
+			return io.Copy(dest, resp.Body)
+		}
 	}
+	_, err = requestor.ExecuteFunc("GET", responseHandler)
 	return
 }
 
