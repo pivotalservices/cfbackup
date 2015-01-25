@@ -1,10 +1,14 @@
 package cfbackup
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"os"
 
+	cfhttp "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/osutils"
 )
 
@@ -27,7 +31,7 @@ type ElasticRuntime struct {
 	JsonFile          string
 	SystemsInfo       map[string]SystemDump
 	PersistentSystems []SystemDump
-	RestRunner        RestAdapter
+	HttpGateway       cfhttp.HttpGateway
 	InstallationName  string
 	BackupContext
 }
@@ -78,8 +82,7 @@ var NewElasticRuntime = func(jsonFile string, target string) *ElasticRuntime {
 	)
 
 	context := &ElasticRuntime{
-		JsonFile:   jsonFile,
-		RestRunner: RestAdapter(invoke),
+		JsonFile: jsonFile,
 		BackupContext: BackupContext{
 			TargetDir: target,
 		},
@@ -104,6 +107,7 @@ var NewElasticRuntime = func(jsonFile string, target string) *ElasticRuntime {
 
 // Backup performs a backup of a Pivotal Elastic Runtime deployment
 func (context *ElasticRuntime) Backup() (err error) {
+	log.Println("Entering Backup() function")
 	var (
 		ccStop  *CloudController
 		ccStart *CloudController
@@ -111,14 +115,18 @@ func (context *ElasticRuntime) Backup() (err error) {
 	)
 
 	if err = context.ReadAllUserCredentials(); err == nil && context.directorCredentialsValid() {
-
+		log.Println("Retrieving All CC VMs")
 		if ccJobs, err = context.getAllCloudControllerVMs(); err == nil {
+			log.Println("Setting up CC jobs")
 			directorInfo := context.SystemsInfo[ER_DIRECTOR]
-			ccStop = NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, "stopped")
-			ccStart = NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, "started")
+			ccStop = NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, "stopped", nil)
+			ccStart = NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, "started", nil)
 			defer ccStart.ToggleJobs(CloudControllerJobs(ccJobs))
 			ccStop.ToggleJobs(CloudControllerJobs(ccJobs))
+		} else {
+			log.Fatal(err)
 		}
+		log.Println("Running RunDbBackups(...)")
 		err = context.RunDbBackups(context.PersistentSystems)
 
 	} else if err == nil {
@@ -133,25 +141,35 @@ func (context *ElasticRuntime) Restore() (err error) {
 }
 
 func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []string, err error) {
-	var (
-		statusCode int
-		body       io.Reader
-		jsonObj    []VMObject
-	)
 
+	log.Println("Entering getAllCloudControllerVMs() function")
 	directorInfo := context.SystemsInfo[ER_DIRECTOR]
 	connectionURL := fmt.Sprintf(ER_VMS_URL, directorInfo.Get(SD_IP), context.InstallationName)
+	gateway := context.HttpGateway
+	if gateway == nil {
+		gateway = cfhttp.NewHttpGateway(connectionURL, directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), "application/json", nil)
+	}
 
-	if statusCode, body, err = context.RestRunner.Run("GET", connectionURL, directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), false); err == nil && statusCode == 200 {
+	log.Println("Retrieving CC vms")
+	if body, err := gateway.Execute("GET"); err == nil {
+		var jsonObj []VMObject
 
-		if jsonObj, err = ReadAndUnmarshalVMObjects(body); err == nil {
+		log.Println("Unmarshalling CC vms")
+		contents := body.(*bytes.Buffer)
+		if err = json.Unmarshal(contents.Bytes(), &jsonObj); err == nil {
 			ccvms, err = GetCCVMs(jsonObj)
+			if err != nil {
+				log.Fatalf("Error unmarshalling ccvms.", err)
+			}
+		} else {
+			log.Fatalf("Error unmarshalling contents.", err)
 		}
 	}
 	return
 }
 
 func (context *ElasticRuntime) RunDbBackups(dbInfoList []SystemDump) (err error) {
+	log.Println("Entering RunDbBackups() function")
 
 	for _, info := range dbInfoList {
 
@@ -238,8 +256,12 @@ func (context *ElasticRuntime) directorCredentialsValid() (ok bool) {
 
 	if directorInfo, ok = context.SystemsInfo[ER_DIRECTOR]; ok {
 		connectionURL := fmt.Sprintf(ER_DIRECTOR_INFO_URL, directorInfo.Get(SD_IP))
-		statusCode, _, err := context.RestRunner.Run("GET", connectionURL, directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), false)
-		ok = (err == nil && statusCode == 200)
+		gateway := context.HttpGateway
+		if gateway == nil {
+			gateway = cfhttp.NewHttpGateway(connectionURL, directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), "application/json", nil)
+		}
+		_, err := gateway.Execute("GET")
+		ok = (err == nil)
 	}
 	return
 }

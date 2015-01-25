@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"path"
@@ -163,7 +162,6 @@ func (context *OpsManager) exportUrlToFile(urlFormat string, filename string) (e
 func (context *OpsManager) exportUrlToWriter(urlFormat string, dest io.Writer, requestor httpRequestor) (err error) {
 	var responseHandler = context.HttpResponseHandler
 	if responseHandler == nil {
-		log.Printf("responseHandler is nil")
 		responseHandler = func(resp *http.Response) (interface{}, error) {
 			defer resp.Body.Close()
 			return io.Copy(dest, resp.Body)

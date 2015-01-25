@@ -10,15 +10,14 @@ import (
 	"strings"
 
 	"github.com/pivotalservices/gtils/command"
+	cfhttp "github.com/pivotalservices/gtils/http"
 )
 
 type CloudControllerJobs []string
 
-type RestAdapter func(method, connectionURL, username, password string, isYaml bool) (*http.Response, error)
-
 type JobTogglerAdapter func(serverUrl, username, password string, exec command.Executer) (res string, err error)
 
-type EvenTaskCreaterAdapter func(method, url, username, password string, isYaml bool) (task EventTasker)
+type EvenTaskCreaterAdapter func(method string, httpGateway cfhttp.HttpGateway, handleRespFunc cfhttp.HandleRespFunc) (task EventTasker)
 
 type EventTasker interface {
 	WaitForEventStateDone(contents bytes.Buffer, eventObject *EventObject) (err error)
@@ -39,23 +38,13 @@ type CloudController struct {
 	state               string
 	JobToggler          JobTogglerAdapter
 	NewEventTaskCreater EvenTaskCreaterAdapter
+	HttpResponseHandler cfhttp.HandleRespFunc
 }
 
 type Task struct {
-	Method     string
-	Url        string
-	Username   string
-	Password   string
-	IsYaml     bool
-	RestRunner RestAdapter
-}
-
-func (restAdapter RestAdapter) Run(method, connectionURL, username, password string, isYaml bool) (statusCode int, body io.Reader, err error) {
-	res, err := restAdapter(method, connectionURL, username, password, isYaml)
-	defer res.Body.Close()
-	body = res.Body
-	statusCode = res.StatusCode
-	return
+	Method              string
+	HttpGateway         cfhttp.HttpGateway
+	HttpResponseHandler cfhttp.HandleRespFunc
 }
 
 func ToggleCCJobRunner(serverUrl, username, password string, exec command.Executer) (res string, err error) {
@@ -67,7 +56,7 @@ func ToggleCCJobRunner(serverUrl, username, password string, exec command.Execut
 	return
 }
 
-func NewCloudController(ip, username, password, deploymentName, state string) *CloudController {
+func NewCloudController(ip, username, password, deploymentName, state string, handleRespFunc cfhttp.HandleRespFunc) *CloudController {
 	return &CloudController{
 		ip:                  ip,
 		username:            username,
@@ -76,6 +65,7 @@ func NewCloudController(ip, username, password, deploymentName, state string) *C
 		state:               state,
 		JobToggler:          JobTogglerAdapter(ToggleCCJobRunner),
 		NewEventTaskCreater: EvenTaskCreaterAdapter(NewTask),
+		HttpResponseHandler: handleRespFunc,
 	}
 }
 
@@ -96,32 +86,36 @@ func (s *CloudController) ToggleJob(ccjob, serverURL string, ccjobindex int) (er
 	)
 
 	if originalUrl, err := s.JobToggler(connectionURL, s.username, s.password, command.NewLocalExecuter()); err == nil {
-		task := s.NewEventTaskCreater("GET", modifyUrl(s.ip, serverURL, originalUrl), s.username, s.password, false)
+		gateway := cfhttp.NewHttpGateway(modifyUrl(s.ip, serverURL, originalUrl), s.username, s.password, "application/json", s.HttpResponseHandler)
+		task := s.NewEventTaskCreater("GET", gateway, s.HttpResponseHandler)
 		err = task.WaitForEventStateDone(contents, &eventObject)
 	}
 	return
 }
 
-func NewTask(method, url, username, password string, isYaml bool) (task EventTasker) {
+func NewTask(method string, httpGateway cfhttp.HttpGateway, handleRespFunc cfhttp.HandleRespFunc) (task EventTasker) {
 	task = &Task{
-		Method:     method,
-		Url:        url,
-		Username:   username,
-		Password:   password,
-		IsYaml:     isYaml,
-		RestRunner: RestAdapter(invoke),
+		Method:              method,
+		HttpGateway:         httpGateway,
+		HttpResponseHandler: handleRespFunc,
 	}
 	return
 }
 
 func (s *Task) getEvents(dest io.Writer) (err error) {
-	statusCode, body, err := s.RestRunner.Run(s.Method, s.Url, s.Username, s.Password, s.IsYaml)
-
-	if statusCode == 200 {
-		io.Copy(dest, body)
-
-	} else {
+	var responseHandler = s.HttpResponseHandler
+	if responseHandler == nil {
+		responseHandler = func(resp *http.Response) (interface{}, error) {
+			defer resp.Body.Close()
+			return io.Copy(dest, resp.Body)
+		}
+	}
+	contents, err := s.HttpGateway.ExecuteFunc("GET", responseHandler)
+	if err != nil {
 		err = fmt.Errorf("Invalid Bosh Director Credentials")
+	}
+	if responseHandler != nil {
+		io.Copy(dest, contents.(io.Reader))
 	}
 	return
 }

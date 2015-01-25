@@ -20,7 +20,7 @@ type DefaultHttpGateway struct {
 	username       string
 	password       string
 	contentType    string
-	handleResponse HandleRespFunc
+	HandleResponse HandleRespFunc
 }
 
 type HandleRespFunc func(response *http.Response) (interface{}, error)
@@ -37,7 +37,7 @@ func NewHttpGateway(endpoint, username, password, contentType string, handler Ha
 		username:       username,
 		password:       password,
 		contentType:    contentType,
-		handleResponse: handler,
+		HandleResponse: handler,
 	}
 }
 
@@ -89,7 +89,7 @@ func (gateway *DefaultHttpGateway) makeResponse(method string, handleResponse Ha
 		return
 	}
 	if handleResponse == nil {
-		handleResponse = gateway.handleResponse
+		handleResponse = gateway.HandleResponse
 	  }
 	return handleResponse(resp)
  }

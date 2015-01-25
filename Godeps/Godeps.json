@@ -14,19 +14,19 @@
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/command",
-			"Rev": "9bfd1ca10872d7d29e3c19f54c099c089a23ab27"
+			"Rev": "ad86a35cab9e820a5c83ef8ecfde7c1d627d7cd1"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/http",
-			"Rev": "9bfd1ca10872d7d29e3c19f54c099c089a23ab27"
+			"Rev": "ad86a35cab9e820a5c83ef8ecfde7c1d627d7cd1"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/osutils",
-			"Rev": "9bfd1ca10872d7d29e3c19f54c099c089a23ab27"
+			"Rev": "ad86a35cab9e820a5c83ef8ecfde7c1d627d7cd1"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/persistence",
-			"Rev": "9bfd1ca10872d7d29e3c19f54c099c089a23ab27"
+			"Rev": "ad86a35cab9e820a5c83ef8ecfde7c1d627d7cd1"
 		},
 		{
 			"ImportPath": "github.com/xchapter7x/goutil",
