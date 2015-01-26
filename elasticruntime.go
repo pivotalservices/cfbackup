@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/pivotal-golang/lager"
+	cfhttp "github.com/pivotalservices/gtils/http"
+	"github.com/pivotalservices/gtils/osutils"
 	"io"
 	"log"
 	"os"
-
-	cfhttp "github.com/pivotalservices/gtils/http"
-	"github.com/pivotalservices/gtils/osutils"
 )
 
 const (
@@ -34,10 +34,11 @@ type ElasticRuntime struct {
 	HttpGateway       cfhttp.HttpGateway
 	InstallationName  string
 	BackupContext
+	Logger lager.Logger
 }
 
 // NewElasticRuntime initializes an ElasticRuntime intance
-var NewElasticRuntime = func(jsonFile string, target string) *ElasticRuntime {
+var NewElasticRuntime = func(jsonFile string, target string, logger lager.Logger) *ElasticRuntime {
 	var (
 		uaadbInfo *PgInfo = &PgInfo{
 			SystemInfo: SystemInfo{
@@ -101,13 +102,14 @@ var NewElasticRuntime = func(jsonFile string, target string) *ElasticRuntime {
 			nfsInfo,
 			mysqldbInfo,
 		},
+		Logger: logger,
 	}
 	return context
 }
 
 // Backup performs a backup of a Pivotal Elastic Runtime deployment
 func (context *ElasticRuntime) Backup() (err error) {
-	log.Println("Entering Backup() function")
+	context.Logger.Debug("Entering Backup() function")
 	var (
 		ccStop  *CloudController
 		ccStart *CloudController
@@ -115,9 +117,9 @@ func (context *ElasticRuntime) Backup() (err error) {
 	)
 
 	if err = context.ReadAllUserCredentials(); err == nil && context.directorCredentialsValid() {
-		log.Println("Retrieving All CC VMs")
+		context.Logger.Debug("Retrieving All CC VMs")
 		if ccJobs, err = context.getAllCloudControllerVMs(); err == nil {
-			log.Println("Setting up CC jobs")
+			context.Logger.Debug("Setting up CC jobs")
 			directorInfo := context.SystemsInfo[ER_DIRECTOR]
 			ccStop = NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, "stopped", nil)
 			ccStart = NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, "started", nil)
@@ -126,7 +128,7 @@ func (context *ElasticRuntime) Backup() (err error) {
 		} else {
 			log.Fatal(err)
 		}
-		log.Println("Running RunDbBackups(...)")
+		context.Logger.Debug("Running RunDbBackups(...)")
 		err = context.RunDbBackups(context.PersistentSystems)
 
 	} else if err == nil {
@@ -142,7 +144,7 @@ func (context *ElasticRuntime) Restore() (err error) {
 
 func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []string, err error) {
 
-	log.Println("Entering getAllCloudControllerVMs() function")
+	context.Logger.Debug("Entering getAllCloudControllerVMs() function")
 	directorInfo := context.SystemsInfo[ER_DIRECTOR]
 	connectionURL := fmt.Sprintf(ER_VMS_URL, directorInfo.Get(SD_IP), context.InstallationName)
 	gateway := context.HttpGateway
@@ -150,11 +152,11 @@ func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []string, err e
 		gateway = cfhttp.NewHttpGateway(connectionURL, directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), "application/json", nil)
 	}
 
-	log.Println("Retrieving CC vms")
+	context.Logger.Debug("Retrieving CC vms")
 	if body, err := gateway.Execute("GET"); err == nil {
 		var jsonObj []VMObject
 
-		log.Println("Unmarshalling CC vms")
+		context.Logger.Debug("Unmarshalling CC vms")
 		contents := body.(*bytes.Buffer)
 		if err = json.Unmarshal(contents.Bytes(), &jsonObj); err == nil {
 			ccvms, err = GetCCVMs(jsonObj)
@@ -169,7 +171,7 @@ func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []string, err e
 }
 
 func (context *ElasticRuntime) RunDbBackups(dbInfoList []SystemDump) (err error) {
-	log.Println("Entering RunDbBackups() function")
+	context.Logger.Debug("Entering RunDbBackups() function")
 
 	for _, info := range dbInfoList {
 
@@ -185,7 +187,7 @@ func (context *ElasticRuntime) RunDbBackups(dbInfoList []SystemDump) (err error)
 }
 
 func (context *ElasticRuntime) openWriterAndDump(dbInfo SystemDump, databaseDir string) (err error) {
-	log.Println("Entering openWriterAndDump() function")
+	context.Logger.Debug("Entering openWriterAndDump() function")
 	var (
 		outfile *os.File
 	)
@@ -198,7 +200,7 @@ func (context *ElasticRuntime) openWriterAndDump(dbInfo SystemDump, databaseDir 
 }
 
 func (context *ElasticRuntime) dump(dest io.Writer, s SystemDump) (err error) {
-	log.Println("Entering dump() function")
+	context.Logger.Debug("Entering dump() function")
 	var dumper PersistanceBackup
 
 	if dumper, err = s.GetPersistanceBackup(); err == nil {
