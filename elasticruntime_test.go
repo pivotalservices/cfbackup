@@ -86,7 +86,15 @@ var _ = Describe("ElasticRuntime", func() {
 						Component: component,
 						Identity:  username,
 					},
+					"ConsoledbInfo": &PgInfoMock{
+						SystemInfo: SystemInfo{
+							Product:   product,
+							Component: component,
+							Identity:  username,
+						},
+					},
 				}
+				ps []SystemDump = []SystemDump{info["ConsoledbInfo"]}
 			)
 
 			BeforeEach(func() {
@@ -97,7 +105,8 @@ var _ = Describe("ElasticRuntime", func() {
 					BackupContext: BackupContext{
 						TargetDir: target,
 					},
-					SystemsInfo: info,
+					SystemsInfo:       info,
+					PersistentSystems: ps,
 				}
 			})
 

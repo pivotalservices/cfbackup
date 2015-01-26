@@ -185,6 +185,7 @@ func (context *ElasticRuntime) RunDbBackups(dbInfoList []SystemDump) (err error)
 }
 
 func (context *ElasticRuntime) openWriterAndDump(dbInfo SystemDump, databaseDir string) (err error) {
+	log.Println("Entering openWriterAndDump() function")
 	var (
 		outfile *os.File
 	)
@@ -197,6 +198,7 @@ func (context *ElasticRuntime) openWriterAndDump(dbInfo SystemDump, databaseDir 
 }
 
 func (context *ElasticRuntime) dump(dest io.Writer, s SystemDump) (err error) {
+	log.Println("Entering dump() function")
 	var dumper PersistanceBackup
 
 	if dumper, err = s.GetPersistanceBackup(); err == nil {
