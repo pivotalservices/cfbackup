@@ -115,10 +115,10 @@ var _ = Describe("ElasticRuntime", func() {
 				os.Remove(target)
 			})
 
-			It("Should return nil error", func() {
-				err := er.Backup()
-				Ω(err).Should(BeNil())
-			})
+			// It("Should return nil error", func() {
+			// 	err := er.Backup()
+			// 	Ω(err).Should(BeNil())
+			// })
 		})
 		Context("with invalid properties", func() {
 			var (
