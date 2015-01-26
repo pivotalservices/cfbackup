@@ -1,7 +1,14 @@
 {
 	"ImportPath": "github.com/pivotalservices/cfbackup",
 	"GoVersion": "go1.4",
+	"Packages": [
+		"./..."
+	],
 	"Deps": [
+		{
+			"ImportPath": "github.com/cloudfoundry-incubator/cf-lager",
+			"Rev": "94308c799cf61ac0818667ddcc25046c8c5659d1"
+		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo",
 			"Comment": "v1.1.0-30-g5ce32b7",
@@ -11,6 +18,10 @@
 			"ImportPath": "github.com/onsi/gomega",
 			"Comment": "v1.0-26-gdc751ce",
 			"Rev": "dc751ce5f266d83c26fae5c0a9093973b29cb61d"
+		},
+		{
+			"ImportPath": "github.com/pivotal-golang/lager",
+			"Rev": "ce9effb2d1062e2d81333f942df0549706901b1b"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/command",

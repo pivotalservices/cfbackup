@@ -107,6 +107,7 @@ var _ = Describe("ElasticRuntime", func() {
 					},
 					SystemsInfo:       info,
 					PersistentSystems: ps,
+					Logger:            Logger(),
 				}
 			})
 
@@ -144,6 +145,7 @@ var _ = Describe("ElasticRuntime", func() {
 						TargetDir: target,
 					},
 					SystemsInfo: info,
+					Logger:      Logger(),
 				}
 			})
 
@@ -193,6 +195,7 @@ var _ = Describe("ElasticRuntime", func() {
 						TargetDir: target,
 					},
 					SystemsInfo: info,
+					Logger:      Logger(),
 				}
 				er.ReadAllUserCredentials()
 			})
@@ -244,6 +247,7 @@ var _ = Describe("ElasticRuntime", func() {
 						TargetDir: target,
 					},
 					SystemsInfo: info,
+					Logger:      Logger(),
 				}
 				er.ReadAllUserCredentials()
 			})
@@ -295,6 +299,7 @@ var _ = Describe("ElasticRuntime", func() {
 						TargetDir: target,
 					},
 					SystemsInfo: info,
+					Logger:      Logger(),
 				}
 				er.ReadAllUserCredentials()
 			})
@@ -344,6 +349,7 @@ var _ = Describe("ElasticRuntime", func() {
 						TargetDir: target,
 					},
 					SystemsInfo: info,
+					Logger:      Logger(),
 				}
 				er.ReadAllUserCredentials()
 			})
