@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/pivotal-golang/lager"
 	"os"
-	// "github.com/pivotal-golang/lager/lagertest"
 )
 
 const (
