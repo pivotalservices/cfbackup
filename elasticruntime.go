@@ -8,7 +8,6 @@ import (
 	cfhttp "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/osutils"
 	"io"
-	"log"
 	"os"
 )
 
@@ -125,13 +124,13 @@ func (context *ElasticRuntime) Backup() (err error) {
 			ccStart = NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, "started", nil)
 			defer ccStart.ToggleJobs(CloudControllerJobs(ccJobs))
 			ccStop.ToggleJobs(CloudControllerJobs(ccJobs))
-		} else {
-			log.Fatal(err)
 		}
-		context.Logger.Debug("Running RunDbBackups(...)")
-		err = context.RunDbBackups(context.PersistentSystems)
+		if err != nil {
+			context.Logger.Debug("Running database backups")
+			err = context.RunDbBackups(context.PersistentSystems)
+		}
 
-	} else if err == nil {
+	} else {
 		err = fmt.Errorf("invalid director credentials")
 	}
 	return
@@ -160,11 +159,6 @@ func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []string, err e
 		contents := body.(*bytes.Buffer)
 		if err = json.Unmarshal(contents.Bytes(), &jsonObj); err == nil {
 			ccvms, err = GetCCVMs(jsonObj)
-			if err != nil {
-				log.Fatalf("Error unmarshalling ccvms.", err)
-			}
-		} else {
-			log.Fatalf("Error unmarshalling contents.", err)
 		}
 	}
 	return
