@@ -50,6 +50,7 @@ type OpsManager struct {
 	TempestPassword     string
 	DbEncryptionKey     string
 	Executer            command.Executer
+	LocalExecuter       command.Executer
 	SettingsUploader    httpUploader
 	AssetsUploader      httpUploader
 	SettingsRequestor   httpRequestor
@@ -66,18 +67,19 @@ var NewOpsManager = func(hostname string, username string, password string, temp
 	if remoteExecuter, err = createExecuter(hostname, tempestpassword); err == nil {
 		settingsGateway, assetsGateway := createInstallationGateways(hostname, tempestpassword)
 		context = &OpsManager{
-			SettingsUploader: settingsGateway,
-			AssetsUploader:   assetsGateway,
-			SettingsRequestor:    settingsGateway,
-			AssetsRequestor:      assetsGateway,
-			DeploymentDir:    path.Join(target, OPSMGR_BACKUP_DIR, OPSMGR_DEPLOYMENTS_DIR),
-			Hostname:         hostname,
-			Username:         username,
-			Password:         password,
+			SettingsUploader:  settingsGateway,
+			AssetsUploader:    assetsGateway,
+			SettingsRequestor: settingsGateway,
+			AssetsRequestor:   assetsGateway,
+			DeploymentDir:     path.Join(target, OPSMGR_BACKUP_DIR, OPSMGR_DEPLOYMENTS_DIR),
+			Hostname:          hostname,
+			Username:          username,
+			Password:          password,
 			BackupContext: BackupContext{
 				TargetDir: target,
 			},
 			Executer:            remoteExecuter,
+			LocalExecuter:       command.NewLocalExecuter(),
 			OpsmanagerBackupDir: OPSMGR_BACKUP_DIR,
 		}
 	}
@@ -174,9 +176,23 @@ func (context *OpsManager) exportUrlToWriter(urlFormat string, dest io.Writer, r
 func (context *OpsManager) extract() (err error) {
 	var keyFileRef *os.File
 	defer keyFileRef.Close()
+	fmt.Print("Extracting Ops Manager")
 
-	if keyFileRef, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, OPSMGR_ENCRYPTIONKEY_FILENAME); err == nil {
-		err = ExtractEncryptionKey(keyFileRef, context.DeploymentDir)
+	if keyFileRef, err = osutils.SafeCreate(context.OpsmanagerBackupDir, OPSMGR_ENCRYPTIONKEY_FILENAME); err == nil {
+		fmt.Print("Extracting encryption key")
+		backupDir := path.Join(context.TargetDir, context.OpsmanagerBackupDir)
+		deployment := path.Join(backupDir, OPSMGR_DEPLOYMENTS_FILENAME)
+		cmd := "tar -xf " + deployment + " -C " + backupDir
+		fmt.Printf("Extracting : %s", cmd)
+		context.LocalExecuter.Execute(nil, cmd)
+
+		// err = ExtractEncryptionKey(keyFileRef, context.DeploymentDir)
+		command := "grep -E 'db_encryption_key' " + context.DeploymentDir + "/cf-*.yml | cut -d ':' -f 2 | sort -u | tr -d ' ' > " + backupDir + "/cc_db_encryption_key.txt"
+		fmt.Printf("Executing : %s", command)
+		context.LocalExecuter.Execute(nil, command)
+	}
+	if err != nil {
+		fmt.Printf("Error: %v", err)
 	}
 	return
 }
