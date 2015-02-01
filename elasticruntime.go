@@ -44,6 +44,7 @@ var NewElasticRuntime = func(jsonFile string, target string, logger lager.Logger
 				Component: "uaadb",
 				Identity:  "root",
 			},
+			Database: "uaa",
 		}
 		consoledbInfo *PgInfo = &PgInfo{
 			SystemInfo: SystemInfo{
@@ -51,6 +52,7 @@ var NewElasticRuntime = func(jsonFile string, target string, logger lager.Logger
 				Component: "consoledb",
 				Identity:  "root",
 			},
+			Database: "console",
 		}
 		ccdbInfo *PgInfo = &PgInfo{
 			SystemInfo: SystemInfo{
@@ -58,6 +60,7 @@ var NewElasticRuntime = func(jsonFile string, target string, logger lager.Logger
 				Component: "ccdb",
 				Identity:  "admin",
 			},
+			Database: "ccdb",
 		}
 		mysqldbInfo *MysqlInfo = &MysqlInfo{
 			SystemInfo: SystemInfo{
@@ -65,6 +68,7 @@ var NewElasticRuntime = func(jsonFile string, target string, logger lager.Logger
 				Component: "mysql",
 				Identity:  "root",
 			},
+			Database: "mysql",
 		}
 		directorInfo *SystemInfo = &SystemInfo{
 			Product:   "microbosh",
@@ -97,8 +101,8 @@ var NewElasticRuntime = func(jsonFile string, target string, logger lager.Logger
 			consoledbInfo,
 			uaadbInfo,
 			ccdbInfo,
-			nfsInfo,
-			mysqldbInfo,
+			// nfsInfo,
+			// mysqldbInfo,
 		},
 		Logger: logger,
 	}
@@ -187,6 +191,7 @@ func (context *ElasticRuntime) openWriterAndDump(dbInfo SystemDump, databaseDir 
 		outfile *os.File
 	)
 	filename := fmt.Sprintf(ER_BACKUP_FILE_FORMAT, dbInfo.Get(SD_COMPONENT))
+	context.Logger.Debug("openWriterAndDump() function", lager.Data{"filename": filename})
 
 	if outfile, err = osutils.SafeCreate(databaseDir, filename); err == nil {
 		err = context.dump(outfile, dbInfo)
