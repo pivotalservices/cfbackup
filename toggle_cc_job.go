@@ -46,7 +46,6 @@ type Task struct {
 	RequestAdaptor RequestAdaptor
 }
 
-// func ToggleCCHandler(response *http.Response) (redirectUrl interface{}, err error) {
 func ToggleCCHandler(response *http.Response) (redirectUrl interface{}, err error) {
 	if response.StatusCode != 302 {
 		err = errors.New("The response code from toggle request should return 302")
