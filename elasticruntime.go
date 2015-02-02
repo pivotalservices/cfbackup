@@ -1,13 +1,13 @@
 package cfbackup
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/pivotal-golang/lager"
-	cfhttp "github.com/pivotalservices/gtils/http"
+	. "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/osutils"
 	"io"
+	"io/ioutil"
 	"os"
 )
 
@@ -30,7 +30,7 @@ type ElasticRuntime struct {
 	JsonFile          string
 	SystemsInfo       map[string]SystemDump
 	PersistentSystems []SystemDump
-	HttpGateway       cfhttp.HttpGateway
+	HttpGateway       HttpGateway
 	InstallationName  string
 	BackupContext
 	Logger lager.Logger
@@ -45,6 +45,7 @@ var NewElasticRuntime = func(jsonFile string, target string, logger lager.Logger
 				Component: "uaadb",
 				Identity:  "root",
 			},
+			Database: "uaa",
 		}
 		consoledbInfo *PgInfo = &PgInfo{
 			SystemInfo: SystemInfo{
@@ -52,6 +53,7 @@ var NewElasticRuntime = func(jsonFile string, target string, logger lager.Logger
 				Component: "consoledb",
 				Identity:  "root",
 			},
+			Database: "console",
 		}
 		ccdbInfo *PgInfo = &PgInfo{
 			SystemInfo: SystemInfo{
@@ -59,6 +61,7 @@ var NewElasticRuntime = func(jsonFile string, target string, logger lager.Logger
 				Component: "ccdb",
 				Identity:  "admin",
 			},
+			Database: "ccdb",
 		}
 		mysqldbInfo *MysqlInfo = &MysqlInfo{
 			SystemInfo: SystemInfo{
@@ -66,6 +69,7 @@ var NewElasticRuntime = func(jsonFile string, target string, logger lager.Logger
 				Component: "mysql",
 				Identity:  "root",
 			},
+			Database: "mysql",
 		}
 		directorInfo *SystemInfo = &SystemInfo{
 			Product:   "microbosh",
@@ -98,8 +102,8 @@ var NewElasticRuntime = func(jsonFile string, target string, logger lager.Logger
 			consoledbInfo,
 			uaadbInfo,
 			ccdbInfo,
-			nfsInfo,
-			mysqldbInfo,
+			// nfsInfo,
+			// mysqldbInfo,
 		},
 		Logger: logger,
 	}
@@ -120,12 +124,12 @@ func (context *ElasticRuntime) Backup() (err error) {
 		if ccJobs, err = context.getAllCloudControllerVMs(); err == nil {
 			context.Logger.Debug("Setting up CC jobs")
 			directorInfo := context.SystemsInfo[ER_DIRECTOR]
-			ccStop = NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, "stopped", nil)
-			ccStart = NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, "started", nil)
+			ccStop = NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, "stopped")
+			ccStart = NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, "started")
 			defer ccStart.ToggleJobs(CloudControllerJobs(ccJobs))
 			ccStop.ToggleJobs(CloudControllerJobs(ccJobs))
 		}
-		if err != nil {
+		if err == nil {
 			context.Logger.Debug("Running database backups")
 			err = context.RunDbBackups(context.PersistentSystems)
 		}
@@ -146,18 +150,24 @@ func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []string, err e
 	context.Logger.Debug("Entering getAllCloudControllerVMs() function")
 	directorInfo := context.SystemsInfo[ER_DIRECTOR]
 	connectionURL := fmt.Sprintf(ER_VMS_URL, directorInfo.Get(SD_IP), context.InstallationName)
+	context.Logger.Debug("getAllCloudControllerVMs() function", lager.Data{"connectionURL": connectionURL, "directorInfo": directorInfo})
 	gateway := context.HttpGateway
 	if gateway == nil {
-		gateway = cfhttp.NewHttpGateway(connectionURL, directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), "application/json", nil)
+		gateway = NewHttpGateway()
 	}
-
 	context.Logger.Debug("Retrieving CC vms")
-	if body, err := gateway.Execute("GET"); err == nil {
+	if resp, err := gateway.Get(HttpRequestEntity{
+		Url:         connectionURL,
+		Username:    directorInfo.Get(SD_USER),
+		Password:    directorInfo.Get(SD_PASS),
+		ContentType: "application/json",
+	})(); err == nil {
 		var jsonObj []VMObject
 
 		context.Logger.Debug("Unmarshalling CC vms")
-		contents := body.(*bytes.Buffer)
-		if err = json.Unmarshal(contents.Bytes(), &jsonObj); err == nil {
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err = json.Unmarshal(body, &jsonObj); err == nil {
 			ccvms, err = GetCCVMs(jsonObj)
 		}
 	}
@@ -174,9 +184,10 @@ func (context *ElasticRuntime) RunDbBackups(dbInfoList []SystemDump) (err error)
 		}
 
 		if err != nil {
-			break
+			return fmt.Errorf("db backup failed: %v", err)
 		}
 	}
+	context.Logger.Debug("RunDbBackups() function complete")
 	return
 }
 
@@ -186,6 +197,7 @@ func (context *ElasticRuntime) openWriterAndDump(dbInfo SystemDump, databaseDir 
 		outfile *os.File
 	)
 	filename := fmt.Sprintf(ER_BACKUP_FILE_FORMAT, dbInfo.Get(SD_COMPONENT))
+	context.Logger.Debug("openWriterAndDump() function", lager.Data{"filename": filename})
 
 	if outfile, err = osutils.SafeCreate(databaseDir, filename); err == nil {
 		err = context.dump(outfile, dbInfo)
@@ -256,9 +268,14 @@ func (context *ElasticRuntime) directorCredentialsValid() (ok bool) {
 		connectionURL := fmt.Sprintf(ER_DIRECTOR_INFO_URL, directorInfo.Get(SD_IP))
 		gateway := context.HttpGateway
 		if gateway == nil {
-			gateway = cfhttp.NewHttpGateway(connectionURL, directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), "application/json", nil)
+			gateway = NewHttpGateway()
 		}
-		_, err := gateway.Execute("GET")
+		_, err := gateway.Get(HttpRequestEntity{
+			Url:         connectionURL,
+			Username:    directorInfo.Get(SD_USER),
+			Password:    directorInfo.Get(SD_PASS),
+			ContentType: "application/json",
+		})()
 		ok = (err == nil)
 	}
 	return

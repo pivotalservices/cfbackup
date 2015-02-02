@@ -4,12 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"path"
 
 	"github.com/pivotalservices/gtils/command"
-	cfhttp "github.com/pivotalservices/gtils/http"
+	. "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/osutils"
 )
 
@@ -27,18 +26,12 @@ const (
 	OPSMGR_INSTALLATION_ASSETS_URL              string = "https://%s/api/installation_asset_collection"
 )
 
-type httpUploader interface {
-	Upload(paramName, filename string, fileRef io.Reader, params map[string]string) (*http.Response, error)
-}
+type httpUploader func(string, string, io.Reader, map[string]string) (io.Reader, error)
 
 type httpRequestor interface {
-	Execute(method string) (interface{}, error)
-	ExecuteFunc(method string, handler cfhttp.HandleRespFunc) (interface{}, error)
-}
-
-type httpGateway interface {
-	httpUploader
-	httpRequestor
+	Get(HttpRequestEntity) RequestAdaptor
+	Post(HttpRequestEntity, io.Reader) RequestAdaptor
+	Put(HttpRequestEntity, io.Reader) RequestAdaptor
 }
 
 // OpsManager contains the location and credentials of a Pivotal Ops Manager instance
@@ -50,11 +43,11 @@ type OpsManager struct {
 	TempestPassword     string
 	DbEncryptionKey     string
 	Executer            command.Executer
+	LocalExecuter       command.Executer
 	SettingsUploader    httpUploader
 	AssetsUploader      httpUploader
 	SettingsRequestor   httpRequestor
 	AssetsRequestor     httpRequestor
-	HttpResponseHandler cfhttp.HandleRespFunc
 	DeploymentDir       string
 	OpsmanagerBackupDir string
 }
@@ -64,20 +57,25 @@ var NewOpsManager = func(hostname string, username string, password string, temp
 	var remoteExecuter command.Executer
 
 	if remoteExecuter, err = createExecuter(hostname, tempestpassword); err == nil {
-		settingsGateway, assetsGateway := createInstallationGateways(hostname, tempestpassword)
+		settingsHttpRequestor := NewHttpGateway()
+		settingsMultiHttpRequestor := MultiPartBody
+		assetsHttpRequestor := NewHttpGateway()
+		assetsMultiHttpRequestor := MultiPartBody
+
 		context = &OpsManager{
-			SettingsUploader: settingsGateway,
-			AssetsUploader:   assetsGateway,
-			SettingsRequestor:    settingsGateway,
-			AssetsRequestor:      assetsGateway,
-			DeploymentDir:    path.Join(target, OPSMGR_BACKUP_DIR, OPSMGR_DEPLOYMENTS_DIR),
-			Hostname:         hostname,
-			Username:         username,
-			Password:         password,
+			SettingsUploader:  settingsMultiHttpRequestor,
+			AssetsUploader:    assetsMultiHttpRequestor,
+			SettingsRequestor: settingsHttpRequestor,
+			AssetsRequestor:   assetsHttpRequestor,
+			DeploymentDir:     path.Join(target, OPSMGR_BACKUP_DIR, OPSMGR_DEPLOYMENTS_DIR),
+			Hostname:          hostname,
+			Username:          username,
+			Password:          password,
 			BackupContext: BackupContext{
 				TargetDir: target,
 			},
 			Executer:            remoteExecuter,
+			LocalExecuter:       command.NewLocalExecuter(),
 			OpsmanagerBackupDir: OPSMGR_BACKUP_DIR,
 		}
 	}
@@ -118,16 +116,12 @@ func (context *OpsManager) removeExistingDeploymentFiles() (err error) {
 	return
 }
 
-func (context *OpsManager) importInstallationPart(filename, fieldname string, uploader httpUploader) (err error) {
-	var (
-		fileRef *os.File
-		res     *http.Response
-	)
+func (context *OpsManager) importInstallationPart(filename, fieldname string, upload httpUploader) (err error) {
 	filePath := path.Join(context.TargetDir, context.OpsmanagerBackupDir, filename)
 
-	if fileRef, err = os.Open(filePath); err == nil {
+	if fileRef, err := os.Open(filePath); err == nil {
 
-		if res, err = uploader.Upload(fieldname, filename, fileRef, nil); err == nil && res.StatusCode != 200 {
+		if res, err := upload(fieldname, filename, fileRef, nil); err == nil {
 			err = fmt.Errorf(fmt.Sprintf("Bad Response from Gateway: %v", res))
 		}
 	}
@@ -153,6 +147,9 @@ func (context *OpsManager) exportUrlToFile(urlFormat string, filename string) (e
 	var settingsFileRef *os.File
 	defer settingsFileRef.Close()
 
+	fmt.Println()
+	fmt.Printf("Exporting url '%s' to file '%s'", urlFormat, filename)
+
 	if settingsFileRef, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, filename); err == nil {
 		err = context.exportUrlToWriter(urlFormat, settingsFileRef, context.SettingsRequestor)
 	}
@@ -160,22 +157,36 @@ func (context *OpsManager) exportUrlToFile(urlFormat string, filename string) (e
 }
 
 func (context *OpsManager) exportUrlToWriter(urlFormat string, dest io.Writer, requestor httpRequestor) (err error) {
-	var responseHandler = context.HttpResponseHandler
-	if responseHandler == nil {
-		responseHandler = func(resp *http.Response) (interface{}, error) {
-			defer resp.Body.Close()
-			return io.Copy(dest, resp.Body)
-		}
-	}
-	_, err = requestor.ExecuteFunc("GET", responseHandler)
+	resp, err := requestor.Get(HttpRequestEntity{
+		Url:         urlFormat,
+		Username:    "admin",
+		Password:    "admin",
+		ContentType: "application/octet-stream",
+	})()
+	defer resp.Body.Close()
+	_, err = io.Copy(dest, resp.Body)
 	return
 }
 
 func (context *OpsManager) extract() (err error) {
 	var keyFileRef *os.File
 	defer keyFileRef.Close()
+	fmt.Println()
+	fmt.Print("Extracting Ops Manager")
+	fmt.Println()
 
 	if keyFileRef, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, OPSMGR_ENCRYPTIONKEY_FILENAME); err == nil {
+		fmt.Println()
+		fmt.Print("Extracting encryption key")
+		fmt.Println()
+		backupDir := path.Join(context.TargetDir, context.OpsmanagerBackupDir)
+		deployment := path.Join(backupDir, OPSMGR_DEPLOYMENTS_FILENAME)
+		cmd := "tar -xf " + deployment + " -C " + backupDir
+		fmt.Println()
+		fmt.Printf("Extracting : %s", cmd)
+		fmt.Println()
+		context.LocalExecuter.Execute(nil, cmd)
+
 		err = ExtractEncryptionKey(keyFileRef, context.DeploymentDir)
 	}
 	return
@@ -199,14 +210,5 @@ func createExecuter(hostname, tempestpassword string) (remoteExecuter command.Ex
 		Host:     hostname,
 		Port:     22,
 	})
-	return
-}
-
-func createInstallationGateways(hostname, tempestpassword string) (settingsGateway, assetsGateway httpGateway) {
-	defaultContentType := "application/octet-stream"
-	settingsURL := fmt.Sprintf(OPSMGR_INSTALLATION_SETTINGS_URL, hostname)
-	assetsURL := fmt.Sprintf(OPSMGR_INSTALLATION_ASSETS_URL, hostname)
-	settingsGateway = cfhttp.NewHttpGateway(settingsURL, OPSMGR_DEFAULT_USER, tempestpassword, defaultContentType, nil)
-	assetsGateway = cfhttp.NewHttpGateway(assetsURL, OPSMGR_DEFAULT_USER, tempestpassword, defaultContentType, nil)
 	return
 }
