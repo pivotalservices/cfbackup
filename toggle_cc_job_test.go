@@ -125,13 +125,13 @@ var _ = Describe("toggle cc job", func() {
 				}
 			})
 
-			// It("Should loop endlessly if done is never returned", func() {
-			// 	eventObject := &EventObject{}
-			// 	bbf := bytes.NewBuffer([]byte(failureString))
-			// 	err := task.WaitForEventStateDone(*bbf, eventObject)
-			// 	Ω(err).Should(BeNil())
-			// 	Ω(endlessLoopFlag).Should(BeTrue())
-			// })
+			It("Should loop endlessly if done is never returned", func() {
+				eventObject := &EventObject{}
+				bbf := bytes.NewBuffer([]byte(failureString))
+				err := task.WaitForEventStateDone(*bbf, eventObject)
+				Ω(err).Should(BeNil())
+				Ω(endlessLoopFlag).Should(BeTrue())
+			})
 		})
 
 		Context("failed call", func() {
@@ -150,13 +150,6 @@ var _ = Describe("toggle cc job", func() {
 				err := task.WaitForEventStateDone(*bbf, nil)
 				Ω(err).ShouldNot(BeNil())
 			})
-
-			// It("Should loop endlessly if done is never returned", func() {
-			// 	eventObject := &EventObject{}
-			// 	bbf := bytes.NewBuffer([]byte(failureString))
-			// 	err := task.WaitForEventStateDone(*bbf, eventObject)
-			// 	Ω(err).ShouldNot(BeNil())
-			// })
 		})
 
 	})
