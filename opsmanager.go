@@ -147,24 +147,28 @@ func (context *OpsManager) exportUrlToFile(urlFormat string, filename string) (e
 	var settingsFileRef *os.File
 	defer settingsFileRef.Close()
 
+	url := fmt.Sprintf(urlFormat, context.Hostname)
+
 	fmt.Println()
-	fmt.Printf("Exporting url '%s' to file '%s'", urlFormat, filename)
+	fmt.Printf("Exporting url '%s' to file '%s'", url, filename)
 
 	if settingsFileRef, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, filename); err == nil {
-		err = context.exportUrlToWriter(urlFormat, settingsFileRef, context.SettingsRequestor)
+		err = context.exportUrlToWriter(url, settingsFileRef, context.SettingsRequestor)
 	}
 	return
 }
 
-func (context *OpsManager) exportUrlToWriter(urlFormat string, dest io.Writer, requestor httpRequestor) (err error) {
+func (context *OpsManager) exportUrlToWriter(url string, dest io.Writer, requestor httpRequestor) (err error) {
 	resp, err := requestor.Get(HttpRequestEntity{
-		Url:         urlFormat,
+		Url:         url,
 		Username:    "admin",
 		Password:    "admin",
 		ContentType: "application/octet-stream",
 	})()
-	defer resp.Body.Close()
-	_, err = io.Copy(dest, resp.Body)
+	if err == nil {
+		defer resp.Body.Close()
+		_, err = io.Copy(dest, resp.Body)
+	}
 	return
 }
 
