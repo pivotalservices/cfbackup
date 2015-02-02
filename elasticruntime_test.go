@@ -35,7 +35,7 @@ func (s mockDumper) Import(i io.Reader) (err error) {
 }
 
 var _ = Describe("ElasticRuntime", func() {
-	Describe("Backup", func() {
+	Describe("Backup / Restore", func() {
 		Context("with valid properties (DirectorInfo)", func() {
 			var (
 				product   string = "microbosh"
@@ -78,11 +78,21 @@ var _ = Describe("ElasticRuntime", func() {
 				os.Remove(target)
 			})
 
-			// It("Should return nil error", func() {
-			// 	err := er.Backup()
-			// 	Ω(err).Should(BeNil())
-			// })
+			Context("Backup", func() {
+				It("Should return nil error", func() {
+					err := er.Backup()
+					Ω(err).Should(BeNil())
+				})
+			})
+
+			Context("Restore", func() {
+				It("(restore) Should return nil error", func() {
+					err := er.Restore()
+					Ω(err).Should(BeNil())
+				})
+			})
 		})
+
 		Context("with invalid properties", func() {
 			var (
 				product   string = "cf"
@@ -116,17 +126,36 @@ var _ = Describe("ElasticRuntime", func() {
 				os.Remove(target)
 			})
 
-			It("Should not return nil error", func() {
-				err := er.Backup()
-				Ω(err).ShouldNot(BeNil())
+			Context("Backup", func() {
+
+				It("Should not return nil error", func() {
+					err := er.Backup()
+					Ω(err).ShouldNot(BeNil())
+				})
+
+				It("Should not panic", func() {
+					var err error
+					Ω(func() {
+						err = er.Backup()
+					}).ShouldNot(Panic())
+				})
 			})
 
-			It("Should not panic", func() {
-				var err error
-				Ω(func() {
-					err = er.Backup()
-				}).ShouldNot(Panic())
+			Context("Restore", func() {
+
+				It("Should not return nil error", func() {
+					err := er.Restore()
+					Ω(err).ShouldNot(BeNil())
+				})
+
+				It("Should not panic", func() {
+					var err error
+					Ω(func() {
+						err = er.Restore()
+					}).ShouldNot(Panic())
+				})
 			})
+
 		})
 	})
 

@@ -2,27 +2,34 @@ package cfbackup
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/pivotal-golang/lager"
-	. "github.com/pivotalservices/gtils/http"
-	"github.com/pivotalservices/gtils/osutils"
 	"io"
 	"io/ioutil"
 	"os"
+
+	"github.com/pivotal-golang/lager"
+	. "github.com/pivotalservices/gtils/http"
+	"github.com/pivotalservices/gtils/osutils"
 )
 
 const (
-	ER_DEFAULT_SYSTEM_USER string = "vcap"
-	ER_DIRECTOR_INFO_URL   string = "https://%s:25555/info"
-	ER_BACKUP_DIR          string = "elasticruntime"
-	ER_VMS_URL             string = "https://%s:25555/deployments/%s/vms"
-	ER_DIRECTOR            string = "DirectorInfo"
-	ER_CONSOLE             string = "ConsoledbInfo"
-	ER_UAA                 string = "UaadbInfo"
-	ER_CC                  string = "CcdbInfo"
-	ER_MYSQL               string = "MysqldbInfo"
-	ER_NFS                 string = "NfsInfo"
-	ER_BACKUP_FILE_FORMAT  string = "%s.backup"
+	ER_DEFAULT_SYSTEM_USER        string = "vcap"
+	ER_DIRECTOR_INFO_URL          string = "https://%s:25555/info"
+	ER_BACKUP_DIR                 string = "elasticruntime"
+	ER_VMS_URL                    string = "https://%s:25555/deployments/%s/vms"
+	ER_DIRECTOR                   string = "DirectorInfo"
+	ER_CONSOLE                    string = "ConsoledbInfo"
+	ER_UAA                        string = "UaadbInfo"
+	ER_CC                         string = "CcdbInfo"
+	ER_MYSQL                      string = "MysqldbInfo"
+	ER_NFS                        string = "NfsInfo"
+	ER_BACKUP_FILE_FORMAT         string = "%s.backup"
+	ER_INVALID_DIRECTOR_CREDS_MSG string = "invalid director credentials"
+)
+
+var (
+	ER_ERROR_DIRECTOR_CREDS error = errors.New(ER_INVALID_DIRECTOR_CREDS_MSG)
 )
 
 // ElasticRuntime contains information about a Pivotal Elastic Runtime deployment
@@ -112,7 +119,15 @@ var NewElasticRuntime = func(jsonFile string, target string, logger lager.Logger
 
 // Backup performs a backup of a Pivotal Elastic Runtime deployment
 func (context *ElasticRuntime) Backup() (err error) {
-	context.Logger.Debug("Entering Backup() function")
+	return context.backupRestore(context.RunDbBackups)
+}
+
+// Restore performs a restore of a Pivotal Elastic Runtime deployment
+func (context *ElasticRuntime) Restore() (err error) {
+	return context.backupRestore(context.RunDbRestores)
+}
+
+func (context *ElasticRuntime) backupRestore(run func(dbInfoList []SystemDump) (err error)) (err error) {
 	var (
 		ccStop  *CloudController
 		ccStart *CloudController
@@ -129,19 +144,11 @@ func (context *ElasticRuntime) Backup() (err error) {
 			defer ccStart.ToggleJobs(CloudControllerJobs(ccJobs))
 			ccStop.ToggleJobs(CloudControllerJobs(ccJobs))
 		}
-		if err == nil {
-			context.Logger.Debug("Running database backups")
-			err = context.RunDbBackups(context.PersistentSystems)
-		}
+		err = run(context.PersistentSystems)
 
-	} else {
-		err = fmt.Errorf("invalid director credentials")
+	} else if err == nil {
+		err = ER_ERROR_DIRECTOR_CREDS
 	}
-	return
-}
-
-// Restore performs a restore of a Pivotal Elastic Runtime deployment
-func (context *ElasticRuntime) Restore() (err error) {
 	return
 }
 
@@ -171,6 +178,26 @@ func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []string, err e
 			ccvms, err = GetCCVMs(jsonObj)
 		}
 	}
+	return
+}
+
+func (context *ElasticRuntime) RunDbRestores(dbInfoList []SystemDump) (err error) {
+
+	for _, info := range dbInfoList {
+
+		if err = info.Error(); err == nil {
+			err = context.openReaderAndImport(info, context.TargetDir)
+		}
+
+		if err != nil {
+			break
+		}
+	}
+	return
+}
+
+func (context *ElasticRuntime) openReaderAndImport(dbInfo SystemDump, databaseDir string) (err error) {
+
 	return
 }
 
