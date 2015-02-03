@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path"
 
 	"github.com/pivotal-golang/lager"
 	. "github.com/pivotalservices/gtils/http"
@@ -26,10 +27,19 @@ const (
 	ER_NFS                        string = "NfsInfo"
 	ER_BACKUP_FILE_FORMAT         string = "%s.backup"
 	ER_INVALID_DIRECTOR_CREDS_MSG string = "invalid director credentials"
+	ER_NO_PERSISTENCE_ARCHIVES    string = "there are no persistence stores in the list"
+	ER_FILE_DOES_NOT_EXIST        string = "file does not exist"
+)
+
+const (
+	IMPORT_ARCHIVE = iota
+	EXPORT_ARCHIVE
 )
 
 var (
-	ER_ERROR_DIRECTOR_CREDS error = errors.New(ER_INVALID_DIRECTOR_CREDS_MSG)
+	ER_ERROR_DIRECTOR_CREDS error         = errors.New(ER_INVALID_DIRECTOR_CREDS_MSG)
+	ER_ERROR_EMPTY_DB_LIST  error         = errors.New(ER_NO_PERSISTENCE_ARCHIVES)
+	ER_ERROR_INVALID_PATH   *os.PathError = &os.PathError{Err: errors.New(ER_FILE_DOES_NOT_EXIST)}
 )
 
 // ElasticRuntime contains information about a Pivotal Elastic Runtime deployment
@@ -119,15 +129,15 @@ var NewElasticRuntime = func(jsonFile string, target string, logger lager.Logger
 
 // Backup performs a backup of a Pivotal Elastic Runtime deployment
 func (context *ElasticRuntime) Backup() (err error) {
-	return context.backupRestore(context.RunDbBackups)
+	return context.backupRestore(EXPORT_ARCHIVE)
 }
 
 // Restore performs a restore of a Pivotal Elastic Runtime deployment
 func (context *ElasticRuntime) Restore() (err error) {
-	return context.backupRestore(context.RunDbRestores)
+	return context.backupRestore(IMPORT_ARCHIVE)
 }
 
-func (context *ElasticRuntime) backupRestore(run func(dbInfoList []SystemDump) (err error)) (err error) {
+func (context *ElasticRuntime) backupRestore(action int) (err error) {
 	var (
 		ccStop  *CloudController
 		ccStart *CloudController
@@ -144,7 +154,7 @@ func (context *ElasticRuntime) backupRestore(run func(dbInfoList []SystemDump) (
 			defer ccStart.ToggleJobs(CloudControllerJobs(ccJobs))
 			ccStop.ToggleJobs(CloudControllerJobs(ccJobs))
 		}
-		err = run(context.PersistentSystems)
+		err = context.RunDbAction(context.PersistentSystems, action)
 
 	} else if err == nil {
 		err = ER_ERROR_DIRECTOR_CREDS
@@ -181,63 +191,71 @@ func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []string, err e
 	return
 }
 
-func (context *ElasticRuntime) RunDbRestores(dbInfoList []SystemDump) (err error) {
+func (context *ElasticRuntime) RunDbAction(dbInfoList []SystemDump, action int) (err error) {
 
 	for _, info := range dbInfoList {
 
 		if err = info.Error(); err == nil {
-			err = context.openReaderAndImport(info, context.TargetDir)
-		}
+			err = context.readWriterArchive(info, context.TargetDir, action)
 
-		if err != nil {
+		} else {
 			break
 		}
 	}
-	return
-}
 
-func (context *ElasticRuntime) openReaderAndImport(dbInfo SystemDump, databaseDir string) (err error) {
-
-	return
-}
-
-func (context *ElasticRuntime) RunDbBackups(dbInfoList []SystemDump) (err error) {
-	context.Logger.Debug("Entering RunDbBackups() function")
-
-	for _, info := range dbInfoList {
-
-		if err = info.Error(); err == nil {
-			err = context.openWriterAndDump(info, context.TargetDir)
-		}
-
-		if err != nil {
-			return fmt.Errorf("db backup failed: %v", err)
-		}
+	if len(dbInfoList) <= 0 {
+		err = ER_ERROR_EMPTY_DB_LIST
 	}
-	context.Logger.Debug("RunDbBackups() function complete")
 	return
 }
 
-func (context *ElasticRuntime) openWriterAndDump(dbInfo SystemDump, databaseDir string) (err error) {
-	context.Logger.Debug("Entering openWriterAndDump() function")
+func (context *ElasticRuntime) getReadWriter(fpath string, action int) (rw io.ReadWriter, err error) {
+	switch action {
+	case IMPORT_ARCHIVE:
+		var exists bool
+
+		if exists, err = osutils.Exists(fpath); exists && err == nil {
+			rw, err = os.Open(fpath)
+
+		} else {
+			var pathError os.PathError
+			pathError = *ER_ERROR_INVALID_PATH
+			pathError.Path = fpath
+			err = &pathError
+		}
+
+	case EXPORT_ARCHIVE:
+		rw, err = osutils.SafeCreate(fpath)
+	}
+	return
+}
+
+func (context *ElasticRuntime) readWriterArchive(dbInfo SystemDump, databaseDir string, action int) (err error) {
 	var (
-		outfile *os.File
+		archivefile io.ReadWriter
 	)
 	filename := fmt.Sprintf(ER_BACKUP_FILE_FORMAT, dbInfo.Get(SD_COMPONENT))
-	context.Logger.Debug("openWriterAndDump() function", lager.Data{"filename": filename})
+	filepath := path.Join(databaseDir, filename)
 
-	if outfile, err = osutils.SafeCreate(databaseDir, filename); err == nil {
-		err = context.dump(outfile, dbInfo)
+	if archivefile, err = context.getReadWriter(filepath, action); err == nil {
+		err = context.importExport(archivefile, dbInfo, action)
 	}
 	return
 }
 
-func (context *ElasticRuntime) dump(dest io.Writer, s SystemDump) (err error) {
-	context.Logger.Debug("Entering dump() function")
-	var dumper PersistanceBackup
+func (context *ElasticRuntime) importExport(rw io.ReadWriter, s SystemDump, action int) (err error) {
+	var pb PersistanceBackup
 
-	if dumper, err = s.GetPersistanceBackup(); err == nil {
-		err = dumper.Dump(dest)
+	if pb, err = s.GetPersistanceBackup(); err == nil {
+
+		switch action {
+		case IMPORT_ARCHIVE:
+			fmt.Println("we are doing something here now")
+			err = pb.Import(rw)
+
+		case EXPORT_ARCHIVE:
+			err = pb.Dump(rw)
+		}
 	}
 	return
 }
