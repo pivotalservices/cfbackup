@@ -17,12 +17,13 @@ type Task struct {
 }
 
 const (
-	ERROR      int = 0
-	PROCESSING int = 1
-	DONE       int = 2
+	ERROR      int = 1
+	PROCESSING int = 2
+	DONE       int = 3
+	QUEUED     int = 4
 )
 
-var TASKRESULT map[string]int = map[string]int{"error": ERROR, "processing": PROCESSING, "done": DONE}
+var TASKRESULT map[string]int = map[string]int{"error": ERROR, "processing": PROCESSING, "done": DONE, "queued": QUEUED}
 
 func retrieveTaskId(resp *http.Response) (taskId int, err error) {
 	if resp.StatusCode != 302 {

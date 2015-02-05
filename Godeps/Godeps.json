@@ -1,10 +1,10 @@
 {
 	"ImportPath": "github.com/pivotalservices/cfbackup",
-	"GoVersion": "go1.3",
+	"GoVersion": "go1.3.3",
 	"Deps": [
 		{
 			"ImportPath": "github.com/cloudfoundry-incubator/cf-lager",
-			"Rev": "ea49f3b43c0a8f257faeb4bb8d87b474eefbe522"
+			"Rev": "d308139cfb9eb10924f6a1c019ec2e56be6e2f44"
 		},
 		{
 			"ImportPath": "github.com/kr/fs",
@@ -26,23 +26,23 @@
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/bosh",
-			"Rev": "69de87b643d49ac1eaaf12bd615781263c816761"
+			"Rev": "6c9275c0cea6fb126b8a58bd1f13510b9893b29c"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/command",
-			"Rev": "69de87b643d49ac1eaaf12bd615781263c816761"
+			"Rev": "6c9275c0cea6fb126b8a58bd1f13510b9893b29c"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/http",
-			"Rev": "69de87b643d49ac1eaaf12bd615781263c816761"
+			"Rev": "6c9275c0cea6fb126b8a58bd1f13510b9893b29c"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/osutils",
-			"Rev": "69de87b643d49ac1eaaf12bd615781263c816761"
+			"Rev": "6c9275c0cea6fb126b8a58bd1f13510b9893b29c"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/persistence",
-			"Rev": "69de87b643d49ac1eaaf12bd615781263c816761"
+			"Rev": "6c9275c0cea6fb126b8a58bd1f13510b9893b29c"
 		},
 		{
 			"ImportPath": "github.com/pkg/sftp",
@@ -54,7 +54,7 @@
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/ssh",
-			"Rev": "7db43667c77d5d330c359ffd03f5789cf390e973"
+			"Rev": "88b65fb66346493d43e735adad931bf69dee4297"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v1",

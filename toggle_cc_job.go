@@ -4,10 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/pivotalservices/gtils/bosh"
 	. "github.com/pivotalservices/gtils/http"
 )
+
+// Not ping server so frequently and exausted the resources
+var TaskPingFreq time.Duration = 1000 * time.Millisecond
 
 type CloudControllerJobs []string
 
@@ -59,6 +63,7 @@ func (c *CloudController) toggleController(state string) error {
 }
 
 func (c *CloudController) waitUntilDone(taskId int) (err error) {
+	time.Sleep(TaskPingFreq)
 	result, err := c.director.RetrieveTaskStatus(taskId)
 	if err != nil {
 		return
@@ -67,13 +72,16 @@ func (c *CloudController) waitUntilDone(taskId int) (err error) {
 	case bosh.ERROR:
 		err = errors.New(fmt.Sprintf("Task %d process failed", taskId))
 		return
+	case bosh.QUEUED:
+		err = c.waitUntilDone(taskId)
+		return
 	case bosh.PROCESSING:
 		err = c.waitUntilDone(taskId)
 		return
 	case bosh.DONE:
 		return
 	default:
-		err = bosh.TASKRESULTUNKNOWN
+		err = bosh.TaskResultUnknown
 		return
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"errors"
 	. "github.com/pivotalservices/cfbackup"
 	"io"
+	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -58,10 +59,11 @@ var _ = Describe("ToggleCcJob", func() {
 	NewDirector = func(ip, username, password string, port int) bosh.Bosh {
 		return &mockDirector{}
 	}
+	TaskPingFreq = time.Millisecond
 	var (
 		cloudController *CloudController = NewCloudController(ip, username, password, deploymentName, ccjobs)
 	)
-	Describe("Start All jobs", func() {
+	Describe("Toggle All jobs", func() {
 		Context("Change Job State failed", func() {
 			BeforeEach(func() {
 				changeJobState = false
@@ -71,7 +73,7 @@ var _ = Describe("ToggleCcJob", func() {
 				Ω(err).ShouldNot(BeNil())
 			})
 		})
-		Context("HappyPath", func() {
+		Context("Toggle successfully", func() {
 			BeforeEach(func() {
 				changeJobState = true
 				changeJobStateCount = 0
@@ -86,7 +88,7 @@ var _ = Describe("ToggleCcJob", func() {
 				cloudController.Start()
 				Ω(changeJobStateCount).Should(Equal(3))
 			})
-			It("Should Call retriveTaskStatus 10 times", func() {
+			It("Should Call retriveTaskStatus 5 times with retries when task is processing", func() {
 				cloudController.Start()
 				Ω(retrieveTaskStatusCount).Should(Equal(5))
 			})
@@ -96,7 +98,7 @@ var _ = Describe("ToggleCcJob", func() {
 				changeJobState = true
 				task = bosh.Task{State: "error"}
 			})
-			It("Should return nil error", func() {
+			It("Should return error", func() {
 				err := cloudController.Start()
 				Ω(err).ShouldNot(BeNil())
 			})
