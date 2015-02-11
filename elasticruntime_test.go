@@ -79,6 +79,14 @@ var _ = Describe("ElasticRuntime", func() {
 							Identity:  username,
 						},
 					},
+					"BaddbInfo": &PgInfoMock{
+						SystemInfo: SystemInfo{
+							Product:   product,
+							Component: component,
+							Identity:  username,
+						},
+						failDump: true,
+					},
 				}
 				ps []SystemDump = []SystemDump{info["ConsoledbInfo"]}
 			)
@@ -151,6 +159,49 @@ var _ = Describe("ElasticRuntime", func() {
 						err := er.Restore()
 						Ω(err).ShouldNot(BeNil())
 						Ω(err).Should(Equal(ER_ERROR_EMPTY_DB_LIST))
+					})
+				})
+			})
+
+			Context("When db backup fails", func() {
+				var psOrig []SystemDump
+				BeforeEach(func() {
+					psOrig = ps
+					er.PersistentSystems = []SystemDump{
+						&PgInfoMock{
+							SystemInfo: SystemInfo{
+								Product:   product,
+								Component: component,
+								Identity:  username,
+							},
+						},
+						&PgInfoMock{
+							SystemInfo: SystemInfo{
+								Product:   product,
+								Component: component,
+								Identity:  username,
+							},
+							failDump: true,
+						},
+					}
+				})
+
+				AfterEach(func() {
+					er.PersistentSystems = psOrig
+				})
+				Context("Backup", func() {
+					It("should return error if db backup fails", func() {
+						err := er.Backup()
+						Ω(err).ShouldNot(BeNil())
+						Ω(err).Should(Equal(ER_DB_BACKUP))
+					})
+				})
+
+				Context("Restore", func() {
+					It("should return error if db backup fails", func() {
+						err := er.Backup()
+						Ω(err).ShouldNot(BeNil())
+						Ω(err).Should(Equal(ER_DB_BACKUP))
 					})
 				})
 			})
