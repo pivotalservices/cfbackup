@@ -11,7 +11,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Backup", func() {
+var _ = Describe("Backup / Restore", func() {
 	var (
 		dir     string
 		context *OpsManager

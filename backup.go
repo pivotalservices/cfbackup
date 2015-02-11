@@ -7,6 +7,11 @@ import (
 	"github.com/pivotalservices/gtils/log"
 )
 
+const (
+	BACKUP_LOGGER_NAME  = "Backup"
+	RESTORE_LOGGER_NAME = "Restore"
+)
+
 // Tile is a deployable component that can be backed up
 type Tile interface {
 	Backup() error
@@ -23,20 +28,16 @@ type actionAdaptor func(t Tile) action
 
 func RunBackupPipeline(hostname, username, password, tempestpassword, destination string) (err error) {
 	backup := func(t Tile) action {
-		return func() error {
-			return t.Backup()
-		}
+		return t.Backup
 	}
-	return runPipelines(hostname, username, password, tempestpassword, destination, "Backup", backup)
+	return runPipelines(hostname, username, password, tempestpassword, destination, BACKUP_LOGGER_NAME, backup)
 }
 
 func RunRestorePipeline(hostname, username, password, tempestpassword, destination string) (err error) {
 	restore := func(t Tile) action {
-		return func() error {
-			return t.Restore()
-		}
+		return t.Restore
 	}
-	return runPipelines(hostname, username, password, tempestpassword, destination, "Backup", restore)
+	return runPipelines(hostname, username, password, tempestpassword, destination, RESTORE_LOGGER_NAME, restore)
 }
 
 func runPipelines(hostname, username, password, tempestpassword, destination, loggerName string, actionBuilder actionAdaptor) (err error) {
