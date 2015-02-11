@@ -79,14 +79,6 @@ var _ = Describe("ElasticRuntime", func() {
 							Identity:  username,
 						},
 					},
-					"BaddbInfo": &PgInfoMock{
-						SystemInfo: SystemInfo{
-							Product:   product,
-							Component: component,
-							Identity:  username,
-						},
-						failDump: true,
-					},
 				}
 				ps []SystemDump = []SystemDump{info["ConsoledbInfo"]}
 			)
