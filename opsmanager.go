@@ -25,6 +25,7 @@ const (
 	OPSMGR_DEFAULT_USER                         string = "tempest"
 	OPSMGR_INSTALLATION_SETTINGS_URL            string = "https://%s/api/installation_settings"
 	OPSMGR_INSTALLATION_ASSETS_URL              string = "https://%s/api/installation_asset_collection"
+	OPSMGR_DEPLOYMENTS_FILE                     string = "/var/tempest/workspaces/default/deployments/bosh-deployments.yml"
 )
 
 type httpUploader func(string, string, io.Reader, map[string]string) (io.Reader, error)
@@ -114,7 +115,7 @@ func (context *OpsManager) importInstallation() (err error) {
 
 func (context *OpsManager) removeExistingDeploymentFiles() (err error) {
 	var w bytes.Buffer
-	command := "sudo rm /var/tempest/workspaces/default/deployments/bosh-deployments.yml"
+	command := fmt.Sprintf("if [ -f %s ]; then sudo rm %s;fi", OPSMGR_DEPLOYMENTS_FILE, OPSMGR_DEPLOYMENTS_FILE)
 	err = context.Executer.Execute(&w, command)
 	return
 }
