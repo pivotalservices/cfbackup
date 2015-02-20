@@ -204,8 +204,8 @@ func getLogger(minLogLevel string) log.Logger {
 }
 
 var (
-	mockTileErrBackup  = errors.New("backup tile error")
-	mockTileErrRestore = errors.New("restore tile error")
+	mockTileBackupError  = errors.New("backup tile error")
+	mockTileRestoreError = errors.New("restore tile error")
 )
 
 type mockTile struct {
