@@ -18,9 +18,13 @@ type transportClientInterface interface {
 	Do(*http.Request) (*http.Response, error)
 }
 
-type mockClientTransport struct{}
+type mockClientTransport struct {
+	ResponseStatusCode int
+}
 
 func (s *mockClientTransport) Do(req *http.Request) (res *http.Response, err error) {
-
+	res = &http.Response{
+		StatusCode: s.ResponseStatusCode,
+	}
 	return
 }

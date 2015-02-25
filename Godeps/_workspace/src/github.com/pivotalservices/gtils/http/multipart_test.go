@@ -1,12 +1,19 @@
 package http_test
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/pivotalservices/gtils/http"
+	"github.com/pivotalservices/gtils/mock"
+)
+
+const (
+	paramName = "installation[file]"
+	fileName  = "installation.json"
 )
 
 var _ = Describe("Multipart", func() {
@@ -34,26 +41,34 @@ var _ = Describe("Multipart", func() {
 	})
 
 	Describe("MultiPartUpload", func() {
-		var transportClientFunc func() (client interface {
-			Do(*http.Request) (*http.Response, error)
-		})
+		var (
+			httpServerMock *mock.HttpServer = &mock.HttpServer{}
+			request        *http.Request
+		)
 
 		BeforeEach(func() {
-			transportClientFunc = NewTransportClient
-			NewTransportClient = func() (client interface {
-				Do(*http.Request) (*http.Response, error)
-			}) {
-				client = new(mockClientTransport)
-				return
-			}
+			httpServerMock.Setup()
+			httpServerMock.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+				request = r
+			})
 		})
 
 		AfterEach(func() {
-			NewTransportClient = transportClientFunc
+			httpServerMock.Teardown()
 		})
 
-		It("should do something", func() {
-			Ω("hi").Should(Equal("hi"))
+		It("should send the file to the server", func() {
+			filePath := fmt.Sprintf("fixtures/%s", fileName)
+			conn := ConnAuth{
+				Url: httpServerMock.Server.URL,
+			}
+			fileRef, _ := os.Open(filePath)
+			res, err := MultiPartUpload(conn, paramName, fileName, fileRef, nil)
+			Ω(err).Should(BeNil())
+			Ω(res.StatusCode).Should(Equal(200))
+			Ω(request.Method).Should(Equal("POST"))
+			Ω(res).ShouldNot(BeNil())
+			Ω(request.ContentLength).Should(Equal(res.Request.ContentLength))
 		})
 	})
 })
