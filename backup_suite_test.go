@@ -105,6 +105,10 @@ var MockMultiPartBodyFunc = func(string, string, io.Reader, map[string]string) (
 	return &ClosingBuffer{bytes.NewBufferString("success")}, nil
 }
 
+var MockMultiPartUploadFunc = func(ConnAuth, string, string, io.Reader, map[string]string) (*http.Response, error) {
+	return &http.Response{}, nil
+}
+
 type ClosingBuffer struct {
 	*bytes.Buffer
 }

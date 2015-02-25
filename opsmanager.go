@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"path"
 
 	"github.com/pivotalservices/gtils/command"
-	. "github.com/pivotalservices/gtils/http"
+	ghttp "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/log"
 	"github.com/pivotalservices/gtils/osutils"
 )
@@ -28,12 +29,12 @@ const (
 	OPSMGR_DEPLOYMENTS_FILE                     string = "/var/tempest/workspaces/default/deployments/bosh-deployments.yml"
 )
 
-type httpUploader func(string, string, io.Reader, map[string]string) (io.Reader, error)
+type httpUploader func(conn ghttp.ConnAuth, paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error)
 
 type httpRequestor interface {
-	Get(HttpRequestEntity) RequestAdaptor
-	Post(HttpRequestEntity, io.Reader) RequestAdaptor
-	Put(HttpRequestEntity, io.Reader) RequestAdaptor
+	Get(ghttp.HttpRequestEntity) ghttp.RequestAdaptor
+	Post(ghttp.HttpRequestEntity, io.Reader) ghttp.RequestAdaptor
+	Put(ghttp.HttpRequestEntity, io.Reader) ghttp.RequestAdaptor
 }
 
 // OpsManager contains the location and credentials of a Pivotal Ops Manager instance
@@ -60,10 +61,10 @@ var NewOpsManager = func(hostname string, username string, password string, temp
 	var remoteExecuter command.Executer
 
 	if remoteExecuter, err = createExecuter(hostname, tempestpassword); err == nil {
-		settingsHttpRequestor := NewHttpGateway()
-		settingsMultiHttpRequestor := MultiPartBody
-		assetsHttpRequestor := NewHttpGateway()
-		assetsMultiHttpRequestor := MultiPartBody
+		settingsHttpRequestor := ghttp.NewHttpGateway()
+		settingsMultiHttpRequestor := ghttp.MultiPartUpload
+		assetsHttpRequestor := ghttp.NewHttpGateway()
+		assetsMultiHttpRequestor := ghttp.MultiPartUpload
 
 		context = &OpsManager{
 			SettingsUploader:  settingsMultiHttpRequestor,
@@ -106,9 +107,11 @@ func (context *OpsManager) importInstallation() (err error) {
 			err = context.removeExistingDeploymentFiles()
 		}
 	}()
+	installSettingsUrl := fmt.Sprintf(OPSMGR_INSTALLATION_SETTINGS_URL, context.Hostname)
 
-	if err = context.importInstallationPart(OPSMGR_INSTALLATION_SETTINGS_FILENAME, OPSMGR_INSTALLATION_SETTINGS_POSTFIELD_NAME, context.SettingsUploader); err == nil {
-		err = context.importInstallationPart(OPSMGR_INSTALLATION_ASSETS_FILENAME, OPSMGR_INSTALLATION_ASSETS_POSTFIELD_NAME, context.AssetsUploader)
+	if err = context.importInstallationPart(installSettingsUrl, OPSMGR_INSTALLATION_SETTINGS_FILENAME, OPSMGR_INSTALLATION_SETTINGS_POSTFIELD_NAME, context.SettingsUploader); err == nil {
+		installAssetsUrl := fmt.Sprintf(OPSMGR_INSTALLATION_ASSETS_URL, context.Hostname)
+		err = context.importInstallationPart(installAssetsUrl, OPSMGR_INSTALLATION_ASSETS_FILENAME, OPSMGR_INSTALLATION_ASSETS_POSTFIELD_NAME, context.AssetsUploader)
 	}
 	return
 }
@@ -120,12 +123,17 @@ func (context *OpsManager) removeExistingDeploymentFiles() (err error) {
 	return
 }
 
-func (context *OpsManager) importInstallationPart(filename, fieldname string, upload httpUploader) (err error) {
+func (context *OpsManager) importInstallationPart(url, filename, fieldname string, upload httpUploader) (err error) {
 	filePath := path.Join(context.TargetDir, context.OpsmanagerBackupDir, filename)
 
 	if fileRef, err := os.Open(filePath); err == nil {
+		conn := ghttp.ConnAuth{
+			Url:      url,
+			Username: context.Username,
+			Password: context.Password,
+		}
 
-		if res, err := upload(fieldname, filename, fileRef, nil); err == nil {
+		if res, err := upload(conn, fieldname, filename, fileRef, nil); err == nil {
 			err = fmt.Errorf(fmt.Sprintf("Bad Response from Gateway: %v", res))
 		}
 	}
@@ -162,7 +170,7 @@ func (context *OpsManager) exportUrlToFile(urlFormat string, filename string) (e
 }
 
 func (context *OpsManager) exportUrlToWriter(url string, dest io.Writer, requestor httpRequestor) (err error) {
-	resp, err := requestor.Get(HttpRequestEntity{
+	resp, err := requestor.Get(ghttp.HttpRequestEntity{
 		Url:         url,
 		Username:    context.Username,
 		Password:    context.Password,
