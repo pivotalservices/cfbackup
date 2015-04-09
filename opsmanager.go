@@ -139,6 +139,7 @@ func (context *OpsManager) importInstallationPart(url, filename, fieldname strin
 
 		if res, err = upload(conn, fieldname, filename, fileRef, nil); err != nil {
 			err = fmt.Errorf(fmt.Sprintf("ERROR:%s - %v", err.Error(), res))
+			context.Logger.Debug("upload failed", log.Data{"err": err, "response": res})
 		}
 	}
 	return
