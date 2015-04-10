@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/pivotalservices/cfbackup",
-	"GoVersion": "go1.4.2",
+	"GoVersion": "go1.4.1",
 	"Packages": [
 		"./..."
 	],
@@ -52,17 +52,17 @@
 			"Rev": "5de6ec832b72cf4915efc974c9b897f5d3e1882f"
 		},
 		{
-			"ImportPath": "github.com/pkg/sftp",
-			"Rev": "506297c9013d2893d5c5daaa9155e7333a1c58de"
+			"ImportPath": "github.com/pivotalservices/sftp",
+			"Rev": "dffda93cc86c0aa96dc580da7c57c8301519b262"
 		},
 		{
 			"ImportPath": "github.com/xchapter7x/goutil",
 			"Rev": "d11405d449b25127a32fab25ce8b1fc0388da5b3"
 		},
 		{
-			"ImportPath": "golang.org/x/crypto/ssh",
-			"Comment": "null-234",
-			"Rev": "60a80aaa50ff0e8506f61b1fa35078a24941be50"
+			"ImportPath": "gopkg.in/datianshi/crypto.v1/ssh",
+			"Comment": "v1",
+			"Rev": "968024fffabd9aa8d34a3a27b19a2351549aa06c"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v1",
