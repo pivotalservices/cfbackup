@@ -63,7 +63,7 @@ var _ = Describe("ElasticRuntime", func() {
 		testERWithVersionSpecificFile(installationSettingsFilePath)
 	})
 
-	XDescribe("ElasticRuntime Version 1.4", func() {
+	Describe("ElasticRuntime Version 1.4", func() {
 		var installationSettingsFilePath = "fixtures/installation-settings-1-4.json"
 		testERWithVersionSpecificFile(installationSettingsFilePath)
 	})

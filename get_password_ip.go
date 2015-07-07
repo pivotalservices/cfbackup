@@ -34,6 +34,7 @@ type (
 
 	jobCompare struct {
 		Type       string
+		Identifier string
 		Properties []propertyCompare
 	}
 
@@ -50,16 +51,25 @@ type (
 	}
 )
 
-func filterERProductsVersion13(v interface{}) bool {
-	return v.(productCompareObject).Type == "cf"
+func filterERProductsVersion13(v interface{}, product string) bool {
+	return v.(productCompareObject).Type == product
 }
 
-func filterERProductsVersion14(v interface{}) bool {
-	return v.(productCompareObject).Identifier == "cf"
+func filterERProductsVersion14(v interface{}, product string) bool {
+	return v.(productCompareObject).Identifier == product
+}
+
+func filterJobsVersion13(v interface{}, product string) bool {
+	return v.(jobCompare).Type == product
+}
+
+func filterJobsVersion14(v interface{}, product string) bool {
+	return v.(jobCompare).Identifier == product
 }
 
 func filterERProducts(i, v interface{}) bool {
-	return filterERProductsVersion13(v) || filterERProductsVersion14(v)
+	product := "cf"
+	return filterERProductsVersion13(v, product) || filterERProductsVersion14(v, product)
 }
 
 func GetDeploymentName(jsonObj InstallationCompareObject) (deploymentName string, err error) {
@@ -151,11 +161,11 @@ func (s *IpPasswordParser) setPassword(productObj productCompareObject) (err err
 }
 
 func (s *IpPasswordParser) productFilter(i, v interface{}) bool {
-	return v.(productCompareObject).Type == s.Product
+	return filterERProductsVersion13(v, s.Product) || filterERProductsVersion14(v, s.Product)
 }
 
 func (s *IpPasswordParser) jobsFilter(i, v interface{}) bool {
-	return v.(jobCompare).Type == s.Component
+	return filterJobsVersion13(v, s.Component) || filterJobsVersion14(v, s.Component)
 }
 
 func (s *IpPasswordParser) propertiesFilter(i, v interface{}) (ok bool) {
