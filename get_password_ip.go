@@ -24,6 +24,7 @@ type (
 
 	productCompareObject struct {
 		Type              string
+		Identifier        string
 		Installation_name string
 		Jobs              []jobCompare
 		IPs               ipCompare
@@ -49,8 +50,16 @@ type (
 	}
 )
 
-func filterERProducts(i, v interface{}) bool {
+func filterERProductsVersion13(v interface{}) bool {
 	return v.(productCompareObject).Type == "cf"
+}
+
+func filterERProductsVersion14(v interface{}) bool {
+	return v.(productCompareObject).Identifier == "cf"
+}
+
+func filterERProducts(i, v interface{}) bool {
+	return filterERProductsVersion13(v) || filterERProductsVersion14(v)
 }
 
 func GetDeploymentName(jsonObj InstallationCompareObject) (deploymentName string, err error) {
