@@ -16,7 +16,7 @@ var _ = Describe("get_password_ip", func() {
 		testGetPasswordWithVersionSpecificFile(installationSettingsFilePath)
 	})
 
-	XDescribe("Ops Manager Elastic Runtime v1.4", func() {
+	Describe("Ops Manager Elastic Runtime v1.4", func() {
 		var installationSettingsFilePath = "fixtures/installation-settings-1-4.json"
 		testGetPasswordWithVersionSpecificFile(installationSettingsFilePath)
 	})

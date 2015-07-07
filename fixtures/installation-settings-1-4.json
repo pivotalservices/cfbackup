@@ -199,7 +199,7 @@
                     "192.168.10.35"
                 ],
                 "ccdb-part-29cfbf7c0b9d29e4f4e7": [
-                    "192.168.10.15"
+                    "172.16.1.46"
                 ],
                 "clock_global-part-d11d382e8cb5afa3d2e2": [
                     "192.168.10.21"
@@ -473,7 +473,7 @@
                             "identifier": "credentials",
                             "value": {
                                 "identity": "admin",
-                                "password": "c36b547a29dee9c8e6cf"
+                                "password": "e3e89a528625d819160d"
                             }
                         }
                     ],
