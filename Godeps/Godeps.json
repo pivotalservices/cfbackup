@@ -18,42 +18,42 @@
 		},
 		{
 			"ImportPath": "github.com/pivotal-golang/lager",
-			"Rev": "09a71f6eb2dcc1c2335e37ceb78a91c6f618d561"
+			"Rev": "be52ae622d25728f17aac7330e4565201c19155c"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/bosh",
-			"Comment": "v0.1.0-5-g8769c5c",
-			"Rev": "8769c5c31c99856867b8018e5a7655c386e83106"
+			"Comment": "v0.1.4",
+			"Rev": "6582e9d0cb15a8588851a12dee9406733b9a715d"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/command",
-			"Comment": "v0.1.0-5-g8769c5c",
-			"Rev": "8769c5c31c99856867b8018e5a7655c386e83106"
+			"Comment": "v0.1.4",
+			"Rev": "6582e9d0cb15a8588851a12dee9406733b9a715d"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/http",
-			"Comment": "v0.1.0-5-g8769c5c",
-			"Rev": "8769c5c31c99856867b8018e5a7655c386e83106"
+			"Comment": "v0.1.4",
+			"Rev": "6582e9d0cb15a8588851a12dee9406733b9a715d"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/log",
-			"Comment": "v0.1.0-5-g8769c5c",
-			"Rev": "8769c5c31c99856867b8018e5a7655c386e83106"
+			"Comment": "v0.1.4",
+			"Rev": "6582e9d0cb15a8588851a12dee9406733b9a715d"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/mock",
-			"Comment": "v0.1.0-5-g8769c5c",
-			"Rev": "8769c5c31c99856867b8018e5a7655c386e83106"
+			"Comment": "v0.1.4",
+			"Rev": "6582e9d0cb15a8588851a12dee9406733b9a715d"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/osutils",
-			"Comment": "v0.1.0-5-g8769c5c",
-			"Rev": "8769c5c31c99856867b8018e5a7655c386e83106"
+			"Comment": "v0.1.4",
+			"Rev": "6582e9d0cb15a8588851a12dee9406733b9a715d"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/persistence",
-			"Comment": "v0.1.0-5-g8769c5c",
-			"Rev": "8769c5c31c99856867b8018e5a7655c386e83106"
+			"Comment": "v0.1.4",
+			"Rev": "6582e9d0cb15a8588851a12dee9406733b9a715d"
 		},
 		{
 			"ImportPath": "github.com/pkg/sftp",
