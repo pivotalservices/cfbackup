@@ -60,7 +60,7 @@ type OpsManager struct {
 }
 
 // NewOpsManager initializes an OpsManager instance
-var NewOpsManager = func(opsManagerHostname string, adminUsername string, adminPassword string, opsManagerUsername string, opsManagerPassword string, target string, logger log.Logger) (context *OpsManager, err error) {
+var NewOpsManager = func(opsManagerHostname string, adminUsername string, adminPassword string, opsManagerUsername string, opsManagerPassword string, target string) (context *OpsManager, err error) {
 	var remoteExecuter command.Executer
 
 	if remoteExecuter, err = createExecuter(opsManagerHostname, opsManagerUsername, opsManagerPassword, OPSMGR_DEFAULT_SSH_PORT); err == nil {

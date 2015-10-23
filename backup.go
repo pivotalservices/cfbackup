@@ -1,10 +1,6 @@
 package cfbackup
 
-import (
-	"path"
-
-	"github.com/pivotalservices/gtils/log"
-)
+import "path"
 
 const (
 	BACKUP_LOGGER_NAME  = "Backup"
@@ -18,7 +14,6 @@ var (
 	TILE_BACKUP_ACTION = func(t Tile) func() error {
 		return t.Backup
 	}
-	backupLogger log.Logger
 )
 
 // Tile is a deployable component that can be backed up
@@ -108,7 +103,7 @@ func fullTileList(conn connBucketInterface, loggerName string) (tiles []Tile, er
 	)
 	installationFilePath := path.Join(conn.Destination(), OPSMGR_BACKUP_DIR, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
 
-	if opsmanager, err = NewOpsManager(conn.Host(), conn.AdminUser(), conn.AdminPass(), conn.OpsManagerUser(), conn.OpsManagerPass(), conn.Destination(), backupLogger); err == nil {
+	if opsmanager, err = NewOpsManager(conn.Host(), conn.AdminUser(), conn.AdminPass(), conn.OpsManagerUser(), conn.OpsManagerPass(), conn.Destination()); err == nil {
 		elasticRuntime = NewElasticRuntime(installationFilePath, conn.Destination())
 		tiles = []Tile{
 			opsmanager,
