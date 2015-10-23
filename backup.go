@@ -1,7 +1,6 @@
 package cfbackup
 
 import (
-	"os"
 	"path"
 
 	"github.com/pivotalservices/gtils/log"
@@ -44,15 +43,6 @@ type BackupContext struct {
 type action func() error
 
 type actionAdaptor func(t Tile) action
-
-//SetLogger - lets us set the logger object
-func SetLogger(logger log.Logger) {
-	backupLogger = logger
-}
-
-func init() {
-	backupLogger = log.LogFactory("cfbackup default logger", log.Lager, os.Stdout)
-}
 
 //Backup the list of all default tiles
 func RunBackupPipeline(hostname, adminUsername, adminPassword, opsManagerUsername, opsManagerPassword, destination string) (err error) {
@@ -119,7 +109,7 @@ func fullTileList(conn connBucketInterface, loggerName string) (tiles []Tile, er
 	installationFilePath := path.Join(conn.Destination(), OPSMGR_BACKUP_DIR, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
 
 	if opsmanager, err = NewOpsManager(conn.Host(), conn.AdminUser(), conn.AdminPass(), conn.OpsManagerUser(), conn.OpsManagerPass(), conn.Destination(), backupLogger); err == nil {
-		elasticRuntime = NewElasticRuntime(installationFilePath, conn.Destination(), backupLogger)
+		elasticRuntime = NewElasticRuntime(installationFilePath, conn.Destination())
 		tiles = []Tile{
 			opsmanager,
 			elasticRuntime,
