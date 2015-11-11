@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/pivotalservices/cfops/tileregistry"
 	. "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/log"
 	"github.com/pivotalservices/gtils/osutils"
@@ -44,6 +45,14 @@ var (
 	ER_ERROR_INVALID_PATH   = &os.PathError{Err: errors.New(ER_FILE_DOES_NOT_EXIST)}
 	ER_DB_BACKUP            = errors.New(ER_DB_BACKUP_FAILURE)
 )
+
+//ElasticRuntimeBuilder -- an object that can build an elastic runtime pre-initialized
+type ElasticRuntimeBuilder struct{}
+
+//New -- method to generate an initialized elastic runtime
+func (s *ElasticRuntimeBuilder) New(tileSpec tileregistry.TileSpec) (elasticRuntime tileregistry.Tile) {
+	return
+}
 
 // ElasticRuntime contains information about a Pivotal Elastic Runtime deployment
 type ElasticRuntime struct {
