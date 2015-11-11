@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/pivotalservices/cfops/tileregistry"
 	"github.com/pivotalservices/gtils/command"
 	ghttp "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/log"
@@ -57,6 +58,14 @@ type OpsManager struct {
 	AssetsRequestor     httpRequestor
 	DeploymentDir       string
 	OpsmanagerBackupDir string
+}
+
+//OpsManagerBuilder - an object that can build ops manager objects
+type OpsManagerBuilder struct{}
+
+//New -- builds a new ops manager object pre initialized
+func (s *OpsManagerBuilder) New(tileSpec tileregistry.TileSpec) (opsManager tileregistry.Tile) {
+	return
 }
 
 // NewOpsManager initializes an OpsManager instance
