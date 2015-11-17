@@ -50,7 +50,7 @@ var (
 type ElasticRuntimeBuilder struct{}
 
 //New -- method to generate an initialized elastic runtime
-func (s *ElasticRuntimeBuilder) New(tileSpec tileregistry.TileSpec) (elasticRuntime tileregistry.Tile) {
+func (s *ElasticRuntimeBuilder) New(tileSpec tileregistry.TileSpec) (elasticRuntime tileregistry.Tile, err error) {
 	return
 }
 
