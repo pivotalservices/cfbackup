@@ -64,7 +64,8 @@ type OpsManager struct {
 type OpsManagerBuilder struct{}
 
 //New -- builds a new ops manager object pre initialized
-func (s *OpsManagerBuilder) New(tileSpec tileregistry.TileSpec) (opsManager tileregistry.Tile) {
+func (s *OpsManagerBuilder) New(tileSpec tileregistry.TileSpec) (opsManager tileregistry.Tile, err error) {
+	opsManager, err = NewOpsManager(tileSpec.OpsManagerHost, tileSpec.AdminUser, tileSpec.AdminPass, tileSpec.OpsManagerUser, tileSpec.OpsManagerPass, tileSpec.ArchiveDirectory)
 	return
 }
 
