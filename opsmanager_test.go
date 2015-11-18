@@ -1,6 +1,7 @@
 package cfbackup_test
 
 import (
+	"io"
 	"io/ioutil"
 	"net/http"
 	"path"
@@ -22,7 +23,7 @@ var _ = Describe("OpsManager object", func() {
 	Describe("Given a GetInstallationSettings method", func() {
 		Context("when called on a properly initialized opsmanager", func() {
 			var (
-				installationSettings        []byte
+				installationSettings        io.Reader
 				err                         error
 				controlInstallationSettings = "{my:fake, installation:settings, object:blob}"
 			)
@@ -49,8 +50,9 @@ var _ = Describe("OpsManager object", func() {
 				installationSettings, err = opsManager.GetInstallationSettings()
 			})
 			It("then it should return the installation_settings json from the ops manager api", func() {
+				contents, _ := ioutil.ReadAll(installationSettings)
 				Ω(err).ShouldNot(HaveOccurred())
-				Ω(installationSettings).Should(Equal([]byte(controlInstallationSettings)))
+				Ω(contents).Should(Equal([]byte(controlInstallationSettings)))
 			})
 		})
 	})
