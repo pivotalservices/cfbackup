@@ -19,6 +19,41 @@ var _ = Describe("OpsManager object", func() {
 		tmpDir     string
 		backupDir  string
 	)
+	Describe("Given a GetInstallationSettings method", func() {
+		Context("when called on a properly initialized opsmanager", func() {
+			var (
+				installationSettings        []byte
+				err                         error
+				controlInstallationSettings = "{my:fake, installation:settings, object:blob}"
+			)
+			BeforeEach(func() {
+				tmpDir, _ = ioutil.TempDir("/tmp", "test")
+				backupDir = path.Join(tmpDir, "backup", "opsmanager")
+				gw := &MockHttpGateway{StatusCode: 200, State: controlInstallationSettings}
+
+				opsManager = &OpsManager{
+					SettingsUploader:  MockMultiPartUploadFunc,
+					AssetsUploader:    MockMultiPartUploadFunc,
+					SettingsRequestor: gw,
+					AssetsRequestor:   gw,
+					Hostname:          "localhost",
+					Username:          "user",
+					Password:          "password",
+					BackupContext: BackupContext{
+						TargetDir: path.Join(tmpDir, "backup"),
+					},
+					Executer:            &successExecuter{},
+					DeploymentDir:       "fixtures/encryptionkey",
+					OpsmanagerBackupDir: "opsmanager",
+				}
+				installationSettings, err = opsManager.GetInstallationSettings()
+			})
+			It("then it should return the installation_settings json from the ops manager api", func() {
+				Ω(err).ShouldNot(HaveOccurred())
+				Ω(installationSettings).Should(Equal([]byte(controlInstallationSettings)))
+			})
+		})
+	})
 	Describe("Given a Restore method", func() {
 
 		Context("calling restore with failed removal of deployment files", func() {
