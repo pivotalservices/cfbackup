@@ -8,7 +8,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/pivotalservices/cfbackup"
-	"github.com/pivotalservices/cfops/tileregistry"
 	. "github.com/pivotalservices/gtils/command"
 	ghttp "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/osutils"
@@ -20,33 +19,6 @@ var _ = Describe("OpsManager object", func() {
 		tmpDir     string
 		backupDir  string
 	)
-	Describe("OpsManagerBuilder", func() {
-		Describe("given a New() method", func() {
-			Context("when called with invalid tileSpec connection credentials", func() {
-				var controlTileSpec tileregistry.TileSpec
-				BeforeEach(func() {
-					controlTileSpec = tileregistry.TileSpec{}
-				})
-
-				It("then it should return an initialized OpsManager as a tileregistry.Tile interface", func() {
-					_, err := new(OpsManagerBuilder).New(controlTileSpec)
-					Ω(err).Should(HaveOccurred())
-				})
-			})
-
-			Context("when called with a valid tileSpec", func() {
-				var controlTileSpec tileregistry.TileSpec
-				BeforeEach(func() {
-					controlTileSpec = tileregistry.TileSpec{}
-				})
-
-				It("then it should return an initialized OpsManager as a tileregistry.Tile interface", func() {
-					tile, _ := new(OpsManagerBuilder).New(controlTileSpec)
-					Ω(tile).Should(BeAssignableToTypeOf(new(OpsManager)))
-				})
-			})
-		})
-	})
 	Describe("Given a Restore method", func() {
 
 		Context("calling restore with failed removal of deployment files", func() {
