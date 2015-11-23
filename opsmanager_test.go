@@ -11,6 +11,7 @@ import (
 	. "github.com/pivotalservices/cfbackup"
 	. "github.com/pivotalservices/gtils/command"
 	ghttp "github.com/pivotalservices/gtils/http"
+	"github.com/pivotalservices/gtils/http/fake"
 	"github.com/pivotalservices/gtils/osutils"
 )
 
@@ -57,6 +58,49 @@ var _ = Describe("OpsManager object", func() {
 		})
 	})
 	Describe("Given a Restore method", func() {
+
+		Context("when called", func() {
+			var (
+				opsMgr               *OpsManager
+				fakeSettingsUploader *fake.MultiPart
+				fakeAssetsUploader   *fake.MultiPart
+			)
+
+			BeforeEach(func() {
+				fakeSettingsUploader = new(fake.MultiPart)
+				fakeAssetsUploader = new(fake.MultiPart)
+				tmpDir, _ = ioutil.TempDir("/tmp", "test")
+				backupDir = path.Join(tmpDir, "backup", "opsmanager")
+				gw := &MockHttpGateway{}
+
+				opsMgr = &OpsManager{
+					SettingsUploader:  fakeSettingsUploader.Upload,
+					AssetsUploader:    fakeAssetsUploader.Upload,
+					SettingsRequestor: gw,
+					AssetsRequestor:   gw,
+					Hostname:          "localhost",
+					Username:          "user",
+					Password:          "password",
+					BackupContext: BackupContext{
+						TargetDir: path.Join(tmpDir, "backup"),
+					},
+					Executer:            &successExecuter{},
+					DeploymentDir:       "fixtures/encryptionkey",
+					OpsmanagerBackupDir: "opsmanager",
+				}
+				f, _ := osutils.SafeCreate(opsMgr.TargetDir, opsMgr.OpsmanagerBackupDir, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
+				f.Close()
+				f, _ = osutils.SafeCreate(opsMgr.TargetDir, opsMgr.OpsmanagerBackupDir, OPSMGR_INSTALLATION_ASSETS_FILENAME)
+				f.Close()
+				opsMgr.Restore()
+			})
+			It("then it should import the assets archive", func() {
+				Ω(fakeAssetsUploader.UploadCallCount).ShouldNot(Equal(0))
+			})
+			It("then it should not import the settings archive", func() {
+				Ω(fakeSettingsUploader.UploadCallCount).Should(Equal(0))
+			})
+		})
 
 		Context("calling restore with failed removal of deployment files", func() {
 
