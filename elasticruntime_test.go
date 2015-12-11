@@ -10,6 +10,7 @@ import (
 
 	. "github.com/pivotalservices/cfbackup"
 	"github.com/pivotalservices/gtils/osutils"
+	"github.com/pivotalservices/gtils/persistence"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -79,12 +80,62 @@ var _ = Describe("ElasticRuntime", func() {
 	})
 
 	Describe("ElasticRuntime Version 1.6", func() {
-		os.Setenv("ER_VERSION", "1.6")
+		os.Setenv(ER_VERSION_ENV_FLAG, ER_VERSION_16)
 		var installationSettingsFilePath = "fixtures/installation-settings-1-6.json"
 		testERWithVersionSpecificFile(installationSettingsFilePath)
-		os.Setenv("ER_VERSION", "")
+		os.Setenv(ER_VERSION_ENV_FLAG, "")
 	})
 
+	Describe("Given: a er version feature toggle", func() {
+		Context("when toggled to v1.6", func() {
+			versionBoshName := "p-bosh"
+			versionPGDump := "/var/vcap/packages/postgres-9.4.2/bin/pg_dump"
+			versionPGRestore := "/var/vcap/packages/postgres-9.4.2/bin/pg_restore"
+
+			BeforeEach(func() {
+				os.Setenv(ER_VERSION_ENV_FLAG, ER_VERSION_16)
+				SetPGDumpUtilVersions()
+			})
+
+			AfterEach(func() {
+				os.Setenv(ER_VERSION_ENV_FLAG, "")
+				SetPGDumpUtilVersions()
+			})
+
+			It("then it should know the correct bosh name for this version", func() {
+				Ω(BoshName()).Should(Equal(versionBoshName))
+			})
+
+			It("then it should target the proper vendored postgres utils", func() {
+				Ω(persistence.PGDMP_DUMP_BIN).Should(Equal(versionPGDump))
+				Ω(persistence.PGDMP_RESTORE_BIN).Should(Equal(versionPGRestore))
+			})
+		})
+		Context("when NOT toggled to v1.6", func() {
+			versionBoshName := "microbosh"
+			versionPGDump := "/var/vcap/packages/postgres/bin/pg_dump"
+			versionPGRestore := "/var/vcap/packages/postgres/bin/pg_restore"
+
+			BeforeEach(func() {
+				os.Setenv(ER_VERSION_ENV_FLAG, "")
+				SetPGDumpUtilVersions()
+			})
+
+			AfterEach(func() {
+				os.Setenv(ER_VERSION_ENV_FLAG, "")
+				SetPGDumpUtilVersions()
+			})
+
+			It("then it should know the correct bosh name for this version", func() {
+				Ω(BoshName()).Should(Equal(versionBoshName))
+			})
+
+			It("then it should target the proper vendored postgres utils", func() {
+				Ω(persistence.PGDMP_DUMP_BIN).Should(Equal(versionPGDump))
+				Ω(persistence.PGDMP_RESTORE_BIN).Should(Equal(versionPGRestore))
+			})
+		})
+	})
 })
 
 func testERWithVersionSpecificFile(installationSettingsFilePath string) {
