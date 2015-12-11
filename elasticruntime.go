@@ -43,15 +43,17 @@ var (
 	ER_ERROR_EMPTY_DB_LIST  = errors.New(ER_NO_PERSISTENCE_ARCHIVES)
 	ER_ERROR_INVALID_PATH   = &os.PathError{Err: errors.New(ER_FILE_DOES_NOT_EXIST)}
 	ER_DB_BACKUP            = errors.New(ER_DB_BACKUP_FAILURE)
-	BoshName                = func() (bosh string) {
-		if os.Getenv("ER_VERSION") == "1.6" {
-			bosh = "p-bosh"
-		} else {
-			bosh = "microbosh"
-		}
-		return
-	}
 )
+
+func BoshName() (bosh string) {
+	switch os.Getenv("ER_VERSION") {
+	case "1.6":
+		bosh = "p-bosh"
+	default:
+		bosh = "microbosh"
+	}
+	return
+}
 
 // ElasticRuntime contains information about a Pivotal Elastic Runtime deployment
 type ElasticRuntime struct {
