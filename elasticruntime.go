@@ -31,6 +31,8 @@ const (
 	ER_NO_PERSISTENCE_ARCHIVES    = "there are no persistence stores in the list"
 	ER_FILE_DOES_NOT_EXIST        = "file does not exist"
 	ER_DB_BACKUP_FAILURE          = "failed to backup database"
+	ER_VERSION_ENV_FLAG           = "ER_VERSION"
+	ER_VERSION_16                 = "1.6"
 )
 
 const (
@@ -46,8 +48,8 @@ var (
 )
 
 func BoshName() (bosh string) {
-	switch os.Getenv("ER_VERSION") {
-	case "1.6":
+	switch os.Getenv(ER_VERSION_ENV_FLAG) {
+	case ER_VERSION_16:
 		bosh = "p-bosh"
 	default:
 		bosh = "microbosh"
