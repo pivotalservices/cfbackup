@@ -78,13 +78,20 @@ var _ = Describe("ElasticRuntime", func() {
 		testERWithVersionSpecificFile(installationSettingsFilePath)
 	})
 
+	Describe("ElasticRuntime Version 1.6", func() {
+		os.Setenv("ER_VERSION", "1.6")
+		var installationSettingsFilePath = "fixtures/installation-settings-1-6.json"
+		testERWithVersionSpecificFile(installationSettingsFilePath)
+		os.Setenv("ER_VERSION", "")
+	})
+
 })
 
 func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 	Describe("Backup / Restore", func() {
 		Context("with valid properties (DirectorInfo)", func() {
 			var (
-				product   string = "microbosh"
+				product   string = BoshName()
 				component string = "director"
 				username  string = "director"
 				target    string
