@@ -61,9 +61,11 @@ var _ = Describe("OpsManager object", func() {
 
 		Context("when called", func() {
 			var (
-				opsMgr               *OpsManager
-				fakeSettingsUploader *fake.MultiPart
-				fakeAssetsUploader   *fake.MultiPart
+				opsMgr                  *OpsManager
+				fakeSettingsUploader    *fake.MultiPart
+				fakeAssetsUploader      *fake.MultiPart
+				controlAssetsContents   = []byte(`test assets`)
+				controlSettingsContents = []byte(`test bytes`)
 			)
 
 			BeforeEach(func() {
@@ -89,16 +91,20 @@ var _ = Describe("OpsManager object", func() {
 					OpsmanagerBackupDir: "opsmanager",
 				}
 				f, _ := osutils.SafeCreate(opsMgr.TargetDir, opsMgr.OpsmanagerBackupDir, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
+				f.Write(controlSettingsContents)
 				f.Close()
 				f, _ = osutils.SafeCreate(opsMgr.TargetDir, opsMgr.OpsmanagerBackupDir, OPSMGR_INSTALLATION_ASSETS_FILENAME)
+				f.Write(controlAssetsContents)
 				f.Close()
 				opsMgr.Restore()
 			})
 			It("then it should import the assets archive", func() {
 				Ω(fakeAssetsUploader.UploadCallCount).ShouldNot(Equal(0))
+				Ω(fakeAssetsUploader.SpyFileContents).Should(Equal(controlAssetsContents))
 			})
 			It("then it should not import the settings archive", func() {
 				Ω(fakeSettingsUploader.UploadCallCount).Should(Equal(0))
+				Ω(fakeSettingsUploader.SpyFileContents).Should(BeNil())
 			})
 		})
 
