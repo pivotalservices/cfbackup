@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/cloudfoundry-community/go-cfenv"
 	. "github.com/pivotalservices/cfbackup"
 	"github.com/pivotalservices/gtils/osutils"
 	"github.com/pivotalservices/gtils/persistence"
@@ -167,11 +168,9 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					JsonFile:    installationSettingsFilePath,
-					HttpGateway: &MockHttpGateway{},
-					BackupContext: BackupContext{
-						TargetDir: target,
-					},
+					JsonFile:          installationSettingsFilePath,
+					HttpGateway:       &MockHttpGateway{},
+					BackupContext:     NewBackupContext(target, cfenv.CurrentEnv()),
 					SystemsInfo:       info,
 					PersistentSystems: ps,
 				}
@@ -299,12 +298,10 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					JsonFile:    installationSettingsFilePath,
-					HttpGateway: &MockHttpGateway{true, 500, `{"state":"notdone"}`},
-					BackupContext: BackupContext{
-						TargetDir: target,
-					},
-					SystemsInfo: info,
+					JsonFile:      installationSettingsFilePath,
+					HttpGateway:   &MockHttpGateway{true, 500, `{"state":"notdone"}`},
+					BackupContext: NewBackupContext(target, cfenv.CurrentEnv()),
+					SystemsInfo:   info,
 				}
 			})
 
@@ -368,12 +365,10 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					JsonFile:    installationSettingsFilePath,
-					HttpGateway: &MockHttpGateway{},
-					BackupContext: BackupContext{
-						TargetDir: target,
-					},
-					SystemsInfo: info,
+					JsonFile:      installationSettingsFilePath,
+					HttpGateway:   &MockHttpGateway{},
+					BackupContext: NewBackupContext(target, cfenv.CurrentEnv()),
+					SystemsInfo:   info,
 				}
 				er.ReadAllUserCredentials()
 			})
@@ -474,12 +469,10 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					JsonFile:    installationSettingsFilePath,
-					HttpGateway: &MockHttpGateway{},
-					BackupContext: BackupContext{
-						TargetDir: target,
-					},
-					SystemsInfo: info,
+					JsonFile:      installationSettingsFilePath,
+					HttpGateway:   &MockHttpGateway{},
+					BackupContext: NewBackupContext(target, cfenv.CurrentEnv()),
+					SystemsInfo:   info,
 				}
 				er.ReadAllUserCredentials()
 			})
@@ -528,12 +521,10 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					JsonFile:    installationSettingsFilePath,
-					HttpGateway: &MockHttpGateway{},
-					BackupContext: BackupContext{
-						TargetDir: target,
-					},
-					SystemsInfo: info,
+					JsonFile:      installationSettingsFilePath,
+					HttpGateway:   &MockHttpGateway{},
+					BackupContext: NewBackupContext(target, cfenv.CurrentEnv()),
+					SystemsInfo:   info,
 				}
 				er.ReadAllUserCredentials()
 			})
@@ -584,12 +575,10 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					JsonFile:    installationSettingsFilePath,
-					HttpGateway: &MockHttpGateway{},
-					BackupContext: BackupContext{
-						TargetDir: target,
-					},
-					SystemsInfo: info,
+					JsonFile:      installationSettingsFilePath,
+					HttpGateway:   &MockHttpGateway{},
+					BackupContext: NewBackupContext(target, cfenv.CurrentEnv()),
+					SystemsInfo:   info,
 				}
 				er.ReadAllUserCredentials()
 			})

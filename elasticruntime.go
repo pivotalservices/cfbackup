@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/cloudfoundry-community/go-cfenv"
 	. "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/log"
 	"github.com/pivotalservices/gtils/osutils"
@@ -122,10 +123,8 @@ var NewElasticRuntime = func(jsonFile string, target string) *ElasticRuntime {
 	)
 
 	context := &ElasticRuntime{
-		JsonFile: jsonFile,
-		BackupContext: BackupContext{
-			TargetDir: target,
-		},
+		JsonFile:      jsonFile,
+		BackupContext: NewBackupContext(target, cfenv.CurrentEnv()),
 		SystemsInfo: map[string]SystemDump{
 			ER_DIRECTOR: directorInfo,
 			ER_CONSOLE:  consoledbInfo,
