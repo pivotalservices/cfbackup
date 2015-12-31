@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"path"
 
+	"github.com/cloudfoundry-community/go-cfenv"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/pivotalservices/cfbackup"
@@ -34,16 +35,14 @@ var _ = Describe("OpsManager object", func() {
 				gw := &MockHttpGateway{StatusCode: 200, State: controlInstallationSettings}
 
 				opsManager = &OpsManager{
-					SettingsUploader:  MockMultiPartUploadFunc,
-					AssetsUploader:    MockMultiPartUploadFunc,
-					SettingsRequestor: gw,
-					AssetsRequestor:   gw,
-					Hostname:          "localhost",
-					Username:          "user",
-					Password:          "password",
-					BackupContext: BackupContext{
-						TargetDir: path.Join(tmpDir, "backup"),
-					},
+					SettingsUploader:    MockMultiPartUploadFunc,
+					AssetsUploader:      MockMultiPartUploadFunc,
+					SettingsRequestor:   gw,
+					AssetsRequestor:     gw,
+					Hostname:            "localhost",
+					Username:            "user",
+					Password:            "password",
+					BackupContext:       NewBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv()),
 					Executer:            &successExecuter{},
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
@@ -76,16 +75,14 @@ var _ = Describe("OpsManager object", func() {
 				gw := &MockHttpGateway{}
 
 				opsMgr = &OpsManager{
-					SettingsUploader:  fakeSettingsUploader.Upload,
-					AssetsUploader:    fakeAssetsUploader.Upload,
-					SettingsRequestor: gw,
-					AssetsRequestor:   gw,
-					Hostname:          "localhost",
-					Username:          "user",
-					Password:          "password",
-					BackupContext: BackupContext{
-						TargetDir: path.Join(tmpDir, "backup"),
-					},
+					SettingsUploader:    fakeSettingsUploader.Upload,
+					AssetsUploader:      fakeAssetsUploader.Upload,
+					SettingsRequestor:   gw,
+					AssetsRequestor:     gw,
+					Hostname:            "localhost",
+					Username:            "user",
+					Password:            "password",
+					BackupContext:       NewBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv()),
 					Executer:            &successExecuter{},
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
@@ -116,16 +113,14 @@ var _ = Describe("OpsManager object", func() {
 				gw := &MockHttpGateway{}
 
 				opsManager = &OpsManager{
-					SettingsUploader:  MockMultiPartUploadFunc,
-					AssetsUploader:    MockMultiPartUploadFunc,
-					SettingsRequestor: gw,
-					AssetsRequestor:   gw,
-					Hostname:          "localhost",
-					Username:          "user",
-					Password:          "password",
-					BackupContext: BackupContext{
-						TargetDir: path.Join(tmpDir, "backup"),
-					},
+					SettingsUploader:    MockMultiPartUploadFunc,
+					AssetsUploader:      MockMultiPartUploadFunc,
+					SettingsRequestor:   gw,
+					AssetsRequestor:     gw,
+					Hostname:            "localhost",
+					Username:            "user",
+					Password:            "password",
+					BackupContext:       NewBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv()),
 					Executer:            &failExecuter{},
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
@@ -150,16 +145,14 @@ var _ = Describe("OpsManager object", func() {
 				gw := &MockHttpGateway{}
 
 				opsManager = &OpsManager{
-					SettingsUploader:  MockMultiPartUploadFunc,
-					AssetsUploader:    MockMultiPartUploadFunc,
-					SettingsRequestor: gw,
-					AssetsRequestor:   gw,
-					Hostname:          "localhost",
-					Username:          "user",
-					Password:          "password",
-					BackupContext: BackupContext{
-						TargetDir: path.Join(tmpDir, "backup"),
-					},
+					SettingsUploader:    MockMultiPartUploadFunc,
+					AssetsUploader:      MockMultiPartUploadFunc,
+					SettingsRequestor:   gw,
+					AssetsRequestor:     gw,
+					Hostname:            "localhost",
+					Username:            "user",
+					Password:            "password",
+					BackupContext:       NewBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv()),
 					Executer:            &successExecuter{},
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
@@ -183,16 +176,14 @@ var _ = Describe("OpsManager object", func() {
 				gw := &MockHttpGateway{StatusCode: 500, State: failureString}
 
 				opsManager = &OpsManager{
-					SettingsUploader:  ghttp.MultiPartUpload,
-					AssetsUploader:    ghttp.MultiPartUpload,
-					SettingsRequestor: gw,
-					AssetsRequestor:   gw,
-					Hostname:          "localhost",
-					Username:          "user",
-					Password:          "password",
-					BackupContext: BackupContext{
-						TargetDir: path.Join(tmpDir, "backup"),
-					},
+					SettingsUploader:    ghttp.MultiPartUpload,
+					AssetsUploader:      ghttp.MultiPartUpload,
+					SettingsRequestor:   gw,
+					AssetsRequestor:     gw,
+					Hostname:            "localhost",
+					Username:            "user",
+					Password:            "password",
+					BackupContext:       NewBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv()),
 					Executer:            &failExecuter{},
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
@@ -214,16 +205,14 @@ var _ = Describe("OpsManager object", func() {
 				gw := &MockHttpGateway{StatusCode: 500, State: failureString}
 
 				opsManager = &OpsManager{
-					SettingsUploader:  MockMultiPartUploadFunc,
-					AssetsUploader:    MockMultiPartUploadFunc,
-					SettingsRequestor: gw,
-					AssetsRequestor:   gw,
-					Hostname:          "localhost",
-					Username:          "user",
-					Password:          "password",
-					BackupContext: BackupContext{
-						TargetDir: path.Join(tmpDir, "backup"),
-					},
+					SettingsUploader:    MockMultiPartUploadFunc,
+					AssetsUploader:      MockMultiPartUploadFunc,
+					SettingsRequestor:   gw,
+					AssetsRequestor:     gw,
+					Hostname:            "localhost",
+					Username:            "user",
+					Password:            "password",
+					BackupContext:       NewBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv()),
 					Executer:            &failExecuter{},
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
@@ -252,13 +241,11 @@ var _ = Describe("OpsManager object", func() {
 				fakeHttpRequestor := &MockHttpGateway{StatusCode: http.StatusUnauthorized, State: controlBody}
 
 				opsManager = &OpsManager{
-					SettingsRequestor: fakeHttpRequestor,
-					Hostname:          "localhost",
-					Username:          "user",
-					Password:          "password",
-					BackupContext: BackupContext{
-						TargetDir: path.Join(tmpDir, "backup"),
-					},
+					SettingsRequestor:   fakeHttpRequestor,
+					Hostname:            "localhost",
+					Username:            "user",
+					Password:            "password",
+					BackupContext:       NewBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv()),
 					Executer:            &successExecuter{},
 					LocalExecuter:       NewLocalMockExecuter(),
 					DeploymentDir:       "fixtures/encryptionkey",
@@ -279,12 +266,10 @@ var _ = Describe("OpsManager object", func() {
 				backupDir = path.Join(tmpDir, "backup", "opsmanager")
 
 				opsManager = &OpsManager{
-					Hostname: "localhost",
-					Username: "user",
-					Password: "password",
-					BackupContext: BackupContext{
-						TargetDir: path.Join(tmpDir, "backup"),
-					},
+					Hostname:            "localhost",
+					Username:            "user",
+					Password:            "password",
+					BackupContext:       NewBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv()),
 					Executer:            &failExecuter{},
 					LocalExecuter:       NewLocalMockExecuter(),
 					DeploymentDir:       "fixtures/encryptionkey",
@@ -322,13 +307,11 @@ var _ = Describe("OpsManager object", func() {
 				backupDir = path.Join(tmpDir, "backup", "opsmanager")
 				gw := &MockHttpGateway{StatusCode: 200, State: successString}
 				opsManager = &OpsManager{
-					SettingsRequestor: gw,
-					Hostname:          "localhost",
-					Username:          "user",
-					Password:          "password",
-					BackupContext: BackupContext{
-						TargetDir: path.Join(tmpDir, "backup"),
-					},
+					SettingsRequestor:   gw,
+					Hostname:            "localhost",
+					Username:            "user",
+					Password:            "password",
+					BackupContext:       NewBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv()),
 					Executer:            &successExecuter{},
 					LocalExecuter:       NewLocalMockExecuter(),
 					DeploymentDir:       "fixtures/encryptionkey",

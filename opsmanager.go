@@ -11,6 +11,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/cloudfoundry-community/go-cfenv"
 	"github.com/pivotalservices/gtils/command"
 	ghttp "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/log"
@@ -71,17 +72,15 @@ var NewOpsManager = func(opsManagerHostname string, adminUsername string, adminP
 		assetsMultiHttpRequestor := ghttp.LargeMultiPartUpload
 
 		context = &OpsManager{
-			SettingsUploader:  settingsMultiHttpRequestor,
-			AssetsUploader:    assetsMultiHttpRequestor,
-			SettingsRequestor: settingsHttpRequestor,
-			AssetsRequestor:   assetsHttpRequestor,
-			DeploymentDir:     path.Join(target, OPSMGR_BACKUP_DIR, OPSMGR_DEPLOYMENTS_DIR),
-			Hostname:          opsManagerHostname,
-			Username:          adminUsername,
-			Password:          adminPassword,
-			BackupContext: BackupContext{
-				TargetDir: target,
-			},
+			SettingsUploader:    settingsMultiHttpRequestor,
+			AssetsUploader:      assetsMultiHttpRequestor,
+			SettingsRequestor:   settingsHttpRequestor,
+			AssetsRequestor:     assetsHttpRequestor,
+			DeploymentDir:       path.Join(target, OPSMGR_BACKUP_DIR, OPSMGR_DEPLOYMENTS_DIR),
+			Hostname:            opsManagerHostname,
+			Username:            adminUsername,
+			Password:            adminPassword,
+			BackupContext:       NewBackupContext(target, cfenv.CurrentEnv()),
 			Executer:            remoteExecuter,
 			LocalExecuter:       command.NewLocalExecuter(),
 			OpsmanagerBackupDir: OPSMGR_BACKUP_DIR,
