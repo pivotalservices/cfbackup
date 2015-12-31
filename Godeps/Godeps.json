@@ -6,8 +6,17 @@
 	],
 	"Deps": [
 		{
+			"ImportPath": "github.com/cloudfoundry-community/go-cfenv",
+			"Comment": "v1.12",
+			"Rev": "c682e189b94b0b2ec6edf12363df2eecf29d7256"
+		},
+		{
 			"ImportPath": "github.com/kr/fs",
 			"Rev": "2788f0dbd16903de03cb8186e5c7d97b69ad387b"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/mapstructure",
+			"Rev": "281073eb9eb092240d33ef253c404f1cca550309"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo",
@@ -29,8 +38,8 @@
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/cfops/tileregistry",
-			"Comment": "v1.1.0-27-g23fbde5",
-			"Rev": "23fbde56493475475d6165e4145068178efcca11"
+			"Comment": "v2.0.0-2-g51a3ae4",
+			"Rev": "51a3ae469fe2d9591aad9ebfa7404d3a34d2f3eb"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/bosh",
