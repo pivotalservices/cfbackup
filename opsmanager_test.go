@@ -87,10 +87,10 @@ var _ = Describe("OpsManager object", func() {
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
 				}
-				f, _ := osutils.SafeCreate(opsMgr.TargetDir, opsMgr.OpsmanagerBackupDir, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
+				f, _ := osutils.SafeCreate(opsMgr.TargetDir, opsMgr.OpsmanagerBackupDir, OpsMgrInstallationSettingsFilename)
 				f.Write(controlSettingsContents)
 				f.Close()
-				f, _ = osutils.SafeCreate(opsMgr.TargetDir, opsMgr.OpsmanagerBackupDir, OPSMGR_INSTALLATION_ASSETS_FILENAME)
+				f, _ = osutils.SafeCreate(opsMgr.TargetDir, opsMgr.OpsmanagerBackupDir, OpsMgrInstallationAssetsFileName)
 				f.Write(controlAssetsContents)
 				f.Close()
 				opsMgr.Restore()
@@ -125,9 +125,9 @@ var _ = Describe("OpsManager object", func() {
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
 				}
-				f, _ := osutils.SafeCreate(opsManager.TargetDir, opsManager.OpsmanagerBackupDir, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
+				f, _ := osutils.SafeCreate(opsManager.TargetDir, opsManager.OpsmanagerBackupDir, OpsMgrInstallationSettingsFilename)
 				f.Close()
-				f, _ = osutils.SafeCreate(opsManager.TargetDir, opsManager.OpsmanagerBackupDir, OPSMGR_INSTALLATION_ASSETS_FILENAME)
+				f, _ = osutils.SafeCreate(opsManager.TargetDir, opsManager.OpsmanagerBackupDir, OpsMgrInstallationAssetsFileName)
 				f.Close()
 			})
 
@@ -157,9 +157,9 @@ var _ = Describe("OpsManager object", func() {
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
 				}
-				f, _ := osutils.SafeCreate(opsManager.TargetDir, opsManager.OpsmanagerBackupDir, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
+				f, _ := osutils.SafeCreate(opsManager.TargetDir, opsManager.OpsmanagerBackupDir, OpsMgrInstallationSettingsFilename)
 				f.Close()
-				f, _ = osutils.SafeCreate(opsManager.TargetDir, opsManager.OpsmanagerBackupDir, OPSMGR_INSTALLATION_ASSETS_FILENAME)
+				f, _ = osutils.SafeCreate(opsManager.TargetDir, opsManager.OpsmanagerBackupDir, OpsMgrInstallationAssetsFileName)
 				f.Close()
 			})
 
@@ -188,7 +188,7 @@ var _ = Describe("OpsManager object", func() {
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
 				}
-				f, _ := osutils.SafeCreate(opsManager.TargetDir, opsManager.OpsmanagerBackupDir, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
+				f, _ := osutils.SafeCreate(opsManager.TargetDir, opsManager.OpsmanagerBackupDir, OpsMgrInstallationSettingsFilename)
 				f.Close()
 			})
 
@@ -217,7 +217,7 @@ var _ = Describe("OpsManager object", func() {
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
 				}
-				f, _ := osutils.SafeCreate(opsManager.TargetDir, opsManager.OpsmanagerBackupDir, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
+				f, _ := osutils.SafeCreate(opsManager.TargetDir, opsManager.OpsmanagerBackupDir, OpsMgrInstallationSettingsFilename)
 				f.Close()
 			})
 

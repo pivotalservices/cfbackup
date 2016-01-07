@@ -78,7 +78,7 @@ func fullTileList(conn connBucketInterface, loggerName string) (tiles []Tile, er
 		opsmanager     Tile
 		elasticRuntime Tile
 	)
-	installationFilePath := path.Join(conn.Destination(), OPSMGR_BACKUP_DIR, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
+	installationFilePath := path.Join(conn.Destination(), OpsMgrBackupDir, OpsMgrInstallationSettingsFilename)
 
 	if opsmanager, err = NewOpsManager(conn.Host(), conn.AdminUser(), conn.AdminPass(), conn.OpsManagerUser(), conn.OpsManagerPass(), conn.Destination()); err == nil {
 		elasticRuntime = NewElasticRuntime(installationFilePath, conn.Destination())
