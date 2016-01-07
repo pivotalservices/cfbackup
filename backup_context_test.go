@@ -46,6 +46,9 @@ var _ = Describe("BackupContext", func() {
 				Ω(backupContext.BucketName).Should(Equal(controlBucket))
 				Ω(backupContext.IsS3Archive).Should(BeTrue())
 			})
+			// It("return a valid s3 backup writer", func() {
+			// 	backupContext.NewWriter()
+			// })
 		})
 	})
 })

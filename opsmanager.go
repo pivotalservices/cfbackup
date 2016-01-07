@@ -173,15 +173,15 @@ func (context *OpsManager) export() (err error) {
 }
 
 func (context *OpsManager) exportUrlToFile(urlFormat string, filename string) (err error) {
-	var settingsFileRef *os.File
-	defer settingsFileRef.Close()
+	var settingsWriter io.WriteCloser
 
 	url := fmt.Sprintf(urlFormat, context.Hostname)
 
 	lo.G.Debug("Exporting url '%s' to file '%s'", log.Data{"url": url, "filename": filename})
 
-	if settingsFileRef, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, filename); err == nil {
-		err = context.exportUrlToWriter(url, settingsFileRef, context.SettingsRequestor)
+	if settingsWriter, err = context.GetBackupWriter(context.TargetDir, context.OpsmanagerBackupDir, filename); err == nil {
+		defer settingsWriter.Close()
+		err = context.exportUrlToWriter(url, settingsWriter, context.SettingsRequestor)
 	}
 	return
 }
