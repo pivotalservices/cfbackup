@@ -213,10 +213,9 @@ func (context *OpsManager) importInstallation() (err error) {
 }
 
 func (context *OpsManager) importInstallationPart(url, filename, fieldname string, upload httpUploader) (err error) {
-	filePath := path.Join(context.TargetDir, context.OpsmanagerBackupDir, filename)
 	var backupReader io.ReadCloser
 
-	if backupReader, err = context.Reader(filePath); err == nil {
+	if backupReader, err = context.Reader(context.TargetDir, context.OpsmanagerBackupDir, filename); err == nil {
 		defer backupReader.Close()
 		bufferedReader := bufio.NewReader(backupReader)
 		var res *http.Response
@@ -225,6 +224,8 @@ func (context *OpsManager) importInstallationPart(url, filename, fieldname strin
 			Username: context.Username,
 			Password: context.Password,
 		}
+
+		filePath := path.Join(context.TargetDir, context.OpsmanagerBackupDir, filename)
 
 		if res, err = upload(conn, fieldname, filePath, bufferedReader, nil); err != nil {
 			err = fmt.Errorf(fmt.Sprintf("ERROR:%s - %v", err.Error(), res))

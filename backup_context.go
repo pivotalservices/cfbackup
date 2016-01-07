@@ -3,6 +3,7 @@ package cfbackup
 import (
 	"io"
 	"os"
+	ospath "path"
 	"strings"
 
 	"github.com/pivotalservices/gtils/log"
@@ -11,6 +12,7 @@ import (
 	"github.com/xchapter7x/lo"
 )
 
+// NewBackupContext initializes a BackupContext
 func NewBackupContext(targetDir string, env map[string]string) (backupContext BackupContext) {
 	backupContext = BackupContext{
 		TargetDir: targetDir,
@@ -35,28 +37,33 @@ func useS3(env map[string]string) bool {
 	return (akid && sak && bn && is && isS3)
 }
 
+// Writer for writing to a file or s3 bucket
 func (s *BackupContext) Writer(path ...string) (io.WriteCloser, error) {
 	if s.IsS3Archive {
-		s3FileName := strings.Join(path, "/")
-		lo.G.Debug("BackupContext.Writer()", log.Data{"s3FileName": s3FileName})
+		s3FilePath := strings.Join(path, "/")
+		lo.G.Debug("BackupContext.Writer()", log.Data{"s3FilePath": s3FilePath})
 
 		s3, err := storage.SafeCreateS3Bucket(s.S3Domain, s.BucketName, s.AccessKeyID, s.SecretAccessKey)
 		if err != nil {
 			return nil, err
 		}
 		lo.G.Debug("Created Bucket", log.Data{"s3Domain": s.S3Domain, "bucketName": s.BucketName, "accessKeyID": s.AccessKeyID, "secretAccessKey": s.SecretAccessKey})
-		return s3.NewWriter(s3FileName)
+		return s3.NewWriter(s3FilePath)
 	}
 	return osutils.SafeCreate(path...)
 }
 
+// Reader for reading from a file or s3 bucket
 func (s *BackupContext) Reader(path ...string) (io.ReadCloser, error) {
 	if s.IsS3Archive {
+		s3FilePath := strings.Join(path, "/")
+		lo.G.Debug("BackupContext.Reader()", log.Data{"s3FilePath": s3FilePath})
 		s3, err := storage.SafeCreateS3Bucket(s.S3Domain, s.BucketName, s.AccessKeyID, s.SecretAccessKey)
 		if err != nil {
 			return nil, err
 		}
-		return s3.NewReader(path[0])
+		return s3.NewReader(s3FilePath)
 	}
-	return os.Open(path[0])
+	filePath := ospath.Join(path...)
+	return os.Open(filePath)
 }
