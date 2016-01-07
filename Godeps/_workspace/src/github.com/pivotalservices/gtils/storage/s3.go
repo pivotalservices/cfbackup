@@ -29,9 +29,6 @@ func SafeCreateS3Bucket(domain, bucket, accessKey, secretKey string) (*S3Bucket,
 	if s.Bucket == "" {
 		return nil, errors.New("bucket name is undefined")
 	}
-	if s.Domain == "" {
-		return nil, errors.New("s3 domain is undefined")
-	}
 	var k s3gof3r.Keys
 	var err error
 
