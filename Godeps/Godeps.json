@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/pivotalservices/cfbackup",
-	"GoVersion": "go1.5.2",
+	"GoVersion": "go1.5.1",
 	"Packages": [
 		"./..."
 	],
@@ -35,6 +35,11 @@
 		{
 			"ImportPath": "github.com/pivotal-golang/lager",
 			"Rev": "be52ae622d25728f17aac7330e4565201c19155c"
+		},
+		{
+			"ImportPath": "github.com/pivotalservices/cfops/tileregistry",
+			"Comment": "v2.0.0-4-g43e8cab",
+			"Rev": "43e8cab9e220851708549567a7cbb927b9cf613d"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/bosh",
@@ -81,6 +86,11 @@
 			"Rev": "9d712e91b1f05c35bf7e8fa71a1b09392925d452"
 		},
 		{
+			"ImportPath": "github.com/rlmcpherson/s3gof3r",
+			"Comment": "v0.5.0",
+			"Rev": "31603a0dc94aefb822bfe2ceea75a6be6013b445"
+		},
+		{
 			"ImportPath": "github.com/technoweenie/multipartstreamer",
 			"Comment": "v1.0.1",
 			"Rev": "a90a01d73ae432e2611d178c18367fbaa13e0154"
@@ -94,9 +104,12 @@
 			"Rev": "aa2602d0e8e8647f0ce7b53109b37040941915aa"
 		},
 		{
+			"ImportPath": "golang.org/x/crypto/curve25519",
+			"Rev": "552e9d568fde9701ea1944fb01c8aadaceaa7353"
+		},
+		{
 			"ImportPath": "golang.org/x/crypto/ssh",
-			"Comment": "null-234",
-			"Rev": "'60a80aaa50ff0e8506f61b1fa35078a24941be50'"
+			"Rev": "552e9d568fde9701ea1944fb01c8aadaceaa7353"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v1",
