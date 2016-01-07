@@ -119,9 +119,9 @@ func (context *OpsManager) Backup() (err error) {
 	return
 }
 
-// save the deployments directory
 func (context *OpsManager) saveDeployments() (err error) {
-	if backupWriter, err := context.Writer(context.TargetDir, context.OpsmanagerBackupDir, OpsMgrDeploymentsFileName); err == nil {
+	var backupWriter io.WriteCloser
+	if backupWriter, err = context.Writer(context.TargetDir, context.OpsmanagerBackupDir, OpsMgrDeploymentsFileName); err == nil {
 		defer backupWriter.Close()
 		command := "cd /var/tempest/workspaces/default && tar cz deployments"
 		err = context.Executer.Execute(backupWriter, command)
@@ -129,7 +129,6 @@ func (context *OpsManager) saveDeployments() (err error) {
 	return
 }
 
-// save the encryption key and installation settings and assets
 func (context *OpsManager) saveInstallation() (err error) {
 	if err = context.saveEncryptionKey(); err == nil {
 		err = context.saveInstallationSettingsAndAssets()
@@ -138,8 +137,8 @@ func (context *OpsManager) saveInstallation() (err error) {
 }
 
 func (context *OpsManager) saveEncryptionKey() (err error) {
-	// backup the encryption key
-	if backupWriter, err := context.Writer(context.TargetDir, context.OpsmanagerBackupDir, OpsMgrEncryptionKeyFileName); err == nil {
+	var backupWriter io.WriteCloser
+	if backupWriter, err = context.Writer(context.TargetDir, context.OpsmanagerBackupDir, OpsMgrEncryptionKeyFileName); err == nil {
 		defer backupWriter.Close()
 		lo.G.Debug("Extracting encryption key")
 		backupDir := path.Join(context.TargetDir, context.OpsmanagerBackupDir)
@@ -153,7 +152,6 @@ func (context *OpsManager) saveEncryptionKey() (err error) {
 }
 
 func (context *OpsManager) saveInstallationSettingsAndAssets() (err error) {
-	// backup settings and assets using OpsMan API
 	if err = context.exportFile(OpsMgrInstallationSettingsURL, OpsMgrInstallationSettingsFilename); err == nil {
 		err = context.exportFile(OpsMgrInstallationAssetsURL, OpsMgrInstallationAssetsFileName)
 	}
@@ -164,8 +162,9 @@ func (context *OpsManager) exportFile(urlFormat string, filename string) (err er
 	url := fmt.Sprintf(urlFormat, context.Hostname)
 
 	lo.G.Debug("Exporting file", log.Data{"url": url, "filename": filename})
+	var backupWriter io.WriteCloser
 
-	if backupWriter, err := context.Writer(context.TargetDir, context.OpsmanagerBackupDir, filename); err == nil {
+	if backupWriter, err = context.Writer(context.TargetDir, context.OpsmanagerBackupDir, filename); err == nil {
 		defer backupWriter.Close()
 		err = context.saveHTTPResponse(url, backupWriter)
 	}
@@ -180,6 +179,7 @@ func (context *OpsManager) saveHTTPResponse(url string, dest io.Writer) (err err
 		Password:    context.Password,
 		ContentType: "application/octet-stream",
 	})()
+
 	if err == nil && resp.StatusCode == http.StatusOK {
 		defer resp.Body.Close()
 		_, err = io.Copy(dest, resp.Body)
@@ -201,6 +201,7 @@ func (context *OpsManager) Restore() (err error) {
 
 func (context *OpsManager) importInstallation() (err error) {
 	defer func() {
+
 		if err == nil {
 			err = context.removeExistingDeploymentFiles()
 		}
@@ -213,8 +214,9 @@ func (context *OpsManager) importInstallation() (err error) {
 
 func (context *OpsManager) importInstallationPart(url, filename, fieldname string, upload httpUploader) (err error) {
 	filePath := path.Join(context.TargetDir, context.OpsmanagerBackupDir, filename)
+	var backupReader io.ReadCloser
 
-	if backupReader, err := context.Reader(filePath); err == nil {
+	if backupReader, err = context.Reader(filePath); err == nil {
 		defer backupReader.Close()
 		bufferedReader := bufio.NewReader(backupReader)
 		var res *http.Response

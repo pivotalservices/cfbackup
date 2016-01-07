@@ -42,9 +42,7 @@ func (s *BackupContext) Writer(path ...string) (io.WriteCloser, error) {
 
 		s3, err := storage.SafeCreateS3Bucket(s.S3Domain, s.BucketName, s.AccessKeyID, s.SecretAccessKey)
 		if err != nil {
-			lo.G.Debug("BackupContext.Writer()", log.Data{"err": err})
-			panic("Could not safely create an s3 bucket!")
-			// return nil, err
+			return nil, err
 		}
 		lo.G.Debug("Created Bucket", log.Data{"s3Domain": s.S3Domain, "bucketName": s.BucketName, "accessKeyID": s.AccessKeyID, "secretAccessKey": s.SecretAccessKey})
 		return s3.NewWriter(s3FileName)
