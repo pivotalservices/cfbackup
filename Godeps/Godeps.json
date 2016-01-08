@@ -43,43 +43,43 @@
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/bosh",
-			"Comment": "v0.1.3-38-g4ca9dff",
-			"Rev": "4ca9dff29446be3bfef32458956ad88b55cc3234"
+			"Comment": "v0.1.3-41-g0de71b5",
+			"Rev": "0de71b5e3f0cd14664f4351b773d92477466da2f"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/command",
-			"Comment": "v0.1.3-38-g4ca9dff",
-			"Rev": "4ca9dff29446be3bfef32458956ad88b55cc3234"
+			"Comment": "v0.1.3-41-g0de71b5",
+			"Rev": "0de71b5e3f0cd14664f4351b773d92477466da2f"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/http",
-			"Comment": "v0.1.3-38-g4ca9dff",
-			"Rev": "4ca9dff29446be3bfef32458956ad88b55cc3234"
+			"Comment": "v0.1.3-41-g0de71b5",
+			"Rev": "0de71b5e3f0cd14664f4351b773d92477466da2f"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/log",
-			"Comment": "v0.1.3-38-g4ca9dff",
-			"Rev": "4ca9dff29446be3bfef32458956ad88b55cc3234"
+			"Comment": "v0.1.3-41-g0de71b5",
+			"Rev": "0de71b5e3f0cd14664f4351b773d92477466da2f"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/mock",
-			"Comment": "v0.1.3-38-g4ca9dff",
-			"Rev": "4ca9dff29446be3bfef32458956ad88b55cc3234"
+			"Comment": "v0.1.3-41-g0de71b5",
+			"Rev": "0de71b5e3f0cd14664f4351b773d92477466da2f"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/osutils",
-			"Comment": "v0.1.3-38-g4ca9dff",
-			"Rev": "4ca9dff29446be3bfef32458956ad88b55cc3234"
+			"Comment": "v0.1.3-41-g0de71b5",
+			"Rev": "0de71b5e3f0cd14664f4351b773d92477466da2f"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/persistence",
-			"Comment": "v0.1.3-38-g4ca9dff",
-			"Rev": "4ca9dff29446be3bfef32458956ad88b55cc3234"
+			"Comment": "v0.1.3-41-g0de71b5",
+			"Rev": "0de71b5e3f0cd14664f4351b773d92477466da2f"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/storage",
-			"Comment": "v0.1.3-38-g4ca9dff",
-			"Rev": "4ca9dff29446be3bfef32458956ad88b55cc3234"
+			"Comment": "v0.1.3-41-g0de71b5",
+			"Rev": "0de71b5e3f0cd14664f4351b773d92477466da2f"
 		},
 		{
 			"ImportPath": "github.com/pkg/sftp",
