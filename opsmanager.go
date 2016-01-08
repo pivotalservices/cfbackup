@@ -32,7 +32,7 @@ const (
 	OpsMgrDeploymentsFile                 string = "/var/tempest/workspaces/default/deployments/bosh-deployments.yml"
 )
 
-type httpUploader func(conn ghttp.ConnAuth, paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error)
+type httpUploader func(conn ghttp.ConnAuth, paramName, filename string, fileSize int64, fileRef io.Reader, params map[string]string) (res *http.Response, err error)
 
 type httpRequestor interface {
 	Get(ghttp.HttpRequestEntity) ghttp.RequestAdaptor
@@ -227,7 +227,7 @@ func (context *OpsManager) importInstallationPart(url, filename, fieldname strin
 
 		filePath := path.Join(context.TargetDir, context.OpsmanagerBackupDir, filename)
 
-		if res, err = upload(conn, fieldname, filePath, bufferedReader, nil); err != nil {
+		if res, err = upload(conn, fieldname, filePath, -1, bufferedReader, nil); err != nil {
 			err = fmt.Errorf(fmt.Sprintf("ERROR:%s - %v", err.Error(), res))
 			lo.G.Debug("upload failed", log.Data{"err": err, "response": res})
 		}
