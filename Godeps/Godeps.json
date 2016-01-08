@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/pivotalservices/cfbackup",
-	"GoVersion": "go1.5.2",
+	"GoVersion": "go1.5.1",
 	"Packages": [
 		"./..."
 	],
@@ -38,40 +38,57 @@
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/cfops/tileregistry",
-			"Comment": "v2.0.0-2-g51a3ae4",
-			"Rev": "51a3ae469fe2d9591aad9ebfa7404d3a34d2f3eb"
+			"Comment": "v2.0.0-4-g43e8cab",
+			"Rev": "43e8cab9e220851708549567a7cbb927b9cf613d"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/bosh",
-			"Rev": "b4a5ba0edcfd1da67937e259fc58e40b3395b382"
+			"Comment": "v0.1.3-32-gde56075",
+			"Rev": "a0a677ea0db4c37b512cb8d7ec4561d46863789d"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/command",
-			"Rev": "b4a5ba0edcfd1da67937e259fc58e40b3395b382"
+			"Comment": "v0.1.3-32-gde56075",
+			"Rev": "a0a677ea0db4c37b512cb8d7ec4561d46863789d"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/http",
-			"Rev": "b4a5ba0edcfd1da67937e259fc58e40b3395b382"
+			"Comment": "v0.1.3-32-gde56075",
+			"Rev": "a0a677ea0db4c37b512cb8d7ec4561d46863789d"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/log",
-			"Rev": "b4a5ba0edcfd1da67937e259fc58e40b3395b382"
+			"Comment": "v0.1.3-32-gde56075",
+			"Rev": "a0a677ea0db4c37b512cb8d7ec4561d46863789d"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/mock",
-			"Rev": "b4a5ba0edcfd1da67937e259fc58e40b3395b382"
+			"Comment": "v0.1.3-32-gde56075",
+			"Rev": "a0a677ea0db4c37b512cb8d7ec4561d46863789d"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/osutils",
-			"Rev": "b4a5ba0edcfd1da67937e259fc58e40b3395b382"
+			"Comment": "v0.1.3-32-gde56075",
+			"Rev": "a0a677ea0db4c37b512cb8d7ec4561d46863789d"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/persistence",
-			"Rev": "b4a5ba0edcfd1da67937e259fc58e40b3395b382"
+			"Comment": "v0.1.3-32-gde56075",
+			"Rev": "a0a677ea0db4c37b512cb8d7ec4561d46863789d"
+		},
+		{
+			"ImportPath": "github.com/pivotalservices/gtils/storage",
+			"Comment": "v0.1.3-32-gde56075",
+			"Rev": "a0a677ea0db4c37b512cb8d7ec4561d46863789d"
 		},
 		{
 			"ImportPath": "github.com/pkg/sftp",
 			"Rev": "9d712e91b1f05c35bf7e8fa71a1b09392925d452"
+		},
+		{
+			"ImportPath": "github.com/rlmcpherson/s3gof3r",
+			"Comment": "v0.5.0",
+			"Rev": "31603a0dc94aefb822bfe2ceea75a6be6013b445"
 		},
 		{
 			"ImportPath": "github.com/technoweenie/multipartstreamer",
@@ -87,9 +104,12 @@
 			"Rev": "aa2602d0e8e8647f0ce7b53109b37040941915aa"
 		},
 		{
+			"ImportPath": "golang.org/x/crypto/curve25519",
+			"Rev": "552e9d568fde9701ea1944fb01c8aadaceaa7353"
+		},
+		{
 			"ImportPath": "golang.org/x/crypto/ssh",
-			"Comment": "null-234",
-			"Rev": "'60a80aaa50ff0e8506f61b1fa35078a24941be50'"
+			"Rev": "552e9d568fde9701ea1944fb01c8aadaceaa7353"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v1",
