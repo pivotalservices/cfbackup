@@ -1,13 +1,18 @@
 package cfbackup
 
+import "io"
+
 //BackupContext - stores the base context information for a backup/restore
 type BackupContext struct {
-	TargetDir       string
-	S3Domain        string
-	BucketName      string
-	AccessKeyID     string
-	SecretAccessKey string
-	IsS3Archive     bool
+	TargetDir string
+	StorageProvider
+}
+
+// StorageProvider is responsible for obtaining/managing a reader/writer to
+// a storage type (eg disk/s3)
+type StorageProvider interface {
+	Reader(path ...string) (io.ReadCloser, error)
+	Writer(path ...string) (io.WriteCloser, error)
 }
 
 // Tile is a deployable component that can be backed up
