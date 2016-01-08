@@ -229,6 +229,12 @@ func (s *mockTile) Restore() error {
 	return s.ErrRestore
 }
 
+func NewFakeBackupContext(target string, env map[string]string, storageProvider StorageProvider) (backupContext BackupContext) {
+	backupContext = NewBackupContext(target, env)
+	backupContext.StorageProvider = storageProvider
+	return
+}
+
 type FakeStorageProvider struct {
 }
 
