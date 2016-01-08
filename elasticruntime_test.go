@@ -18,8 +18,8 @@ import (
 )
 
 var (
-	ERROR_IMPORT error = errors.New("failed import")
-	ERROR_DUMP   error = errors.New("failed dump")
+	ErrorImport = errors.New("failed import")
+	ErrorDump   = errors.New("failed dump")
 )
 
 type PgInfoMock struct {
@@ -45,7 +45,7 @@ func (s mockDumper) Dump(i io.Writer) (err error) {
 	i.Write([]byte("sometext"))
 
 	if s.failDump {
-		err = ERROR_DUMP
+		err = ErrorDump
 	}
 	return
 }
@@ -54,7 +54,7 @@ func (s mockDumper) Import(i io.Reader) (err error) {
 	i.Read([]byte("sometext"))
 
 	if s.failImport {
-		err = ERROR_IMPORT
+		err = ErrorImport
 	}
 	return
 }
@@ -143,12 +143,12 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 	Describe("Backup / Restore", func() {
 		Context("with valid properties (DirectorInfo)", func() {
 			var (
-				product   string = BoshName()
-				component string = "director"
-				username  string = "director"
+				product   = BoshName()
+				component = "director"
+				username  = "director"
 				target    string
 				er        ElasticRuntime
-				info      map[string]SystemDump = map[string]SystemDump{
+				info      = map[string]SystemDump{
 					"DirectorInfo": &SystemInfo{
 						Product:   product,
 						Component: component,
@@ -162,7 +162,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 						},
 					},
 				}
-				ps []SystemDump = []SystemDump{info["ConsoledbInfo"]}
+				ps = []SystemDump{info["ConsoledbInfo"]}
 			)
 
 			BeforeEach(func() {
@@ -189,7 +189,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 				})
 
 				Context("Restore", func() {
-					var filename string = fmt.Sprintf("%s.backup", component)
+					var filename = fmt.Sprintf("%s.backup", component)
 
 					BeforeEach(func() {
 						file, _ := os.Create(path.Join(target, filename))
@@ -281,12 +281,12 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 
 		Context("with invalid properties", func() {
 			var (
-				product   string = "cf"
-				component string = "consoledb"
-				username  string = "root"
+				product   = "cf"
+				component = "consoledb"
+				username  = "root"
 				target    string
 				er        ElasticRuntime
-				info      map[string]SystemDump = map[string]SystemDump{
+				info      = map[string]SystemDump{
 					"ConsoledbInfo": &SystemInfo{
 						Product:   product,
 						Component: component,
@@ -346,12 +346,12 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 	Describe("RunDbBackups function", func() {
 		Context("with a valid product and component for ccdb", func() {
 			var (
-				product   string = "cf"
-				component string = "consoledb"
-				username  string = "root"
+				product   = "cf"
+				component = "consoledb"
+				username  = "root"
 				target    string
 				er        ElasticRuntime
-				info      map[string]SystemDump = map[string]SystemDump{
+				info      = map[string]SystemDump{
 					"ConsoledbInfo": &PgInfoMock{
 						SystemInfo: SystemInfo{
 							Product:   product,
@@ -402,7 +402,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 				})
 
 				Context("local file exists", func() {
-					var filename string = fmt.Sprintf("%s.backup", component)
+					var filename = fmt.Sprintf("%s.backup", component)
 
 					BeforeEach(func() {
 						file, _ := os.Create(path.Join(target, filename))
@@ -441,7 +441,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 						It("should return error", func() {
 							err := er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, IMPORT_ARCHIVE)
 							Ω(err).ShouldNot(BeNil())
-							Ω(err).ShouldNot(Equal(ERROR_IMPORT))
+							Ω(err).ShouldNot(Equal(ErrorImport))
 						})
 					})
 				})
@@ -450,12 +450,12 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 
 		Context("with a valid product and component for consoledb", func() {
 			var (
-				product   string = "cf"
-				component string = "consoledb"
-				username  string = "root"
+				product   = "cf"
+				component = "consoledb"
+				username  = "root"
 				target    string
 				er        ElasticRuntime
-				info      map[string]SystemDump = map[string]SystemDump{
+				info      = map[string]SystemDump{
 					"ConsoledbInfo": &PgInfoMock{
 						SystemInfo: SystemInfo{
 							Product:   product,
@@ -502,12 +502,12 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 
 		Context("with a valid product and component for uaadb", func() {
 			var (
-				product   string = "cf"
-				component string = "uaadb"
-				username  string = "root"
+				product   = "cf"
+				component = "uaadb"
+				username  = "root"
 				target    string
 				er        ElasticRuntime
-				info      map[string]SystemDump = map[string]SystemDump{
+				info      = map[string]SystemDump{
 					"UaadbInfo": &PgInfoMock{
 						SystemInfo: SystemInfo{
 							Product:   product,
@@ -558,12 +558,12 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 
 		Context("with a invalid product, username and component", func() {
 			var (
-				product   string = "aaaaaaaa"
-				component string = "aaaaaaaa"
-				username  string = "aaaaaaaa"
+				product   = "aaaaaaaa"
+				component = "aaaaaaaa"
+				username  = "aaaaaaaa"
 				target    string
 				er        ElasticRuntime
-				info      map[string]SystemDump = map[string]SystemDump{
+				info      = map[string]SystemDump{
 					"ConsoledbInfo": &SystemInfo{
 						Product:   product,
 						Component: component,
