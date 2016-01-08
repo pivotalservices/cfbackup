@@ -228,3 +228,16 @@ func (s *mockTile) Restore() error {
 	s.RestoreCalled++
 	return s.ErrRestore
 }
+
+type FakeStorageProvider struct {
+}
+
+func (d *FakeStorageProvider) Reader(path ...string) (io.ReadCloser, error) {
+	return &ClosingBuffer{
+		bytes.NewBufferString("Fake storage provider doesn't care about your data"),
+	}, nil
+}
+
+func (d *FakeStorageProvider) Writer(path ...string) (closer io.WriteCloser, err error) {
+	return closer, nil
+}

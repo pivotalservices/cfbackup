@@ -17,10 +17,7 @@ var _ = Describe("BackupContext", func() {
 			})
 			It("then it should create a backup context with the targetdir set", func() {
 				Ω(backupContext.TargetDir).Should(Equal(controlTargetDir))
-				Ω(backupContext.AccessKeyID).Should(BeEmpty())
-				Ω(backupContext.SecretAccessKey).Should(BeEmpty())
-				Ω(backupContext.BucketName).Should(BeEmpty())
-				Ω(backupContext.IsS3Archive).Should(BeFalse())
+				Ω(backupContext.StorageProvider).Should(BeAssignableToTypeOf(&DiskProvider{}))
 			})
 		})
 
@@ -41,14 +38,8 @@ var _ = Describe("BackupContext", func() {
 			})
 			It("then it should create a backup context that can be used for s3 backup/restore ", func() {
 				Ω(backupContext.TargetDir).Should(Equal(controlTargetDir))
-				Ω(backupContext.AccessKeyID).Should(Equal(controlkey))
-				Ω(backupContext.SecretAccessKey).Should(Equal(controlSecret))
-				Ω(backupContext.BucketName).Should(Equal(controlBucket))
-				Ω(backupContext.IsS3Archive).Should(BeTrue())
+				Ω(backupContext.StorageProvider).Should(BeAssignableToTypeOf(&S3Provider{}))
 			})
-			// It("return a valid s3 backup writer", func() {
-			// 	backupContext.NewWriter()
-			// })
 		})
 	})
 })
