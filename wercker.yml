@@ -1,4 +1,4 @@
-box: wercker/box-golang
+box: box-golang
 build:
   # The steps that will be executed on build
   steps:
