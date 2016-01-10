@@ -129,26 +129,8 @@ func (context *OpsManager) saveDeployments() (err error) {
 	return
 }
 
-func (context *OpsManager) saveInstallation() (err error) {
-	if err = context.saveEncryptionKey(); err == nil {
-		err = context.saveInstallationSettingsAndAssets()
-	}
-	return
-}
-
-func (context *OpsManager) saveEncryptionKey() (err error) {
-	var backupWriter io.WriteCloser
-	if backupWriter, err = context.Writer(context.TargetDir, context.OpsmanagerBackupDir, OpsMgrEncryptionKeyFileName); err == nil {
-		defer backupWriter.Close()
-		lo.G.Debug("Extracting encryption key")
-		backupDir := path.Join(context.TargetDir, context.OpsmanagerBackupDir)
-		deployment := path.Join(backupDir, OpsMgrDeploymentsFileName)
-		cmd := "tar -xf " + deployment + " -C " + backupDir
-		lo.G.Debug("Extracting : %s", log.Data{"command": cmd})
-		context.LocalExecuter.Execute(nil, cmd)
-		err = ExtractEncryptionKey(backupWriter, context.DeploymentDir)
-	}
-	return
+func (context *OpsManager) saveInstallation() error {
+	return context.saveInstallationSettingsAndAssets()
 }
 
 func (context *OpsManager) saveInstallationSettingsAndAssets() (err error) {

@@ -285,13 +285,6 @@ var _ = Describe("OpsManager object", func() {
 				Ω(osutils.Exists(filepath)).Should(BeFalse())
 			})
 
-			It("should return non nil error and not write cc_db_encryption_key.txt", func() {
-				err := opsManager.Backup()
-				filepath := path.Join(backupDir, "cc_db_encryption_key.txt")
-				Ω(err).ShouldNot(BeNil())
-				Ω(osutils.Exists(filepath)).Should(BeFalse())
-			})
-
 			It("should return non nil error and not write deployments.tar.gz", func() {
 				err := opsManager.Backup()
 				filepath := path.Join(backupDir, "deployments.tar.gz")
@@ -325,12 +318,6 @@ var _ = Describe("OpsManager object", func() {
 				b, _ := ioutil.ReadFile(filepath)
 				Ω(err).Should(BeNil())
 				Ω(b).Should(Equal([]byte(successString)))
-			})
-
-			It("should return nil error and write ", func() {
-				opsManager.Backup()
-				filepath := path.Join(backupDir, "cc_db_encryption_key.txt")
-				Ω(osutils.Exists(filepath)).Should(BeTrue())
 			})
 
 			It("should return nil error and write ", func() {
