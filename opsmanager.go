@@ -63,10 +63,11 @@ var NewOpsManager = func(opsManagerHostname string, adminUsername string, adminP
 	var remoteExecuter command.Executer
 
 	if remoteExecuter, err = createExecuter(opsManagerHostname, opsManagerUsername, opsManagerPassword, OpsMgrDefaultSSHPort); err == nil {
+		backupContext := NewBackupContext(target, cfenv.CurrentEnv())
 		settingsHTTPRequestor := ghttp.NewHttpGateway()
-		settingsMultiHTTPRequestor := ghttp.LargeMultiPartUpload
+		settingsMultiHTTPRequestor := GetUploader(backupContext)
 		assetsHTTPRequestor := ghttp.NewHttpGateway()
-		assetsMultiHTTPRequestor := ghttp.LargeMultiPartUpload
+		assetsMultiHTTPRequestor := GetUploader(backupContext)
 
 		context = &OpsManager{
 			SettingsUploader:    settingsMultiHTTPRequestor,
@@ -77,7 +78,7 @@ var NewOpsManager = func(opsManagerHostname string, adminUsername string, adminP
 			Hostname:            opsManagerHostname,
 			Username:            adminUsername,
 			Password:            adminPassword,
-			BackupContext:       NewBackupContext(target, cfenv.CurrentEnv()),
+			BackupContext:       backupContext,
 			Executer:            remoteExecuter,
 			LocalExecuter:       command.NewLocalExecuter(),
 			OpsmanagerBackupDir: OpsMgrBackupDir,
@@ -183,8 +184,8 @@ func (context *OpsManager) Restore() (err error) {
 
 func (context *OpsManager) importInstallation() (err error) {
 	defer func() {
-
 		if err == nil {
+			lo.G.Debug("removing deployment files")
 			err = context.removeExistingDeploymentFiles()
 		}
 	}()
@@ -199,7 +200,6 @@ func (context *OpsManager) importInstallationPart(url, filename, fieldname strin
 
 	if backupReader, err = context.Reader(context.TargetDir, context.OpsmanagerBackupDir, filename); err == nil {
 		defer backupReader.Close()
-		bufferedReader := bufio.NewReader(backupReader)
 		var res *http.Response
 		conn := ghttp.ConnAuth{
 			Url:      url,
@@ -208,9 +208,12 @@ func (context *OpsManager) importInstallationPart(url, filename, fieldname strin
 		}
 
 		filePath := path.Join(context.TargetDir, context.OpsmanagerBackupDir, filename)
+		bufferedReader := bufio.NewReader(backupReader)
+
+		lo.G.Debug("upload request", log.Data{"fieldname": fieldname, "filePath": filePath})
 
 		if res, err = upload(conn, fieldname, filePath, -1, bufferedReader, nil); err != nil {
-			err = fmt.Errorf(fmt.Sprintf("ERROR:%s - %v", err.Error(), res))
+			err = fmt.Errorf(fmt.Sprintf("ERROR:%s", err.Error()))
 			lo.G.Debug("upload failed", log.Data{"err": err, "response": res})
 		}
 	}

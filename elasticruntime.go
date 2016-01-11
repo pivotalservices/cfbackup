@@ -226,7 +226,7 @@ func (context *ElasticRuntime) RunDbAction(dbInfoList []SystemDump, action int) 
 			err = context.readWriterArchive(info, context.TargetDir, action)
 			lo.G.Debug("backed up db", log.Data{"info": info})
 		} else {
-			continue
+			break
 		}
 	}
 	return
