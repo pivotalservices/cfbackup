@@ -25,3 +25,6 @@ _testmain.go
 coverage.out
 
 .envrc
+_builds
+_projects
+_steps
