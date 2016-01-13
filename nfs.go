@@ -10,12 +10,12 @@ import (
 )
 
 const (
-	//NFS_DIR_PATH - this is where the nfs store lives
-	NFS_DIR_PATH string = "/var/vcap/store"
-	//NFS_ARCHIVE_DIR - this is the archive dir name
-	NFS_ARCHIVE_DIR string = "shared"
-	//NFS_DEFAULT_SSH_USER - this is the default ssh user for nfs
-	NFS_DEFAULT_SSH_USER string = "vcap"
+	//NfsDirPath - this is where the nfs store lives
+	NfsDirPath string = "/var/vcap/store"
+	//NfsArchiveDir - this is the archive dir name
+	NfsArchiveDir string = "shared"
+	//NfsDefaultSSHUser - this is the default ssh user for nfs
+	NfsDefaultSSHUser string = "vcap"
 )
 
 type remoteOpsInterface interface {
@@ -45,7 +45,7 @@ var NfsNewRemoteExecuter func(command.SshConfig) (command.Executer, error) = com
 //NewNFSBackup - constructor for an nfsbackup object
 func NewNFSBackup(password, ip string) (nfs *NFSBackup, err error) {
 	config := command.SshConfig{
-		Username: NFS_DEFAULT_SSH_USER,
+		Username: NfsDefaultSSHUser,
 		Password: password,
 		Host:     ip,
 		Port:     22,
@@ -76,9 +76,9 @@ func (s *NFSBackup) Import(lfile io.Reader) (err error) {
 }
 
 func (s *NFSBackup) getRestoreCommand() string {
-	return fmt.Sprintf("cd %s && tar zx %s", NFS_DIR_PATH, s.RemoteOps.Path())
+	return fmt.Sprintf("cd %s && tar zx %s", NfsDirPath, s.RemoteOps.Path())
 }
 
 func (s *NFSBackup) getDumpCommand() string {
-	return fmt.Sprintf("cd %s && tar cz %s", NFS_DIR_PATH, NFS_ARCHIVE_DIR)
+	return fmt.Sprintf("cd %s && tar cz %s", NfsDirPath, NfsArchiveDir)
 }

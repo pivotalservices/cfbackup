@@ -13,10 +13,10 @@ import (
 type (
 	//InstallationCompareObject --
 	InstallationCompareObject struct {
-		Guid                 string
-		Installation_Version string
-		Products             []productCompareObject
-		Infrastructure       infrastructure
+		Guid                string
+		InstallationVersion string `json:"installation_version"`
+		Products            []productCompareObject
+		Infrastructure      infrastructure
 	}
 
 	infrastructure struct {
@@ -42,8 +42,8 @@ type (
 	propertyCompare struct {
 		Value interface{}
 	}
-	//IpPasswordParser - parses the passwords out of a installation settings
-	IpPasswordParser struct {
+	//IPPasswordParser - parses the passwords out of a installation settings
+	IPPasswordParser struct {
 		Product   string
 		Component string
 		Username  string
@@ -92,7 +92,7 @@ func GetDeploymentName(jsonObj InstallationCompareObject) (deploymentName string
 
 //GetPasswordAndIP - returns password and ip from the installation settings from a given component
 func GetPasswordAndIP(jsonObj InstallationCompareObject, product, component, username string) (ip, password string, err error) {
-	parser := &IpPasswordParser{
+	parser := &IPPasswordParser{
 		Product:   product,
 		Component: component,
 		Username:  username,
@@ -101,7 +101,7 @@ func GetPasswordAndIP(jsonObj InstallationCompareObject, product, component, use
 }
 
 //Parse - parse a given installation compare object
-func (s *IpPasswordParser) Parse(jsonObj InstallationCompareObject) (ip, password string, err error) {
+func (s *IPPasswordParser) Parse(jsonObj InstallationCompareObject) (ip, password string, err error) {
 	if err = s.setupAndRun(jsonObj); err == nil {
 		ip = s.ip
 		password = s.password
@@ -119,7 +119,7 @@ func ReadAndUnmarshal(src io.Reader) (jsonObj InstallationCompareObject, err err
 	return
 }
 
-func (s *IpPasswordParser) setupAndRun(jsonObj InstallationCompareObject) (err error) {
+func (s *IPPasswordParser) setupAndRun(jsonObj InstallationCompareObject) (err error) {
 	var productObj productCompareObject
 	s.modifyProductTypeName(jsonObj.Infrastructure.Type)
 
@@ -129,15 +129,15 @@ func (s *IpPasswordParser) setupAndRun(jsonObj InstallationCompareObject) (err e
 	return
 }
 
-func (s *IpPasswordParser) ipPasswordSet(productObj productCompareObject) (err error) {
+func (s *IPPasswordParser) ipPasswordSet(productObj productCompareObject) (err error) {
 
 	if err = s.setPassword(productObj); err == nil {
-		err = s.setIp(productObj)
+		err = s.setIP(productObj)
 	}
 	return
 }
 
-func (s *IpPasswordParser) setIp(productObj productCompareObject) (err error) {
+func (s *IPPasswordParser) setIP(productObj productCompareObject) (err error) {
 	var iplist []string
 
 	if err = jsonFilter(productObj.IPs, s.ipsFilter, &iplist); err == nil {
@@ -147,7 +147,7 @@ func (s *IpPasswordParser) setIp(productObj productCompareObject) (err error) {
 	return
 }
 
-func (s *IpPasswordParser) setPassword(productObj productCompareObject) (err error) {
+func (s *IPPasswordParser) setPassword(productObj productCompareObject) (err error) {
 	var jobObj jobCompare
 	var property propertyCompare
 
@@ -166,15 +166,15 @@ func (s *IpPasswordParser) setPassword(productObj productCompareObject) (err err
 	return
 }
 
-func (s *IpPasswordParser) productFilter(i, v interface{}) bool {
+func (s *IPPasswordParser) productFilter(i, v interface{}) bool {
 	return filterERProductsVersion13(v, s.Product) || filterERProductsVersion14(v, s.Product)
 }
 
-func (s *IpPasswordParser) jobsFilter(i, v interface{}) bool {
+func (s *IPPasswordParser) jobsFilter(i, v interface{}) bool {
 	return filterJobsVersion13(v, s.Component) || filterJobsVersion14(v, s.Component)
 }
 
-func (s *IpPasswordParser) propertiesFilter(i, v interface{}) (ok bool) {
+func (s *IPPasswordParser) propertiesFilter(i, v interface{}) (ok bool) {
 	var identity interface{}
 
 	switch v.(propertyCompare).Value.(type) {
@@ -190,13 +190,13 @@ func (s *IpPasswordParser) propertiesFilter(i, v interface{}) (ok bool) {
 	return
 }
 
-func (s *IpPasswordParser) ipsFilter(i, v interface{}) bool {
+func (s *IPPasswordParser) ipsFilter(i, v interface{}) bool {
 	name := i.(string)
 	val := v.([]string)
 	return strings.Contains(name, fmt.Sprintf("%s-", s.Component)) && len(val) > 0
 }
 
-func (s *IpPasswordParser) modifyProductTypeName(typeval string) {
+func (s *IPPasswordParser) modifyProductTypeName(typeval string) {
 	typename := "vlcoud"
 	productname := "microbosh"
 

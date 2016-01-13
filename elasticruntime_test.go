@@ -81,10 +81,10 @@ var _ = Describe("ElasticRuntime", func() {
 	})
 
 	Describe("ElasticRuntime Version 1.6", func() {
-		os.Setenv(ER_VERSION_ENV_FLAG, ER_VERSION_16)
+		os.Setenv(ERVersionEnvFlag, ERVersion16)
 		var installationSettingsFilePath = "fixtures/installation-settings-1-6.json"
 		testERWithVersionSpecificFile(installationSettingsFilePath)
-		os.Setenv(ER_VERSION_ENV_FLAG, "")
+		os.Setenv(ERVersionEnvFlag, "")
 	})
 
 	Describe("Given: a er version feature toggle", func() {
@@ -94,12 +94,12 @@ var _ = Describe("ElasticRuntime", func() {
 			versionPGRestore := "/var/vcap/packages/postgres-9.4.2/bin/pg_restore"
 
 			BeforeEach(func() {
-				os.Setenv(ER_VERSION_ENV_FLAG, ER_VERSION_16)
+				os.Setenv(ERVersionEnvFlag, ERVersion16)
 				SetPGDumpUtilVersions()
 			})
 
 			AfterEach(func() {
-				os.Setenv(ER_VERSION_ENV_FLAG, "")
+				os.Setenv(ERVersionEnvFlag, "")
 				SetPGDumpUtilVersions()
 			})
 
@@ -118,12 +118,12 @@ var _ = Describe("ElasticRuntime", func() {
 			versionPGRestore := "/var/vcap/packages/postgres/bin/pg_restore"
 
 			BeforeEach(func() {
-				os.Setenv(ER_VERSION_ENV_FLAG, "")
+				os.Setenv(ERVersionEnvFlag, "")
 				SetPGDumpUtilVersions()
 			})
 
 			AfterEach(func() {
-				os.Setenv(ER_VERSION_ENV_FLAG, "")
+				os.Setenv(ERVersionEnvFlag, "")
 				SetPGDumpUtilVersions()
 			})
 
@@ -168,8 +168,8 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					JsonFile:          installationSettingsFilePath,
-					HttpGateway:       &MockHttpGateway{},
+					JSONFile:          installationSettingsFilePath,
+					HTTPGateway:       &MockHttpGateway{},
 					BackupContext:     NewBackupContext(target, cfenv.CurrentEnv()),
 					SystemsInfo:       info,
 					PersistentSystems: ps,
@@ -221,7 +221,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 					It("Should return error on empty list of persistence stores", func() {
 						err := er.Backup()
 						Ω(err).ShouldNot(BeNil())
-						Ω(err).Should(Equal(ER_ERROR_EMPTY_DB_LIST))
+						Ω(err).Should(Equal(ErrEREmptyDBList))
 					})
 				})
 
@@ -229,7 +229,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 					It("Should return error on empty list of persistence stores", func() {
 						err := er.Restore()
 						Ω(err).ShouldNot(BeNil())
-						Ω(err).Should(Equal(ER_ERROR_EMPTY_DB_LIST))
+						Ω(err).Should(Equal(ErrEREmptyDBList))
 					})
 				})
 			})
@@ -264,7 +264,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 					It("should return error if db backup fails", func() {
 						err := er.Backup()
 						Ω(err).ShouldNot(BeNil())
-						Ω(err).Should(Equal(ER_DB_BACKUP))
+						Ω(err).Should(Equal(ErrERDBBackup))
 					})
 				})
 
@@ -272,7 +272,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 					It("should return error if db backup fails", func() {
 						err := er.Backup()
 						Ω(err).ShouldNot(BeNil())
-						Ω(err).Should(Equal(ER_DB_BACKUP))
+						Ω(err).Should(Equal(ErrERDBBackup))
 					})
 				})
 			})
@@ -298,8 +298,8 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					JsonFile:      installationSettingsFilePath,
-					HttpGateway:   &MockHttpGateway{true, 500, `{"state":"notdone"}`},
+					JSONFile:      installationSettingsFilePath,
+					HTTPGateway:   &MockHttpGateway{true, 500, `{"state":"notdone"}`},
 					BackupContext: NewBackupContext(target, cfenv.CurrentEnv()),
 					SystemsInfo:   info,
 				}
@@ -314,7 +314,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 				It("Should not return nil error", func() {
 					err := er.Backup()
 					Ω(err).ShouldNot(BeNil())
-					Ω(err).Should(Equal(ER_ERROR_DIRECTOR_CREDS))
+					Ω(err).Should(Equal(ErrERDirectorCreds))
 				})
 
 				It("Should not panic", func() {
@@ -330,7 +330,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 				It("Should not return nil error", func() {
 					err := er.Restore()
 					Ω(err).ShouldNot(BeNil())
-					Ω(err).Should(Equal(ER_ERROR_DIRECTOR_CREDS))
+					Ω(err).Should(Equal(ErrERDirectorCreds))
 				})
 
 				It("Should not panic", func() {
@@ -365,8 +365,8 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					JsonFile:      installationSettingsFilePath,
-					HttpGateway:   &MockHttpGateway{},
+					JSONFile:      installationSettingsFilePath,
+					HTTPGateway:   &MockHttpGateway{},
 					BackupContext: NewBackupContext(target, cfenv.CurrentEnv()),
 					SystemsInfo:   info,
 				}
@@ -379,7 +379,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 
 			Context("Backup", func() {
 				It("Should write the dumped output to a file in the databaseDir", func() {
-					er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, EXPORT_ARCHIVE)
+					er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, ExportArchive)
 					filename := fmt.Sprintf("%s.backup", component)
 					exists, _ := osutils.Exists(path.Join(target, filename))
 					Ω(exists).Should(BeTrue())
@@ -388,7 +388,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 				It("Should have a nil error and not panic", func() {
 					var err error
 					Ω(func() {
-						err = er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, EXPORT_ARCHIVE)
+						err = er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, ExportArchive)
 					}).ShouldNot(Panic())
 					Ω(err).Should(BeNil())
 				})
@@ -396,9 +396,9 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 
 			Context("Restore", func() {
 				It("should return error if local file does not exist", func() {
-					err := er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, IMPORT_ARCHIVE)
+					err := er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, ImportArchive)
 					Ω(err).ShouldNot(BeNil())
-					Ω(err).Should(BeAssignableToTypeOf(ER_ERROR_INVALID_PATH))
+					Ω(err).Should(BeAssignableToTypeOf(ErrERInvalidPath))
 				})
 
 				Context("local file exists", func() {
@@ -414,7 +414,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 					})
 
 					It("should upload file to remote w/o error", func() {
-						err := er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, IMPORT_ARCHIVE)
+						err := er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, ImportArchive)
 						Ω(err).Should(BeNil())
 					})
 
@@ -439,7 +439,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 							info = origInfo
 						})
 						It("should return error", func() {
-							err := er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, IMPORT_ARCHIVE)
+							err := er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, ImportArchive)
 							Ω(err).ShouldNot(BeNil())
 							Ω(err).ShouldNot(Equal(ErrorImport))
 						})
@@ -469,8 +469,8 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					JsonFile:      installationSettingsFilePath,
-					HttpGateway:   &MockHttpGateway{},
+					JSONFile:      installationSettingsFilePath,
+					HTTPGateway:   &MockHttpGateway{},
 					BackupContext: NewBackupContext(target, cfenv.CurrentEnv()),
 					SystemsInfo:   info,
 				}
@@ -484,7 +484,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 			Context("Backup", func() {
 
 				It("Should write the dumped output to a file in the databaseDir", func() {
-					er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, EXPORT_ARCHIVE)
+					er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, ExportArchive)
 					filename := fmt.Sprintf("%s.backup", component)
 					exists, _ := osutils.Exists(path.Join(target, filename))
 					Ω(exists).Should(BeTrue())
@@ -493,7 +493,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 				It("Should have a nil error and not panic", func() {
 					var err error
 					Ω(func() {
-						err = er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, EXPORT_ARCHIVE)
+						err = er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, ExportArchive)
 					}).ShouldNot(Panic())
 					Ω(err).Should(BeNil())
 				})
@@ -521,8 +521,8 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					JsonFile:      installationSettingsFilePath,
-					HttpGateway:   &MockHttpGateway{},
+					JSONFile:      installationSettingsFilePath,
+					HTTPGateway:   &MockHttpGateway{},
 					BackupContext: NewBackupContext(target, cfenv.CurrentEnv()),
 					SystemsInfo:   info,
 				}
@@ -536,7 +536,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 			Context("Backup", func() {
 
 				It("Should write the dumped output to a file in the databaseDir", func() {
-					er.RunDbAction([]SystemDump{info["UaadbInfo"]}, EXPORT_ARCHIVE)
+					er.RunDbAction([]SystemDump{info["UaadbInfo"]}, ExportArchive)
 					filename := fmt.Sprintf("%s.backup", component)
 					exists, _ := osutils.Exists(path.Join(target, filename))
 					Ω(exists).Should(BeTrue())
@@ -545,7 +545,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 				It("Should have a nil error and not panic", func() {
 					var err error
 					Ω(func() {
-						err = er.RunDbAction([]SystemDump{info["UaadbInfo"]}, EXPORT_ARCHIVE)
+						err = er.RunDbAction([]SystemDump{info["UaadbInfo"]}, ExportArchive)
 					}).ShouldNot(Panic())
 					Ω(err).Should(BeNil())
 				})
@@ -575,8 +575,8 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					JsonFile:      installationSettingsFilePath,
-					HttpGateway:   &MockHttpGateway{},
+					JSONFile:      installationSettingsFilePath,
+					HTTPGateway:   &MockHttpGateway{},
 					BackupContext: NewBackupContext(target, cfenv.CurrentEnv()),
 					SystemsInfo:   info,
 				}
@@ -590,7 +590,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 			Context("Backup", func() {
 
 				It("Should not write the dumped output to a file in the databaseDir", func() {
-					er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, EXPORT_ARCHIVE)
+					er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, ExportArchive)
 					filename := fmt.Sprintf("%s.sql", component)
 					exists, _ := osutils.Exists(path.Join(target, filename))
 					Ω(exists).ShouldNot(BeTrue())
@@ -599,7 +599,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 				It("Should have a non nil error and not panic", func() {
 					var err error
 					Ω(func() {
-						err = er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, EXPORT_ARCHIVE)
+						err = er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, ExportArchive)
 					}).ShouldNot(Panic())
 					Ω(err).ShouldNot(BeNil())
 				})
@@ -609,7 +609,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 				It("Should have a non nil error and not panic", func() {
 					var err error
 					Ω(func() {
-						err = er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, IMPORT_ARCHIVE)
+						err = er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, ImportArchive)
 					}).ShouldNot(Panic())
 					Ω(err).ShouldNot(BeNil())
 				})

@@ -1,7 +1,6 @@
 package cfbackup
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -11,7 +10,7 @@ import (
 )
 
 // Not ping server so frequently and exausted the resources
-var TaskPingFreq time.Duration = 1000 * time.Millisecond
+var TaskPingFreq = 1000 * time.Millisecond
 
 //CloudControllerJobs - array storing a list of CCJobs
 type CloudControllerJobs []CCJob
@@ -52,11 +51,11 @@ func (c *CloudController) Stop() error {
 
 func (c *CloudController) toggleController(state string) error {
 	for _, ccjob := range c.cloudControllers {
-		taskId, err := c.director.ChangeJobState(c.deploymentName, ccjob.Job, state, ccjob.Index, strings.NewReader(c.manifest))
+		taskID, err := c.director.ChangeJobState(c.deploymentName, ccjob.Job, state, ccjob.Index, strings.NewReader(c.manifest))
 		if err != nil {
 			return err
 		}
-		err = c.waitUntilDone(taskId)
+		err = c.waitUntilDone(taskID)
 		if err != nil {
 			return err
 		}
@@ -64,21 +63,21 @@ func (c *CloudController) toggleController(state string) error {
 	return nil
 }
 
-func (c *CloudController) waitUntilDone(taskId int) (err error) {
+func (c *CloudController) waitUntilDone(taskID int) (err error) {
 	time.Sleep(TaskPingFreq)
-	result, err := c.director.RetrieveTaskStatus(taskId)
+	result, err := c.director.RetrieveTaskStatus(taskID)
 	if err != nil {
 		return
 	}
 	switch bosh.TASKRESULT[result.State] {
 	case bosh.ERROR:
-		err = errors.New(fmt.Sprintf("Task %d process failed", taskId))
+		err = fmt.Errorf("Task %d process failed", taskID)
 		return
 	case bosh.QUEUED:
-		err = c.waitUntilDone(taskId)
+		err = c.waitUntilDone(taskID)
 		return
 	case bosh.PROCESSING:
-		err = c.waitUntilDone(taskId)
+		err = c.waitUntilDone(taskID)
 		return
 	case bosh.DONE:
 		return

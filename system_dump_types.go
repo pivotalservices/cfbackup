@@ -16,8 +16,8 @@ func init() {
 
 //SetPGDumpUtilVersions -- set version paths for pgdump/pgrestore utils
 func SetPGDumpUtilVersions() {
-	switch os.Getenv(ER_VERSION_ENV_FLAG) {
-	case ER_VERSION_16:
+	switch os.Getenv(ERVersionEnvFlag) {
+	case ERVersion16:
 		persistence.PGDMP_DUMP_BIN = "/var/vcap/packages/postgres-9.4.2/bin/pg_dump"
 		persistence.PGDMP_RESTORE_BIN = "/var/vcap/packages/postgres-9.4.2/bin/pg_restore"
 	default:
@@ -27,22 +27,22 @@ func SetPGDumpUtilVersions() {
 }
 
 const (
-	//SD_PRODUCT --
-	SD_PRODUCT string = "Product"
-	//SD_COMPONENT --
-	SD_COMPONENT string = "Component"
-	//SD_IDENTITY --
-	SD_IDENTITY string = "Identity"
-	//SD_IP --
-	SD_IP string = "Ip"
-	//SD_USER --
-	SD_USER string = "User"
-	//SD_PASS --
-	SD_PASS string = "Pass"
-	//SD_VCAPUSER --
-	SD_VCAPUSER string = "VcapUser"
-	//SD_VCAPPASS --
-	SD_VCAPPASS string = "VcapPass"
+	//SDProduct --
+	SDProduct string = "Product"
+	//SDComponent --
+	SDComponent string = "Component"
+	//SDIdentity --
+	SDIdentity string = "Identity"
+	//SDIP --
+	SDIP string = "Ip"
+	//SDUser --
+	SDUser string = "User"
+	//SDPass --
+	SDPass string = "Pass"
+	//SDVcapUser --
+	SDVcapUser string = "VcapUser"
+	//SDVcapPass --
+	SDVcapPass string = "VcapPass"
 )
 
 type (

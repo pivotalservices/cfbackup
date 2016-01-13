@@ -16,64 +16,64 @@ import (
 )
 
 const (
-	//ER_DEFAULT_SYSTEM_USER - default user for system vms
-	ER_DEFAULT_SYSTEM_USER = "vcap"
-	//ER_DIRECTOR_INFO_URL - url format for a director info endpoint
-	ER_DIRECTOR_INFO_URL = "https://%s:25555/info"
-	//ER_BACKUP_DIR - default er backup dir
-	ER_BACKUP_DIR = "elasticruntime"
-	//ER_VMS_URL - url format for a vms url
-	ER_VMS_URL = "https://%s:25555/deployments/%s/vms"
-	//ER_DIRECTOR -- key
-	ER_DIRECTOR = "DirectorInfo"
-	//ER_CONSOLE -- key
-	ER_CONSOLE = "ConsoledbInfo"
-	//ER_UAA -- key
-	ER_UAA = "UaadbInfo"
-	//ER_CC -- key
-	ER_CC = "CcdbInfo"
-	//ER_MYSQL -- key
-	ER_MYSQL = "MysqldbInfo"
-	//ER_NFS -- key
-	ER_NFS = "NfsInfo"
-	//ER_BACKUP_FILE_FORMAT -- format of archive filename
-	ER_BACKUP_FILE_FORMAT = "%s.backup"
-	//ER_INVALID_DIRECTOR_CREDS_MSG -- error message for invalid creds on director
-	ER_INVALID_DIRECTOR_CREDS_MSG = "invalid director credentials"
-	//ER_NO_PERSISTENCE_ARCHIVES -- error message for persistence stores
-	ER_NO_PERSISTENCE_ARCHIVES = "there are no persistence stores in the list"
-	//ER_FILE_DOES_NOT_EXIST -- error message for file does not exist
-	ER_FILE_DOES_NOT_EXIST = "file does not exist"
-	//ER_DB_BACKUP_FAILURE -- error message for backup failure
-	ER_DB_BACKUP_FAILURE = "failed to backup database"
-	//ER_VERSION_ENV_FLAG -- env flag from ER version toggle
-	ER_VERSION_ENV_FLAG = "ER_VERSION"
-	//ER_VERSION_16 -- value for 1.6 toggle
-	ER_VERSION_16 = "1.6"
+	//ERDefaultSystemUser - default user for system vms
+	ERDefaultSystemUser = "vcap"
+	//ERDirectorInfoURL - url format for a director info endpoint
+	ERDirectorInfoURL = "https://%s:25555/info"
+	//ERBackupDir - default er backup dir
+	ERBackupDir = "elasticruntime"
+	//ERVmsURL - url format for a vms url
+	ERVmsURL = "https://%s:25555/deployments/%s/vms"
+	//ERDirector -- key
+	ERDirector = "DirectorInfo"
+	//ERConsole -- key
+	ERConsole = "ConsoledbInfo"
+	//ERUaa -- key
+	ERUaa = "UaadbInfo"
+	//ERCc -- key
+	ERCc = "CcdbInfo"
+	//ERMySql -- key
+	ERMySql = "MysqldbInfo"
+	//ERNfs -- key
+	ERNfs = "NfsInfo"
+	//ERBackupFileFormat -- format of archive filename
+	ERBackupFileFormat = "%s.backup"
+	//ERInvalidDirectorCredsMsg -- error message for invalid creds on director
+	ERInvalidDirectorCredsMsg = "invalid director credentials"
+	//ERNoPersistenceArchives -- error message for persistence stores
+	ERNoPersistenceArchives = "there are no persistence stores in the list"
+	//ERFileDoesNotExist -- error message for file does not exist
+	ERFileDoesNotExist = "file does not exist"
+	//ErrERDBBackupFailure -- error message for backup failure
+	ErrERDBBackupFailure = "failed to backup database"
+	//ERVersionEnvFlag -- env flag from ER version toggle
+	ERVersionEnvFlag = "ER_VERSION"
+	//ERVersion16 -- value for 1.6 toggle
+	ERVersion16 = "1.6"
 )
 
 const (
-	//IMPORT_ARCHIVE --
-	IMPORT_ARCHIVE = iota
-	//EXPORT_ARCHIVE --
-	EXPORT_ARCHIVE
+	//ImportArchive --
+	ImportArchive = iota
+	//ExportArchive --
+	ExportArchive
 )
 
 var (
-	//ER_ERROR_DIRECTOR_CREDS - error for director creds
-	ER_ERROR_DIRECTOR_CREDS = errors.New(ER_INVALID_DIRECTOR_CREDS_MSG)
-	//ER_ERROR_EMPTY_DB_LIST - error for db list empty
-	ER_ERROR_EMPTY_DB_LIST = errors.New(ER_NO_PERSISTENCE_ARCHIVES)
-	//ER_ERROR_INVALID_PATH - invalid filepath error
-	ER_ERROR_INVALID_PATH = &os.PathError{Err: errors.New(ER_FILE_DOES_NOT_EXIST)}
-	//ER_DB_BACKUP - error for db backup failures
-	ER_DB_BACKUP = errors.New(ER_DB_BACKUP_FAILURE)
+	//ErrERDirectorCreds - error for director creds
+	ErrERDirectorCreds = errors.New(ERInvalidDirectorCredsMsg)
+	//ErrEREmptyDBList - error for db list empty
+	ErrEREmptyDBList = errors.New(ERNoPersistenceArchives)
+	//ErrERInvalidPath - invalid filepath error
+	ErrERInvalidPath = &os.PathError{Err: errors.New(ERFileDoesNotExist)}
+	//ErrERDBBackup - error for db backup failures
+	ErrERDBBackup = errors.New(ErrERDBBackupFailure)
 )
 
 //BoshName - function which returns proper bosh component name for given version
 func BoshName() (bosh string) {
-	switch os.Getenv(ER_VERSION_ENV_FLAG) {
-	case ER_VERSION_16:
+	switch os.Getenv(ERVersionEnvFlag) {
+	case ERVersion16:
 		bosh = "p-bosh"
 	default:
 		bosh = "microbosh"
@@ -83,10 +83,10 @@ func BoshName() (bosh string) {
 
 // ElasticRuntime contains information about a Pivotal Elastic Runtime deployment
 type ElasticRuntime struct {
-	JsonFile          string
+	JSONFile          string
 	SystemsInfo       map[string]SystemDump
 	PersistentSystems []SystemDump
-	HttpGateway       HttpGateway
+	HTTPGateway       HttpGateway
 	InstallationName  string
 	BackupContext
 }
@@ -147,15 +147,15 @@ var NewElasticRuntime = func(jsonFile string, target string) *ElasticRuntime {
 	)
 
 	context := &ElasticRuntime{
-		JsonFile:      jsonFile,
+		JSONFile:      jsonFile,
 		BackupContext: NewBackupContext(target, cfenv.CurrentEnv()),
 		SystemsInfo: map[string]SystemDump{
-			ER_DIRECTOR: directorInfo,
-			ER_CONSOLE:  consoledbInfo,
-			ER_UAA:      uaadbInfo,
-			ER_CC:       ccdbInfo,
-			ER_MYSQL:    mysqldbInfo,
-			ER_NFS:      nfsInfo,
+			ERDirector: directorInfo,
+			ERConsole:  consoledbInfo,
+			ERUaa:      uaadbInfo,
+			ERCc:       ccdbInfo,
+			ERMySql:    mysqldbInfo,
+			ERNfs:      nfsInfo,
 		},
 		PersistentSystems: []SystemDump{
 			consoledbInfo,
@@ -170,12 +170,12 @@ var NewElasticRuntime = func(jsonFile string, target string) *ElasticRuntime {
 
 // Backup performs a backup of a Pivotal Elastic Runtime deployment
 func (context *ElasticRuntime) Backup() (err error) {
-	return context.backupRestore(EXPORT_ARCHIVE)
+	return context.backupRestore(ExportArchive)
 }
 
 // Restore performs a restore of a Pivotal Elastic Runtime deployment
 func (context *ElasticRuntime) Restore() (err error) {
-	err = context.backupRestore(IMPORT_ARCHIVE)
+	err = context.backupRestore(ImportArchive)
 	return
 }
 
@@ -191,8 +191,8 @@ func (context *ElasticRuntime) backupRestore(action int) (err error) {
 			return erro
 		}
 		if ccJobs, err = context.getAllCloudControllerVMs(); err == nil {
-			directorInfo := context.SystemsInfo[ER_DIRECTOR]
-			cloudController := NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, manifest, ccJobs)
+			directorInfo := context.SystemsInfo[ERDirector]
+			cloudController := NewCloudController(directorInfo.Get(SDIP), directorInfo.Get(SDUser), directorInfo.Get(SDPass), context.InstallationName, manifest, ccJobs)
 			lo.G.Debug("Setting up CC jobs")
 			defer cloudController.Start()
 			cloudController.Stop()
@@ -202,13 +202,13 @@ func (context *ElasticRuntime) backupRestore(action int) (err error) {
 			err = context.RunDbAction(context.PersistentSystems, action)
 			if err != nil {
 				lo.G.Error("Error backing up db", err)
-				err = ER_DB_BACKUP
+				err = ErrERDBBackup
 			}
 		} else {
-			err = ER_ERROR_EMPTY_DB_LIST
+			err = ErrEREmptyDBList
 		}
 	} else if err == nil {
-		err = ER_ERROR_DIRECTOR_CREDS
+		err = ErrERDirectorCreds
 	}
 	return
 }
@@ -216,18 +216,18 @@ func (context *ElasticRuntime) backupRestore(action int) (err error) {
 func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []CCJob, err error) {
 
 	lo.G.Debug("Entering getAllCloudControllerVMs() function")
-	directorInfo := context.SystemsInfo[ER_DIRECTOR]
-	connectionURL := fmt.Sprintf(ER_VMS_URL, directorInfo.Get(SD_IP), context.InstallationName)
+	directorInfo := context.SystemsInfo[ERDirector]
+	connectionURL := fmt.Sprintf(ERVmsURL, directorInfo.Get(SDIP), context.InstallationName)
 	lo.G.Debug("getAllCloudControllerVMs() function", log.Data{"connectionURL": connectionURL, "directorInfo": directorInfo})
-	gateway := context.HttpGateway
+	gateway := context.HTTPGateway
 	if gateway == nil {
 		gateway = NewHttpGateway()
 	}
 	lo.G.Debug("Retrieving CC vms")
 	if resp, err := gateway.Get(HttpRequestEntity{
 		Url:         connectionURL,
-		Username:    directorInfo.Get(SD_USER),
-		Password:    directorInfo.Get(SD_PASS),
+		Username:    directorInfo.Get(SDUser),
+		Password:    directorInfo.Get(SDPass),
 		ContentType: "application/json",
 	})(); err == nil {
 		var jsonObj []VMObject
@@ -259,21 +259,21 @@ func (context *ElasticRuntime) RunDbAction(dbInfoList []SystemDump, action int) 
 }
 
 func (context *ElasticRuntime) readWriterArchive(dbInfo SystemDump, databaseDir string, action int) (err error) {
-	filename := fmt.Sprintf(ER_BACKUP_FILE_FORMAT, dbInfo.Get(SD_COMPONENT))
+	filename := fmt.Sprintf(ERBackupFileFormat, dbInfo.Get(SDComponent))
 	filepath := path.Join(databaseDir, filename)
 
 	var pb PersistanceBackup
 
 	if pb, err = dbInfo.GetPersistanceBackup(); err == nil {
 		switch action {
-		case IMPORT_ARCHIVE:
+		case ImportArchive:
 			lo.G.Debug("we are doing something here now")
 			var backupReader io.ReadCloser
 			if backupReader, err = context.Reader(filepath); err == nil {
 				defer backupReader.Close()
 				err = pb.Import(backupReader)
 			}
-		case EXPORT_ARCHIVE:
+		case ExportArchive:
 			lo.G.Info("Exporting database")
 			var backupWriter io.WriteCloser
 			if backupWriter, err = context.Writer(filepath); err == nil {
@@ -293,7 +293,7 @@ func (context *ElasticRuntime) ReadAllUserCredentials() (err error) {
 	)
 	defer fileRef.Close()
 
-	if fileRef, err = os.Open(context.JsonFile); err == nil {
+	if fileRef, err = os.Open(context.JSONFile); err == nil {
 		if jsonObj, err = ReadAndUnmarshal(fileRef); err == nil {
 			err = context.assignCredentialsAndInstallationName(jsonObj)
 		}
@@ -317,15 +317,15 @@ func (context *ElasticRuntime) assignCredentials(jsonObj InstallationCompareObje
 			pass  string
 			vpass string
 		)
-		sysInfo.Set(SD_VCAPUSER, ER_DEFAULT_SYSTEM_USER)
-		sysInfo.Set(SD_USER, sysInfo.Get(SD_IDENTITY))
+		sysInfo.Set(SDVcapUser, ERDefaultSystemUser)
+		sysInfo.Set(SDUser, sysInfo.Get(SDIdentity))
 
-		if ip, pass, err = GetPasswordAndIP(jsonObj, sysInfo.Get(SD_PRODUCT), sysInfo.Get(SD_COMPONENT), sysInfo.Get(SD_IDENTITY)); err == nil {
-			sysInfo.Set(SD_IP, ip)
-			sysInfo.Set(SD_PASS, pass)
-			lo.G.Debug("%s credentials for %s from installation.json are %s", name, sysInfo.Get(SD_COMPONENT), sysInfo.Get(SD_IDENTITY), pass)
-			_, vpass, err = GetPasswordAndIP(jsonObj, sysInfo.Get(SD_PRODUCT), sysInfo.Get(SD_COMPONENT), sysInfo.Get(SD_VCAPUSER))
-			sysInfo.Set(SD_VCAPPASS, vpass)
+		if ip, pass, err = GetPasswordAndIP(jsonObj, sysInfo.Get(SDProduct), sysInfo.Get(SDComponent), sysInfo.Get(SDIdentity)); err == nil {
+			sysInfo.Set(SDIP, ip)
+			sysInfo.Set(SDPass, pass)
+			lo.G.Debug("%s credentials for %s from installation.json are %s", name, sysInfo.Get(SDComponent), sysInfo.Get(SDIdentity), pass)
+			_, vpass, err = GetPasswordAndIP(jsonObj, sysInfo.Get(SDProduct), sysInfo.Get(SDComponent), sysInfo.Get(SDVcapUser))
+			sysInfo.Set(SDVcapPass, vpass)
 			context.SystemsInfo[name] = sysInfo
 		}
 	}
@@ -335,16 +335,16 @@ func (context *ElasticRuntime) assignCredentials(jsonObj InstallationCompareObje
 func (context *ElasticRuntime) directorCredentialsValid() (ok bool) {
 	var directorInfo SystemDump
 
-	if directorInfo, ok = context.SystemsInfo[ER_DIRECTOR]; ok {
-		connectionURL := fmt.Sprintf(ER_DIRECTOR_INFO_URL, directorInfo.Get(SD_IP))
-		gateway := context.HttpGateway
+	if directorInfo, ok = context.SystemsInfo[ERDirector]; ok {
+		connectionURL := fmt.Sprintf(ERDirectorInfoURL, directorInfo.Get(SDIP))
+		gateway := context.HTTPGateway
 		if gateway == nil {
 			gateway = NewHttpGateway()
 		}
 		_, err := gateway.Get(HttpRequestEntity{
 			Url:         connectionURL,
-			Username:    directorInfo.Get(SD_USER),
-			Password:    directorInfo.Get(SD_PASS),
+			Username:    directorInfo.Get(SDUser),
+			Password:    directorInfo.Get(SDPass),
 			ContentType: "application/json",
 		})()
 		ok = (err == nil)
@@ -353,8 +353,8 @@ func (context *ElasticRuntime) directorCredentialsValid() (ok bool) {
 }
 
 func (context *ElasticRuntime) getManifest() (manifest string, err error) {
-	directorInfo, _ := context.SystemsInfo[ER_DIRECTOR]
-	director := NewDirector(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), 25555)
+	directorInfo, _ := context.SystemsInfo[ERDirector]
+	director := NewDirector(directorInfo.Get(SDIP), directorInfo.Get(SDUser), directorInfo.Get(SDPass), 25555)
 	mfs, err := director.GetDeploymentManifest(context.InstallationName)
 	if err != nil {
 		return

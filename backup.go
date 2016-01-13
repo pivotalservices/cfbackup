@@ -3,24 +3,24 @@ package cfbackup
 import "path"
 
 const (
-	//BACKUP_LOGGER_NAME --
-	BACKUP_LOGGER_NAME = "Backup"
-	//RESTORE_LOGGER_NAME --
-	RESTORE_LOGGER_NAME = "Restore"
+	//BackupLoggerName --
+	BackupLoggerName = "Backup"
+	//RestoreLoggerName --
+	RestoreLoggerName = "Restore"
 )
 
 var (
-	//TILE_RESTORE_ACTION -- executes a restore action on the given tile
-	TILE_RESTORE_ACTION = func(t Tile) func() error {
+	//TileRestoreAction -- executes a restore action on the given tile
+	TileRestoreAction = func(t Tile) func() error {
 		return t.Restore
 	}
-	//TILE_BACKUP_ACTION - executes a backup action on a given tile
-	TILE_BACKUP_ACTION = func(t Tile) func() error {
+	//TileBackupAction - executes a backup action on a given tile
+	TileBackupAction = func(t Tile) func() error {
 		return t.Backup
 	}
 )
 
-//Backup the list of all default tiles
+//RunBackupPipeline - Backup the list of all default tiles
 func RunBackupPipeline(hostname, adminUsername, adminPassword, opsManagerUsername, opsManagerPassword, destination string) (err error) {
 	var tiles []Tile
 	conn := connectionBucket{
@@ -32,13 +32,13 @@ func RunBackupPipeline(hostname, adminUsername, adminPassword, opsManagerUsernam
 		destination:        destination,
 	}
 
-	if tiles, err = fullTileList(conn, BACKUP_LOGGER_NAME); err == nil {
-		err = RunPipeline(TILE_BACKUP_ACTION, tiles)
+	if tiles, err = fullTileList(conn, BackupLoggerName); err == nil {
+		err = RunPipeline(TileBackupAction, tiles)
 	}
 	return
 }
 
-//Restore the list of all default tiles
+//RunRestorePipeline - Restore the list of all default tiles
 func RunRestorePipeline(hostname, adminUsername, adminPassword, opsManagerUser, opsManagerPassword, destination string) (err error) {
 	var tiles []Tile
 	conn := connectionBucket{
@@ -50,8 +50,8 @@ func RunRestorePipeline(hostname, adminUsername, adminPassword, opsManagerUser, 
 		destination:        destination,
 	}
 
-	if tiles, err = fullTileList(conn, RESTORE_LOGGER_NAME); err == nil {
-		err = RunPipeline(TILE_RESTORE_ACTION, tiles)
+	if tiles, err = fullTileList(conn, RestoreLoggerName); err == nil {
+		err = RunPipeline(TileRestoreAction, tiles)
 	}
 	return
 }
