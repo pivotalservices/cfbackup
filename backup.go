@@ -3,14 +3,18 @@ package cfbackup
 import "path"
 
 const (
-	BACKUP_LOGGER_NAME  = "Backup"
+	//BACKUP_LOGGER_NAME --
+	BACKUP_LOGGER_NAME = "Backup"
+	//RESTORE_LOGGER_NAME --
 	RESTORE_LOGGER_NAME = "Restore"
 )
 
 var (
+	//TILE_RESTORE_ACTION -- executes a restore action on the given tile
 	TILE_RESTORE_ACTION = func(t Tile) func() error {
 		return t.Restore
 	}
+	//TILE_BACKUP_ACTION - executes a backup action on a given tile
 	TILE_BACKUP_ACTION = func(t Tile) func() error {
 		return t.Backup
 	}

@@ -11,6 +11,7 @@ import (
 )
 
 type (
+	//InstallationCompareObject --
 	InstallationCompareObject struct {
 		Guid                 string
 		Installation_Version string
@@ -41,7 +42,7 @@ type (
 	propertyCompare struct {
 		Value interface{}
 	}
-
+	//IpPasswordParser - parses the passwords out of a installation settings
 	IpPasswordParser struct {
 		Product   string
 		Component string
@@ -72,6 +73,7 @@ func filterERProducts(i, v interface{}) bool {
 	return filterERProductsVersion13(v, product) || filterERProductsVersion14(v, product)
 }
 
+//GetDeploymentName - returns the name of the deployment
 func GetDeploymentName(jsonObj InstallationCompareObject) (deploymentName string, err error) {
 
 	if o := itertools.Filter(jsonObj.Products, filterERProducts); len(o) > 0 {
@@ -88,6 +90,7 @@ func GetDeploymentName(jsonObj InstallationCompareObject) (deploymentName string
 	return
 }
 
+//GetPasswordAndIP - returns password and ip from the installation settings from a given component
 func GetPasswordAndIP(jsonObj InstallationCompareObject, product, component, username string) (ip, password string, err error) {
 	parser := &IpPasswordParser{
 		Product:   product,
@@ -97,6 +100,7 @@ func GetPasswordAndIP(jsonObj InstallationCompareObject, product, component, use
 	return parser.Parse(jsonObj)
 }
 
+//Parse - parse a given installation compare object
 func (s *IpPasswordParser) Parse(jsonObj InstallationCompareObject) (ip, password string, err error) {
 	if err = s.setupAndRun(jsonObj); err == nil {
 		ip = s.ip
@@ -105,6 +109,7 @@ func (s *IpPasswordParser) Parse(jsonObj InstallationCompareObject) (ip, passwor
 	return
 }
 
+//ReadAndUnmarshal - takes an io.reader and unmarshals its contents into a compare object
 func ReadAndUnmarshal(src io.Reader) (jsonObj InstallationCompareObject, err error) {
 	var contents []byte
 

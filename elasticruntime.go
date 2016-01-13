@@ -16,37 +16,61 @@ import (
 )
 
 const (
-	ER_DEFAULT_SYSTEM_USER        = "vcap"
-	ER_DIRECTOR_INFO_URL          = "https://%s:25555/info"
-	ER_BACKUP_DIR                 = "elasticruntime"
-	ER_VMS_URL                    = "https://%s:25555/deployments/%s/vms"
-	ER_DIRECTOR                   = "DirectorInfo"
-	ER_CONSOLE                    = "ConsoledbInfo"
-	ER_UAA                        = "UaadbInfo"
-	ER_CC                         = "CcdbInfo"
-	ER_MYSQL                      = "MysqldbInfo"
-	ER_NFS                        = "NfsInfo"
-	ER_BACKUP_FILE_FORMAT         = "%s.backup"
+	//ER_DEFAULT_SYSTEM_USER - default user for system vms
+	ER_DEFAULT_SYSTEM_USER = "vcap"
+	//ER_DIRECTOR_INFO_URL - url format for a director info endpoint
+	ER_DIRECTOR_INFO_URL = "https://%s:25555/info"
+	//ER_BACKUP_DIR - default er backup dir
+	ER_BACKUP_DIR = "elasticruntime"
+	//ER_VMS_URL - url format for a vms url
+	ER_VMS_URL = "https://%s:25555/deployments/%s/vms"
+	//ER_DIRECTOR -- key
+	ER_DIRECTOR = "DirectorInfo"
+	//ER_CONSOLE -- key
+	ER_CONSOLE = "ConsoledbInfo"
+	//ER_UAA -- key
+	ER_UAA = "UaadbInfo"
+	//ER_CC -- key
+	ER_CC = "CcdbInfo"
+	//ER_MYSQL -- key
+	ER_MYSQL = "MysqldbInfo"
+	//ER_NFS -- key
+	ER_NFS = "NfsInfo"
+	//ER_BACKUP_FILE_FORMAT -- format of archive filename
+	ER_BACKUP_FILE_FORMAT = "%s.backup"
+	//ER_INVALID_DIRECTOR_CREDS_MSG -- error message for invalid creds on director
 	ER_INVALID_DIRECTOR_CREDS_MSG = "invalid director credentials"
-	ER_NO_PERSISTENCE_ARCHIVES    = "there are no persistence stores in the list"
-	ER_FILE_DOES_NOT_EXIST        = "file does not exist"
-	ER_DB_BACKUP_FAILURE          = "failed to backup database"
-	ER_VERSION_ENV_FLAG           = "ER_VERSION"
-	ER_VERSION_16                 = "1.6"
+	//ER_NO_PERSISTENCE_ARCHIVES -- error message for persistence stores
+	ER_NO_PERSISTENCE_ARCHIVES = "there are no persistence stores in the list"
+	//ER_FILE_DOES_NOT_EXIST -- error message for file does not exist
+	ER_FILE_DOES_NOT_EXIST = "file does not exist"
+	//ER_DB_BACKUP_FAILURE -- error message for backup failure
+	ER_DB_BACKUP_FAILURE = "failed to backup database"
+	//ER_VERSION_ENV_FLAG -- env flag from ER version toggle
+	ER_VERSION_ENV_FLAG = "ER_VERSION"
+	//ER_VERSION_16 -- value for 1.6 toggle
+	ER_VERSION_16 = "1.6"
 )
 
 const (
+	//IMPORT_ARCHIVE --
 	IMPORT_ARCHIVE = iota
+	//EXPORT_ARCHIVE --
 	EXPORT_ARCHIVE
 )
 
 var (
+	//ER_ERROR_DIRECTOR_CREDS - error for director creds
 	ER_ERROR_DIRECTOR_CREDS = errors.New(ER_INVALID_DIRECTOR_CREDS_MSG)
-	ER_ERROR_EMPTY_DB_LIST  = errors.New(ER_NO_PERSISTENCE_ARCHIVES)
-	ER_ERROR_INVALID_PATH   = &os.PathError{Err: errors.New(ER_FILE_DOES_NOT_EXIST)}
-	ER_DB_BACKUP            = errors.New(ER_DB_BACKUP_FAILURE)
+	//ER_ERROR_EMPTY_DB_LIST - error for db list empty
+	ER_ERROR_EMPTY_DB_LIST = errors.New(ER_NO_PERSISTENCE_ARCHIVES)
+	//ER_ERROR_INVALID_PATH - invalid filepath error
+	ER_ERROR_INVALID_PATH = &os.PathError{Err: errors.New(ER_FILE_DOES_NOT_EXIST)}
+	//ER_DB_BACKUP - error for db backup failures
+	ER_DB_BACKUP = errors.New(ER_DB_BACKUP_FAILURE)
 )
 
+//BoshName - function which returns proper bosh component name for given version
 func BoshName() (bosh string) {
 	switch os.Getenv(ER_VERSION_ENV_FLAG) {
 	case ER_VERSION_16:
@@ -67,6 +91,7 @@ type ElasticRuntime struct {
 	BackupContext
 }
 
+//CCJob - a cloud controller job object
 type CCJob struct {
 	Job   string
 	Index int
@@ -217,6 +242,7 @@ func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []CCJob, err er
 	return
 }
 
+//RunDbAction - run a db action dump/import against a list of systemdump types
 func (context *ElasticRuntime) RunDbAction(dbInfoList []SystemDump, action int) (err error) {
 
 	for _, info := range dbInfoList {
@@ -259,6 +285,7 @@ func (context *ElasticRuntime) readWriterArchive(dbInfo SystemDump, databaseDir 
 	return
 }
 
+//ReadAllUserCredentials - get all user creds from the installation json
 func (context *ElasticRuntime) ReadAllUserCredentials() (err error) {
 	var (
 		fileRef *os.File

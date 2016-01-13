@@ -13,8 +13,10 @@ import (
 // Not ping server so frequently and exausted the resources
 var TaskPingFreq time.Duration = 1000 * time.Millisecond
 
+//CloudControllerJobs - array storing a list of CCJobs
 type CloudControllerJobs []CCJob
 
+//CloudController - a struct representing a cloud controller
 type CloudController struct {
 	deploymentName   string
 	director         bosh.Bosh
@@ -22,10 +24,12 @@ type CloudController struct {
 	manifest         string
 }
 
+//NewDirector - a function representing a constructor for a director object
 var NewDirector = func(ip, username, password string, port int) bosh.Bosh {
 	return bosh.NewBoshDirector(ip, username, password, port, NewHttpGateway())
 }
 
+//NewCloudController - a function representing a constructor for a cloud controller
 func NewCloudController(ip, username, password, deploymentName, manifest string, cloudControllers CloudControllerJobs) *CloudController {
 	director := NewDirector(ip, username, password, 25555)
 	return &CloudController{
@@ -36,10 +40,12 @@ func NewCloudController(ip, username, password, deploymentName, manifest string,
 	}
 }
 
+//Start - a method to execute a start event on a cloud controller
 func (c *CloudController) Start() error {
 	return c.toggleController("started")
 }
 
+//Stop - a method which executes a stop against a cloud controller
 func (c *CloudController) Stop() error {
 	return c.toggleController("stopped")
 }
