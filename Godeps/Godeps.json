@@ -38,40 +38,40 @@
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/cfops/tileregistry",
-			"Comment": "v2.0.0-2-g51a3ae4",
-			"Rev": "51a3ae469fe2d9591aad9ebfa7404d3a34d2f3eb"
+			"Comment": "v2.0.0-13-g9ab9c1f",
+			"Rev": "9ab9c1f23fa390f723c2075f5523bd335e5f3301"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/bosh",
-			"Rev": "5fe777208eceabbf307f6aa74afa340c7c6a4ed9"
+			"Rev": "208345bbf4e1c41d91fc1d276edb07a6c05c12d6"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/command",
-			"Rev": "5fe777208eceabbf307f6aa74afa340c7c6a4ed9"
+			"Rev": "208345bbf4e1c41d91fc1d276edb07a6c05c12d6"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/http",
-			"Rev": "5fe777208eceabbf307f6aa74afa340c7c6a4ed9"
+			"Rev": "208345bbf4e1c41d91fc1d276edb07a6c05c12d6"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/log",
-			"Rev": "5fe777208eceabbf307f6aa74afa340c7c6a4ed9"
+			"Rev": "208345bbf4e1c41d91fc1d276edb07a6c05c12d6"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/mock",
-			"Rev": "5fe777208eceabbf307f6aa74afa340c7c6a4ed9"
+			"Rev": "208345bbf4e1c41d91fc1d276edb07a6c05c12d6"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/osutils",
-			"Rev": "5fe777208eceabbf307f6aa74afa340c7c6a4ed9"
+			"Rev": "208345bbf4e1c41d91fc1d276edb07a6c05c12d6"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/persistence",
-			"Rev": "5fe777208eceabbf307f6aa74afa340c7c6a4ed9"
+			"Rev": "208345bbf4e1c41d91fc1d276edb07a6c05c12d6"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/storage",
-			"Rev": "5fe777208eceabbf307f6aa74afa340c7c6a4ed9"
+			"Rev": "208345bbf4e1c41d91fc1d276edb07a6c05c12d6"
 		},
 		{
 			"ImportPath": "github.com/pkg/sftp",
