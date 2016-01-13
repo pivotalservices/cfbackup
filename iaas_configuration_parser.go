@@ -2,6 +2,7 @@ package cfbackup
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 )
 
@@ -19,8 +20,17 @@ func NewConfigurationParser(installationFilePath string) *ConfigurationParser {
 //GetIaaS - get the iaas elements from the installation settings
 func (s *ConfigurationParser) GetIaaS() (config IaaSConfiguration, err error) {
 	config = s.installationSettings.Infrastructure.IaaSConfig
+
+	if config.SSHPrivateKey == "" {
+		err = ErrNoSSLKeyFound
+	}
 	return
 }
+
+var (
+	//ErrNoSSLKeyFound - error if there are no ssl keys found in the iaas config block of installationsettings
+	ErrNoSSLKeyFound = errors.New("no ssl key found in iaas config")
+)
 
 type (
 	//InstallationSettings - an object to house installationsettings elements from the json
