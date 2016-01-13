@@ -12,7 +12,7 @@ var _ = Describe("ConfigurationParser", func() {
 			var controlKey string
 			var configParser *ConfigurationParser
 			BeforeEach(func() {
-				controlKey = "this is my ssh private key"
+				controlKey = "-----BEGIN RSA PRIVATE KEY-----\nxxxxxxxxxxxxxxxxxxxxx\n-----END RSA PRIVATE KEY-----\n"
 				configParser = NewConfigurationParser("./fixtures/installation-settings-1-6-aws.json")
 			})
 			It("then we should return a valid iaas object", func() {
