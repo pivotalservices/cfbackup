@@ -134,10 +134,10 @@ func testGetPasswordWithVersionSpecificFile(installationSettingsFilePath string)
 		})
 	})
 
-	Describe("IpPasswordParser struct", func() {
+	Describe("IPPasswordParser struct", func() {
 		Context("when given a valid installation.json", func() {
 			var (
-				parser      *IpPasswordParser
+				parser      *IPPasswordParser
 				jsonObj     InstallationCompareObject
 				product     string = "cf"
 				component   string = "ccdb"
@@ -152,7 +152,7 @@ func testGetPasswordWithVersionSpecificFile(installationSettingsFilePath string)
 				fileRef, _ = os.Open(installationSettingsFilePath)
 				jsonObj, _ = ReadAndUnmarshal(fileRef)
 
-				parser = &IpPasswordParser{
+				parser = &IPPasswordParser{
 					Product:   product,
 					Component: component,
 					Username:  username,
@@ -178,7 +178,7 @@ func testGetPasswordWithVersionSpecificFile(installationSettingsFilePath string)
 
 		Context("when no valid component found", func() {
 			var (
-				parser    *IpPasswordParser
+				parser    *IPPasswordParser
 				jsonObj   InstallationCompareObject
 				product   string = "cf"
 				component string = "aaaa"
@@ -191,7 +191,7 @@ func testGetPasswordWithVersionSpecificFile(installationSettingsFilePath string)
 				fileRef, _ = os.Open(installationSettingsFilePath)
 				jsonObj, _ = ReadAndUnmarshal(fileRef)
 
-				parser = &IpPasswordParser{
+				parser = &IPPasswordParser{
 					Product:   product,
 					Component: component,
 					Username:  username,
@@ -217,7 +217,7 @@ func testGetPasswordWithVersionSpecificFile(installationSettingsFilePath string)
 
 		Context("when no valid product found", func() {
 			var (
-				parser    *IpPasswordParser
+				parser    *IPPasswordParser
 				jsonObj   InstallationCompareObject
 				product   string = "fail"
 				component string = "ccdb"
@@ -230,7 +230,7 @@ func testGetPasswordWithVersionSpecificFile(installationSettingsFilePath string)
 				fileRef, _ = os.Open(installationSettingsFilePath)
 				jsonObj, _ = ReadAndUnmarshal(fileRef)
 
-				parser = &IpPasswordParser{
+				parser = &IPPasswordParser{
 					Product:   product,
 					Component: component,
 					Username:  username,
@@ -256,7 +256,7 @@ func testGetPasswordWithVersionSpecificFile(installationSettingsFilePath string)
 
 		Context("when no valid username found", func() {
 			var (
-				parser    *IpPasswordParser
+				parser    *IPPasswordParser
 				jsonObj   InstallationCompareObject
 				product   string = "cf"
 				component string = "ccdb"
@@ -269,7 +269,7 @@ func testGetPasswordWithVersionSpecificFile(installationSettingsFilePath string)
 				fileRef, _ = os.Open(installationSettingsFilePath)
 				jsonObj, _ = ReadAndUnmarshal(fileRef)
 
-				parser = &IpPasswordParser{
+				parser = &IPPasswordParser{
 					Product:   product,
 					Component: component,
 					Username:  username,

@@ -85,7 +85,7 @@ var _ = Describe("Backup / Restore", func() {
 			BeforeEach(func() {
 				tile = &mockTile{}
 				controlBackupCount = tile.BackupCalled
-				err = RunPipeline(TILE_BACKUP_ACTION, []Tile{tile})
+				err = RunPipeline(TileBackupAction, []Tile{tile})
 			})
 
 			It("should return nil error and successfully call Backup function", func() {
@@ -97,7 +97,7 @@ var _ = Describe("Backup / Restore", func() {
 				BeforeEach(func() {
 					tile = &mockTile{ErrBackup: mockTileBackupError}
 					controlBackupCount = tile.BackupCalled
-					err = RunPipeline(TILE_BACKUP_ACTION, []Tile{tile})
+					err = RunPipeline(TileBackupAction, []Tile{tile})
 				})
 
 				It("should return backup error and successfully call Backup function", func() {
@@ -115,7 +115,7 @@ var _ = Describe("Backup / Restore", func() {
 			BeforeEach(func() {
 				tile = &mockTile{}
 				controlRestoreCount = tile.RestoreCalled
-				err = RunPipeline(TILE_RESTORE_ACTION, []Tile{tile})
+				err = RunPipeline(TileRestoreAction, []Tile{tile})
 			})
 
 			It("should return nil error and successfully call Restore function", func() {
@@ -127,7 +127,7 @@ var _ = Describe("Backup / Restore", func() {
 				BeforeEach(func() {
 					tile = &mockTile{ErrRestore: mockTileRestoreError}
 					controlRestoreCount = tile.RestoreCalled
-					err = RunPipeline(TILE_RESTORE_ACTION, []Tile{tile})
+					err = RunPipeline(TileRestoreAction, []Tile{tile})
 				})
 
 				It("should return restore error and successfully call Restore function", func() {
