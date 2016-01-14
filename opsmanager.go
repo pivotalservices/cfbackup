@@ -203,8 +203,8 @@ func (context *OpsManager) importInstallation() (err error) {
 			err = context.removeExistingDeploymentFiles()
 		}
 	}()
-	lo.G.Debug("uploading installation assets")
 	installAssetsURL := fmt.Sprintf(OpsMgrInstallationAssetsURL, context.Hostname)
+	lo.G.Debug("uploading installation assets installAssetsURL: %s", installAssetsURL)
 	err = context.importInstallationPart(installAssetsURL, OpsMgrInstallationAssetsFileName, OpsMgrInstallationAssetsPostFieldName, context.AssetsUploader)
 	return
 }
@@ -224,7 +224,7 @@ func (context *OpsManager) importInstallationPart(url, filename, fieldname strin
 		filePath := path.Join(context.TargetDir, context.OpsmanagerBackupDir, filename)
 		bufferedReader := bufio.NewReader(backupReader)
 
-		lo.G.Debug("upload request", log.Data{"fieldname": fieldname, "filePath": filePath})
+		lo.G.Debug("upload request", log.Data{"fieldname": fieldname, "filePath": filePath, "conn": conn})
 
 		if res, err = upload(conn, fieldname, filePath, -1, bufferedReader, nil); err != nil {
 			err = fmt.Errorf(fmt.Sprintf("ERROR:%s", err.Error()))
