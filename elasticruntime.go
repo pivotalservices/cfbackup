@@ -10,7 +10,7 @@ import (
 	"path"
 
 	"github.com/cloudfoundry-community/go-cfenv"
-	. "github.com/pivotalservices/gtils/http"
+	"github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/log"
 	"github.com/xchapter7x/lo"
 )
@@ -32,8 +32,8 @@ const (
 	ERUaa = "UaadbInfo"
 	//ERCc -- key
 	ERCc = "CcdbInfo"
-	//ERMySql -- key
-	ERMySql = "MysqldbInfo"
+	//ERMySQL -- key
+	ERMySQL = "MysqldbInfo"
 	//ERNfs -- key
 	ERNfs = "NfsInfo"
 	//ERBackupFileFormat -- format of archive filename
@@ -86,7 +86,7 @@ type ElasticRuntime struct {
 	JSONFile          string
 	SystemsInfo       map[string]SystemDump
 	PersistentSystems []SystemDump
-	HTTPGateway       HttpGateway
+	HTTPGateway       http.HttpGateway
 	InstallationName  string
 	BackupContext
 }
@@ -154,7 +154,7 @@ var NewElasticRuntime = func(jsonFile string, target string) *ElasticRuntime {
 			ERConsole:  consoledbInfo,
 			ERUaa:      uaadbInfo,
 			ERCc:       ccdbInfo,
-			ERMySql:    mysqldbInfo,
+			ERMySQL:    mysqldbInfo,
 			ERNfs:      nfsInfo,
 		},
 		PersistentSystems: []SystemDump{
@@ -221,10 +221,10 @@ func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []CCJob, err er
 	lo.G.Debug("getAllCloudControllerVMs() function", log.Data{"connectionURL": connectionURL, "directorInfo": directorInfo})
 	gateway := context.HTTPGateway
 	if gateway == nil {
-		gateway = NewHttpGateway()
+		gateway = http.NewHttpGateway()
 	}
 	lo.G.Debug("Retrieving CC vms")
-	if resp, err := gateway.Get(HttpRequestEntity{
+	if resp, err := gateway.Get(http.HttpRequestEntity{
 		Url:         connectionURL,
 		Username:    directorInfo.Get(SDUser),
 		Password:    directorInfo.Get(SDPass),
@@ -250,9 +250,9 @@ func (context *ElasticRuntime) RunDbAction(dbInfoList []SystemDump, action int) 
 
 		if err = info.Error(); err == nil {
 			err = context.readWriterArchive(info, context.TargetDir, action)
-			lo.G.Debug("backed up db", log.Data{"info": info})
 		} else {
-			break
+			// Don't error out yet until issue #111461510 is resolved.
+			continue
 		}
 	}
 	return
@@ -267,18 +267,20 @@ func (context *ElasticRuntime) readWriterArchive(dbInfo SystemDump, databaseDir 
 	if pb, err = dbInfo.GetPersistanceBackup(); err == nil {
 		switch action {
 		case ImportArchive:
-			lo.G.Debug("we are doing something here now")
+			lo.G.Debug("Restoring %s", dbInfo.Get(SDComponent))
 			var backupReader io.ReadCloser
 			if backupReader, err = context.Reader(filepath); err == nil {
 				defer backupReader.Close()
 				err = pb.Import(backupReader)
+				lo.G.Debug("Done restoring %s", dbInfo.Get(SDComponent))
 			}
 		case ExportArchive:
-			lo.G.Info("Exporting database")
+			lo.G.Info("Exporting %s", dbInfo.Get(SDComponent))
 			var backupWriter io.WriteCloser
 			if backupWriter, err = context.Writer(filepath); err == nil {
 				defer backupWriter.Close()
 				err = pb.Dump(backupWriter)
+				lo.G.Debug("Done backing up %s", dbInfo.Get(SDComponent))
 			}
 		}
 	}
@@ -339,9 +341,9 @@ func (context *ElasticRuntime) directorCredentialsValid() (ok bool) {
 		connectionURL := fmt.Sprintf(ERDirectorInfoURL, directorInfo.Get(SDIP))
 		gateway := context.HTTPGateway
 		if gateway == nil {
-			gateway = NewHttpGateway()
+			gateway = http.NewHttpGateway()
 		}
-		_, err := gateway.Get(HttpRequestEntity{
+		_, err := gateway.Get(http.HttpRequestEntity{
 			Url:         connectionURL,
 			Username:    directorInfo.Get(SDUser),
 			Password:    directorInfo.Get(SDPass),
