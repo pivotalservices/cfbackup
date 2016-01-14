@@ -12,7 +12,7 @@
             "database_type": "external",
             "external_database_options": {
                 "database": "bosh",
-                "host": "sps9ydqicfa7su.czno2n8wgfok.us-east-1.rds.amazonaws.com",
+                "host": "xxxxxxxxxxxxxxxxxxxx",
                 "password": "sraoadmin",
                 "port": "3306",
                 "user": "sraoadmin"
@@ -24,21 +24,21 @@
             ],
             "resurrector_enabled": true,
             "s3_blobstore_options": {
-                "access_key": "AKIAI7DG6FMEVTPLGP3Q",
-                "bucket_name": "srao-pcf16stack-opsmanstack-pcfopsmanagers3bucket-1plzj0jr2z7b9",
+                "access_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "bucket_name": "xxxxxxxxxxxxxxxxxxxxxxxxxxxx",
                 "endpoint": "https://s3.amazonaws.com",
-                "secret_key": "s1EmyzsWEGT51zxj3m4NaFSxEbCm1gWyAu07tNpg"
+                "secret_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxx"
             }
         },
         "iaas_configuration": {
-            "access_key_id": "AKIAI7DG6FMEVTPLGP3Q",
+            "access_key_id": "xxxxxxxxxxxxxxxxxxxxxxxx",
             "encrypted": false,
             "key_pair_name": "sraonew",
             "region": "us-east-1",
-            "secret_access_key": "s1EmyzsWEGT51zxj3m4NaFSxEbCm1gWyAu07tNpg",
-            "security_group": "srao-pcf16stack-OpsManStack-PK1UN41HOPUI-PcfOpsManagerSecurityGroup-14N2167TJVDX4",
+            "secret_access_key": "xxxxxxxxxxxxxxxxxxx",
+            "security_group": "xxxxxxxxxxxxxxxxxxxxx",
             "ssh_private_key": "-----BEGIN RSA PRIVATE KEY-----\nxxxxxxxxxxxxxxxxxxxxx\n-----END RSA PRIVATE KEY-----\n",
-            "vpc_id": "vpc-bced5bd8"
+            "vpc_id": "xxxxxxxxxxxxxxx"
         },
         "networks": [
             {
