@@ -3,6 +3,7 @@ package cfbackup
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"io/ioutil"
 )
 
@@ -10,6 +11,17 @@ import (
 func NewConfigurationParser(installationFilePath string) *ConfigurationParser {
 	is := InstallationSettings{}
 	b, _ := ioutil.ReadFile(installationFilePath)
+	json.Unmarshal(b, &is)
+
+	return &ConfigurationParser{
+		installationSettings: is,
+	}
+}
+
+//NewConfigurationParserFromReader - constructor for a ConfigurationParser from a json installationsettings file
+func NewConfigurationParserFromReader(settings io.Reader) *ConfigurationParser {
+	is := InstallationSettings{}
+	b, _ := ioutil.ReadAll(settings)
 	json.Unmarshal(b, &is)
 
 	return &ConfigurationParser{
