@@ -172,7 +172,7 @@ type mockRemoteOps struct {
 }
 
 func (s *mockRemoteOps) Path() string {
-	return osutils.REMOTE_IMPORT_PATH
+	return osutils.RemoteImportPath
 }
 
 func (s *mockRemoteOps) UploadFile(lfile io.Reader) error {

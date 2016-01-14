@@ -12,11 +12,11 @@ import (
 func SetPGDumpUtilVersions() {
 	switch os.Getenv(ERVersionEnvFlag) {
 	case ERVersion16:
-		persistence.PGDMP_DUMP_BIN = "/var/vcap/packages/postgres-9.4.2/bin/pg_dump"
-		persistence.PGDMP_RESTORE_BIN = "/var/vcap/packages/postgres-9.4.2/bin/pg_restore"
+		persistence.PGDmpDumpBin = "/var/vcap/packages/postgres-9.4.2/bin/pg_dump"
+		persistence.PGDmpRestoreBin = "/var/vcap/packages/postgres-9.4.2/bin/pg_restore"
 	default:
-		persistence.PGDMP_DUMP_BIN = "/var/vcap/packages/postgres/bin/pg_dump"
-		persistence.PGDMP_RESTORE_BIN = "/var/vcap/packages/postgres/bin/pg_restore"
+		persistence.PGDmpDumpBin = "/var/vcap/packages/postgres/bin/pg_dump"
+		persistence.PGDmpRestoreBin = "/var/vcap/packages/postgres/bin/pg_restore"
 	}
 }
 
