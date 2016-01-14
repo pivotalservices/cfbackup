@@ -4,15 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"os"
-	"path"
 	"strings"
 
 	. "github.com/pivotalservices/cfbackup"
 	"github.com/pivotalservices/gtils/command"
 	"github.com/pivotalservices/gtils/mock"
-	"github.com/pivotalservices/gtils/osutils"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -133,68 +129,6 @@ var _ = Describe("nfs", func() {
 		})
 	})
 
-	Describe("BackupNfs", func() {
-		var origExecuterFunction func(command.SshConfig) (command.Executer, error)
-		var tmpfile *os.File
-		var tmpfilepath string
-		Context("called with valid arguments", func() {
-			BeforeEach(func() {
-				origExecuterFunction = NfsNewRemoteExecuter
-				NfsNewRemoteExecuter = func(command.SshConfig) (ce command.Executer, err error) {
-					ce = &SuccessMockNFSExecuter{}
-					return
-				}
-
-				tmpdir, _ := ioutil.TempDir("/tmp", "spec")
-				filename := "nfs.tar.gz"
-				tmpfilepath = path.Join(tmpdir, filename)
-				tmpfile, _ = osutils.SafeCreate(tmpfilepath)
-			})
-
-			AfterEach(func() {
-				NfsNewRemoteExecuter = origExecuterFunction
-				tmpfile.Close()
-				os.Remove(tmpfilepath)
-			})
-
-			It("should return nil error and write success output to an outfile", func() {
-				err := BackupNfs("pass", "1.2.3.4", tmpfile)
-				b, _ := ioutil.ReadFile(tmpfilepath)
-				Ω(b).Should(Equal([]byte(nfsSuccessString)))
-				Ω(err).Should(BeNil())
-			})
-		})
-
-		Context("called with invalid arguments", func() {
-			BeforeEach(func() {
-				origExecuterFunction = NfsNewRemoteExecuter
-				NfsNewRemoteExecuter = func(command.SshConfig) (ce command.Executer, err error) {
-					ce = &FailureMockNFSExecuter{}
-					return
-				}
-
-				tmpdir, _ := ioutil.TempDir("/tmp", "spec")
-				filename := "nfs.tar.gz"
-				tmpfilepath = path.Join(tmpdir, filename)
-				tmpfile, _ = osutils.SafeCreate(tmpfilepath)
-			})
-
-			AfterEach(func() {
-				NfsNewRemoteExecuter = origExecuterFunction
-				tmpfile.Close()
-				os.Remove(tmpfilepath)
-			})
-
-			It("should return non nil error and write failure output to file", func() {
-				err := BackupNfs("pass", "1.2.3.4", tmpfile)
-				b, _ := ioutil.ReadFile(tmpfilepath)
-				Ω(b).Should(Equal([]byte(nfsFailureString)))
-				Ω(err).ShouldNot(BeNil())
-			})
-		})
-
-	})
-
 	Describe("NFSBackup", func() {
 		var nfs *NFSBackup
 
@@ -244,7 +178,7 @@ var _ = Describe("nfs", func() {
 				})
 
 				It("should return a nil error and a non-nil NFSBackup object", func() {
-					n, err := NewNFSBackup("pass", "0.0.0.0")
+					n, err := NewNFSBackup("pass", "0.0.0.0", "")
 					Ω(err).Should(BeNil())
 					Ω(n).Should(BeAssignableToTypeOf(&NFSBackup{}))
 					Ω(n).ShouldNot(BeNil())
@@ -268,7 +202,7 @@ var _ = Describe("nfs", func() {
 				})
 
 				It("should return a nil error and a NFSBackup object that is nil", func() {
-					n, err := NewNFSBackup("pass", "0.0.0.0")
+					n, err := NewNFSBackup("pass", "0.0.0.0", "")
 					Ω(err).ShouldNot(BeNil())
 					Ω(n).Should(BeNil())
 					Ω(n).Should(BeAssignableToTypeOf(&NFSBackup{}))

@@ -44,5 +44,32 @@ var _ = Describe("ElasticRuntimeBuilder", func() {
 				Ω(tile).Should(BeAssignableToTypeOf(new(ElasticRuntime)))
 			})
 		})
+
+		Context("when the installationsettings file contains a valid key", func() {
+			var (
+				controlFixtureFile = "fixtures/installation-settings-1-6-aws.json"
+				controlTileSpec    tileregistry.TileSpec
+				err                error
+			)
+			BeforeEach(func() {
+				controlTileSpec = tileregistry.TileSpec{}
+				GetInstallationSettings = func(tileSpec tileregistry.TileSpec) (settings io.Reader, err error) {
+					settings, err = os.Open(controlFixtureFile)
+					return
+				}
+			})
+
+			It("then it should return an initialized ElasticRuntime as a tileregistry.Tile interface", func() {
+				tile, _ := new(ElasticRuntimeBuilder).New(controlTileSpec)
+				Ω(err).ShouldNot(HaveOccurred())
+				Ω(tile).Should(BeAssignableToTypeOf(new(ElasticRuntime)))
+			})
+
+			It("then it should properly set the SSHPrivateKey in the elastic runtime object", func() {
+				tile, _ := new(ElasticRuntimeBuilder).New(controlTileSpec)
+				Ω(err).ShouldNot(HaveOccurred())
+				Ω(tile.(*ElasticRuntime).SSHPrivateKey).ShouldNot(BeEmpty())
+			})
+		})
 	})
 })
