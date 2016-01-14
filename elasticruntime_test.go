@@ -108,8 +108,8 @@ var _ = Describe("ElasticRuntime", func() {
 			})
 
 			It("then it should target the proper vendored postgres utils", func() {
-				Ω(persistence.PGDMP_DUMP_BIN).Should(Equal(versionPGDump))
-				Ω(persistence.PGDMP_RESTORE_BIN).Should(Equal(versionPGRestore))
+				Ω(persistence.PGDmpDumpBin).Should(Equal(versionPGDump))
+				Ω(persistence.PGDmpRestoreBin).Should(Equal(versionPGRestore))
 			})
 		})
 		Context("when NOT toggled to v1.6", func() {
@@ -132,8 +132,8 @@ var _ = Describe("ElasticRuntime", func() {
 			})
 
 			It("then it should target the proper vendored postgres utils", func() {
-				Ω(persistence.PGDMP_DUMP_BIN).Should(Equal(versionPGDump))
-				Ω(persistence.PGDMP_RESTORE_BIN).Should(Equal(versionPGRestore))
+				Ω(persistence.PGDmpDumpBin).Should(Equal(versionPGDump))
+				Ω(persistence.PGDmpRestoreBin).Should(Equal(versionPGRestore))
 			})
 		})
 	})
