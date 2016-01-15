@@ -77,13 +77,13 @@ var _ = Describe("nfs", func() {
 
 			Context("Read failure", func() {
 				BeforeEach(func() {
-					lf := mock.NewReadWriteCloser(mock.READ_FAIL_ERROR, nil, nil)
+					lf := mock.NewReadWriteCloser(mock.ErrReadFailure, nil, nil)
 					err = nfs.Import(lf)
 				})
 
 				It("should return non-nil execution error", func() {
 					Ω(err).ShouldNot(BeNil())
-					Ω(err).Should(Equal(mock.READ_FAIL_ERROR))
+					Ω(err).Should(Equal(mock.ErrReadFailure))
 				})
 
 				It("should write the local file contents to the remote", func() {
@@ -94,14 +94,14 @@ var _ = Describe("nfs", func() {
 			Context("Writer related failure", func() {
 				Context("Write failure", func() {
 					BeforeEach(func() {
-						lf := mock.NewReadWriteCloser(nil, mock.WRITE_FAIL_ERROR, nil)
+						lf := mock.NewReadWriteCloser(nil, mock.ErrWriteFailure, nil)
 						nfs = getNfs(lf, &SuccessMockNFSExecuter{})
 						err = nfs.Import(lf)
 					})
 
 					It("should return non-nil execution error", func() {
 						Ω(err).ShouldNot(BeNil())
-						Ω(err).Should(Equal(mock.WRITE_FAIL_ERROR))
+						Ω(err).Should(Equal(mock.ErrWriteFailure))
 					})
 
 					It("should write the local file contents to the remote", func() {
@@ -111,7 +111,7 @@ var _ = Describe("nfs", func() {
 
 				Context("Close failure", func() {
 					BeforeEach(func() {
-						lf := mock.NewReadWriteCloser(nil, nil, mock.CLOSE_FAIL_ERROR)
+						lf := mock.NewReadWriteCloser(nil, nil, mock.ErrCloseFailure)
 						nfs = getNfs(lf, &SuccessMockNFSExecuter{})
 						err = nfs.Import(lf)
 					})
