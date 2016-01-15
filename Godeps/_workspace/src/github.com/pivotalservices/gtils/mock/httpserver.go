@@ -5,16 +5,19 @@ import (
 	"net/http/httptest"
 )
 
-type HttpServer struct {
+//HTTPServer - a fake http server object
+type HTTPServer struct {
 	Mux    *http.ServeMux
 	Server *httptest.Server
 }
 
-func (s *HttpServer) Setup() {
+//Setup -- allows us to setup our fake server
+func (s *HTTPServer) Setup() {
 	s.Mux = http.NewServeMux()
 	s.Server = httptest.NewServer(s.Mux)
 }
 
-func (s *HttpServer) Teardown() {
+//Teardown -- allows for teardown of fake server
+func (s *HTTPServer) Teardown() {
 	s.Server.Close()
 }
