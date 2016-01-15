@@ -69,7 +69,9 @@ var _ = Describe("OpsManager object", func() {
 
 			BeforeEach(func() {
 				fakeSettingsUploader = new(fake.MultiPart)
+				fakeSettingsUploader.StatusCode = 200
 				fakeAssetsUploader = new(fake.MultiPart)
+				fakeAssetsUploader.StatusCode = 200
 				tmpDir, _ = ioutil.TempDir("/tmp", "test")
 				backupDir = path.Join(tmpDir, "backup", "opsmanager")
 				gw := &MockHttpGateway{}
