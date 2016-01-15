@@ -106,7 +106,9 @@ var MockMultiPartBodyFunc = func(string, string, io.Reader, map[string]string) (
 }
 
 var MockMultiPartUploadFunc = func(ConnAuth, string, string, int64, io.Reader, map[string]string) (*http.Response, error) {
-	return &http.Response{}, nil
+	return &http.Response{
+		StatusCode: 200,
+	}, nil
 }
 
 type ClosingBuffer struct {

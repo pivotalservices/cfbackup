@@ -41,5 +41,8 @@ type MultiPart struct {
 func (s *MultiPart) Upload(conn ghttp.ConnAuth, paramName, filename string, fileSize int64, fileRef io.Reader, params map[string]string) (res *http.Response, err error) {
 	s.SpyFileContents, _ = ioutil.ReadAll(fileRef)
 	s.UploadCallCount++
+	res = &http.Response{
+		StatusCode: 200,
+	}
 	return
 }

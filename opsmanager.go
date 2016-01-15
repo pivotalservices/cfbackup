@@ -185,13 +185,13 @@ func (context *OpsManager) importInstallationPart(url, filename, fieldname strin
 		}
 		resp, err = upload(conn, fieldname, filePath, -1, bufferedReader, creds)
 		if err == nil && resp.StatusCode == http.StatusOK {
-			lo.G.Debugf("Request for %s succeeded with status: %s", url, resp.Status)
+			lo.G.Debug("Request for %s succeeded with status: %s", url, resp.Status)
 		} else if resp != nil && resp.StatusCode != http.StatusOK {
 			err = fmt.Errorf("Request for %s failed with status: %s", url, resp.Status)
 		}
 
 		if err != nil {
-			lo.G.Errorf("error uploading installation: %s", err.Error())
+			lo.G.Error("error uploading installation: %s", err.Error())
 		}
 	}
 	return
