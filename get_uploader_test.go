@@ -21,7 +21,7 @@ var _ = Describe("GetUploader", func() {
 			It("then we should return a LargeMultiPartUploader", func() {
 				bc := BackupContext{IsS3: false}
 				uploader := GetUploader(bc)
-				Ω(uploader).Should(BeAssignableToTypeOf(ghttp.LargeMultiPartUpload))
+				Ω(uploader).Should(BeAssignableToTypeOf(ghttp.MultiPartUpload))
 			})
 		})
 	})
