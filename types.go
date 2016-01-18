@@ -118,6 +118,7 @@ type (
 	//SystemInfo - a struct representing a base systemdump implementation
 	SystemInfo struct {
 		goutil.GetSet
+		systemInfo    map[string]SystemDump
 		Product       string
 		Component     string
 		Identity      string
@@ -141,6 +142,10 @@ type (
 	//NfsInfo - a struct representing a nfs systemdump implementation
 	NfsInfo struct {
 		SystemInfo
+	}
+	//SystemsInfo holds the values for all the supported SystemDump used by an installation
+	SystemsInfo struct {
+		SystemDumps map[string]SystemDump
 	}
 
 	connBucketInterface interface {
