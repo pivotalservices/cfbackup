@@ -3,6 +3,7 @@ package command
 import (
 	"fmt"
 	"io"
+	"sync"
 
 	"github.com/xchapter7x/lo"
 
@@ -44,6 +45,7 @@ type ClientInterface interface {
 type DefaultRemoteExecutor struct {
 	Client         ClientInterface
 	LazyClientDial func()
+	once           sync.Once
 }
 
 //Wrapper of ssh client to match client interface signature, since client.NewSession() does not use an interface
@@ -88,7 +90,7 @@ type SSHSession interface {
 
 // Copy the output from a command to the specified io.Writer
 func (executor *DefaultRemoteExecutor) Execute(dest io.Writer, command string) (err error) {
-	executor.LazyClientDial()
+	executor.once.Do(executor.LazyClientDial)
 	session, err := executor.Client.NewSession()
 	defer session.Close()
 	if err != nil {
