@@ -21,7 +21,7 @@ var NewElasticRuntime = func(jsonFile string, target string, sshKey string) *Ela
 		SSHPrivateKey:     sshKey,
 		JSONFile:          jsonFile,
 		BackupContext:     NewBackupContext(target, cfenv.CurrentEnv()),
-		SystemsInfo:       systemsInfo.SystemDumps,
+		SystemsInfo:       systemsInfo,
 		PersistentSystems: systemsInfo.PersistentSystems(),
 	}
 	return context
@@ -50,7 +50,7 @@ func (context *ElasticRuntime) backupRestore(action int) (err error) {
 			return erro
 		}
 		if ccJobs, err = context.getAllCloudControllerVMs(); err == nil {
-			directorInfo := context.SystemsInfo[ERDirector]
+			directorInfo := context.SystemsInfo.SystemDumps[ERDirector]
 			cloudController := NewCloudController(directorInfo.Get(SDIP), directorInfo.Get(SDUser), directorInfo.Get(SDPass), context.InstallationName, manifest, ccJobs)
 			lo.G.Debug("Setting up CC jobs")
 			defer cloudController.Start()
@@ -75,7 +75,7 @@ func (context *ElasticRuntime) backupRestore(action int) (err error) {
 func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []CCJob, err error) {
 
 	lo.G.Debug("Entering getAllCloudControllerVMs() function")
-	directorInfo := context.SystemsInfo[ERDirector]
+	directorInfo := context.SystemsInfo.SystemDumps[ERDirector]
 	connectionURL := fmt.Sprintf(ERVmsURL, directorInfo.Get(SDIP), context.InstallationName)
 	lo.G.Debug("getAllCloudControllerVMs() function", log.Data{"connectionURL": connectionURL, "directorInfo": directorInfo})
 	gateway := context.HTTPGateway
@@ -172,7 +172,7 @@ func (context *ElasticRuntime) assignCredentialsAndInstallationName(jsonObj Inst
 
 func (context *ElasticRuntime) assignCredentials(jsonObj InstallationCompareObject) (err error) {
 
-	for name, sysInfo := range context.SystemsInfo {
+	for name, sysInfo := range context.SystemsInfo.SystemDumps {
 		var (
 			ip    string
 			pass  string
@@ -187,7 +187,7 @@ func (context *ElasticRuntime) assignCredentials(jsonObj InstallationCompareObje
 			lo.G.Debug("%s credentials for %s from installation.json are %s", name, sysInfo.Get(SDComponent), sysInfo.Get(SDIdentity), pass)
 			_, vpass, err = GetPasswordAndIP(jsonObj, sysInfo.Get(SDProduct), sysInfo.Get(SDComponent), sysInfo.Get(SDVcapUser))
 			sysInfo.Set(SDVcapPass, vpass)
-			context.SystemsInfo[name] = sysInfo
+			context.SystemsInfo.SystemDumps[name] = sysInfo
 		}
 	}
 	return
@@ -196,7 +196,7 @@ func (context *ElasticRuntime) assignCredentials(jsonObj InstallationCompareObje
 func (context *ElasticRuntime) directorCredentialsValid() (ok bool) {
 	var directorInfo SystemDump
 
-	if directorInfo, ok = context.SystemsInfo[ERDirector]; ok {
+	if directorInfo, ok = context.SystemsInfo.SystemDumps[ERDirector]; ok {
 		connectionURL := fmt.Sprintf(ERDirectorInfoURL, directorInfo.Get(SDIP))
 		gateway := context.HTTPGateway
 		if gateway == nil {
@@ -214,7 +214,7 @@ func (context *ElasticRuntime) directorCredentialsValid() (ok bool) {
 }
 
 func (context *ElasticRuntime) getManifest() (manifest string, err error) {
-	directorInfo, _ := context.SystemsInfo[ERDirector]
+	directorInfo, _ := context.SystemsInfo.SystemDumps[ERDirector]
 	director := NewDirector(directorInfo.Get(SDIP), directorInfo.Get(SDUser), directorInfo.Get(SDPass), 25555)
 	mfs, err := director.GetDeploymentManifest(context.InstallationName)
 	if err != nil {

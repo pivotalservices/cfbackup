@@ -15,7 +15,7 @@ type (
 	ElasticRuntime struct {
 		BackupContext
 		JSONFile          string
-		SystemsInfo       map[string]SystemDump
+		SystemsInfo       SystemsInfo
 		PersistentSystems []SystemDump
 		HTTPGateway       ghttp.HttpGateway
 		InstallationName  string
