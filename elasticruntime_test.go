@@ -148,21 +148,23 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 				username  = "director"
 				target    string
 				er        ElasticRuntime
-				info      = map[string]SystemDump{
-					"DirectorInfo": &SystemInfo{
-						Product:   product,
-						Component: component,
-						Identity:  username,
-					},
-					"ConsoledbInfo": &PgInfoMock{
-						SystemInfo: SystemInfo{
+				info      = SystemsInfo{
+					SystemDumps: map[string]SystemDump{
+						"DirectorInfo": &SystemInfo{
 							Product:   product,
 							Component: component,
 							Identity:  username,
 						},
+						"ConsoledbInfo": &PgInfoMock{
+							SystemInfo: SystemInfo{
+								Product:   product,
+								Component: component,
+								Identity:  username,
+							},
+						},
 					},
 				}
-				ps = []SystemDump{info["ConsoledbInfo"]}
+				ps = []SystemDump{info.SystemDumps["ConsoledbInfo"]}
 			)
 
 			BeforeEach(func() {
@@ -286,11 +288,13 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 				username  = "root"
 				target    string
 				er        ElasticRuntime
-				info      = map[string]SystemDump{
-					"ConsoledbInfo": &SystemInfo{
-						Product:   product,
-						Component: component,
-						Identity:  username,
+				info      = SystemsInfo{
+					SystemDumps: map[string]SystemDump{
+						"ConsoledbInfo": &SystemInfo{
+							Product:   product,
+							Component: component,
+							Identity:  username,
+						},
 					},
 				}
 			)
@@ -351,12 +355,14 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 				username  = "root"
 				target    string
 				er        ElasticRuntime
-				info      = map[string]SystemDump{
-					"ConsoledbInfo": &PgInfoMock{
-						SystemInfo: SystemInfo{
-							Product:   product,
-							Component: component,
-							Identity:  username,
+				info      = SystemsInfo{
+					SystemDumps: map[string]SystemDump{
+						"ConsoledbInfo": &PgInfoMock{
+							SystemInfo: SystemInfo{
+								Product:   product,
+								Component: component,
+								Identity:  username,
+							},
 						},
 					},
 				}
@@ -379,7 +385,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 
 			Context("Backup", func() {
 				It("Should write the dumped output to a file in the databaseDir", func() {
-					er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, ExportArchive)
+					er.RunDbAction([]SystemDump{info.SystemDumps["ConsoledbInfo"]}, ExportArchive)
 					filename := fmt.Sprintf("%s.backup", component)
 					exists, _ := osutils.Exists(path.Join(target, filename))
 					Ω(exists).Should(BeTrue())
@@ -388,7 +394,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 				It("Should have a nil error and not panic", func() {
 					var err error
 					Ω(func() {
-						err = er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, ExportArchive)
+						err = er.RunDbAction([]SystemDump{info.SystemDumps["ConsoledbInfo"]}, ExportArchive)
 					}).ShouldNot(Panic())
 					Ω(err).Should(BeNil())
 				})
@@ -396,7 +402,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 
 			Context("Restore", func() {
 				It("should return error if local file does not exist", func() {
-					err := er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, ImportArchive)
+					err := er.RunDbAction([]SystemDump{info.SystemDumps["ConsoledbInfo"]}, ImportArchive)
 					Ω(err).ShouldNot(BeNil())
 					Ω(err).Should(BeAssignableToTypeOf(ErrERInvalidPath))
 				})
@@ -414,7 +420,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 					})
 
 					It("should upload file to remote w/o error", func() {
-						err := er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, ImportArchive)
+						err := er.RunDbAction([]SystemDump{info.SystemDumps["ConsoledbInfo"]}, ImportArchive)
 						Ω(err).Should(BeNil())
 					})
 
@@ -422,24 +428,26 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 						var origInfo map[string]SystemDump
 
 						BeforeEach(func() {
-							origInfo = info
-							info = map[string]SystemDump{
-								"ConsoledbInfo": &PgInfoMock{
-									failImport: true,
-									SystemInfo: SystemInfo{
-										Product:   product,
-										Component: component,
-										Identity:  username,
+							origInfo = info.SystemDumps
+							info = SystemsInfo{
+								SystemDumps: map[string]SystemDump{
+									"ConsoledbInfo": &PgInfoMock{
+										failImport: true,
+										SystemInfo: SystemInfo{
+											Product:   product,
+											Component: component,
+											Identity:  username,
+										},
 									},
 								},
 							}
 						})
 
 						AfterEach(func() {
-							info = origInfo
+							info.SystemDumps = origInfo
 						})
 						It("should return error", func() {
-							err := er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, ImportArchive)
+							err := er.RunDbAction([]SystemDump{info.SystemDumps["ConsoledbInfo"]}, ImportArchive)
 							Ω(err).ShouldNot(BeNil())
 							Ω(err).ShouldNot(Equal(ErrorImport))
 						})
@@ -455,12 +463,14 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 				username  = "root"
 				target    string
 				er        ElasticRuntime
-				info      = map[string]SystemDump{
-					"ConsoledbInfo": &PgInfoMock{
-						SystemInfo: SystemInfo{
-							Product:   product,
-							Component: component,
-							Identity:  username,
+				info      = SystemsInfo{
+					SystemDumps: map[string]SystemDump{
+						"ConsoledbInfo": &PgInfoMock{
+							SystemInfo: SystemInfo{
+								Product:   product,
+								Component: component,
+								Identity:  username,
+							},
 						},
 					},
 				}
@@ -484,7 +494,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 			Context("Backup", func() {
 
 				It("Should write the dumped output to a file in the databaseDir", func() {
-					er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, ExportArchive)
+					er.RunDbAction([]SystemDump{info.SystemDumps["ConsoledbInfo"]}, ExportArchive)
 					filename := fmt.Sprintf("%s.backup", component)
 					exists, _ := osutils.Exists(path.Join(target, filename))
 					Ω(exists).Should(BeTrue())
@@ -493,7 +503,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 				It("Should have a nil error and not panic", func() {
 					var err error
 					Ω(func() {
-						err = er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, ExportArchive)
+						err = er.RunDbAction([]SystemDump{info.SystemDumps["ConsoledbInfo"]}, ExportArchive)
 					}).ShouldNot(Panic())
 					Ω(err).Should(BeNil())
 				})
@@ -507,12 +517,14 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 				username  = "root"
 				target    string
 				er        ElasticRuntime
-				info      = map[string]SystemDump{
-					"UaadbInfo": &PgInfoMock{
-						SystemInfo: SystemInfo{
-							Product:   product,
-							Component: component,
-							Identity:  username,
+				info      = SystemsInfo{
+					SystemDumps: map[string]SystemDump{
+						"UaadbInfo": &PgInfoMock{
+							SystemInfo: SystemInfo{
+								Product:   product,
+								Component: component,
+								Identity:  username,
+							},
 						},
 					},
 				}
@@ -536,7 +548,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 			Context("Backup", func() {
 
 				It("Should write the dumped output to a file in the databaseDir", func() {
-					er.RunDbAction([]SystemDump{info["UaadbInfo"]}, ExportArchive)
+					er.RunDbAction([]SystemDump{info.SystemDumps["UaadbInfo"]}, ExportArchive)
 					filename := fmt.Sprintf("%s.backup", component)
 					exists, _ := osutils.Exists(path.Join(target, filename))
 					Ω(exists).Should(BeTrue())
@@ -545,7 +557,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 				It("Should have a nil error and not panic", func() {
 					var err error
 					Ω(func() {
-						err = er.RunDbAction([]SystemDump{info["UaadbInfo"]}, ExportArchive)
+						err = er.RunDbAction([]SystemDump{info.SystemDumps["UaadbInfo"]}, ExportArchive)
 					}).ShouldNot(Panic())
 					Ω(err).Should(BeNil())
 				})
@@ -563,11 +575,13 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 				username  = "aaaaaaaa"
 				target    string
 				er        ElasticRuntime
-				info      = map[string]SystemDump{
-					"ConsoledbInfo": &SystemInfo{
-						Product:   product,
-						Component: component,
-						Identity:  username,
+				info      = SystemsInfo{
+					SystemDumps: map[string]SystemDump{
+						"ConsoledbInfo": &SystemInfo{
+							Product:   product,
+							Component: component,
+							Identity:  username,
+						},
 					},
 				}
 			)
@@ -590,7 +604,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 			Context("Backup", func() {
 
 				It("Should not write the dumped output to a file in the databaseDir", func() {
-					er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, ExportArchive)
+					er.RunDbAction([]SystemDump{info.SystemDumps["ConsoledbInfo"]}, ExportArchive)
 					filename := fmt.Sprintf("%s.sql", component)
 					exists, _ := osutils.Exists(path.Join(target, filename))
 					Ω(exists).ShouldNot(BeTrue())
@@ -599,7 +613,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 				It("Should have a non nil error and not panic", func() {
 					var err error
 					Ω(func() {
-						err = er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, ExportArchive)
+						err = er.RunDbAction([]SystemDump{info.SystemDumps["ConsoledbInfo"]}, ExportArchive)
 					}).ShouldNot(Panic())
 					Ω(err).ShouldNot(BeNil())
 				})
@@ -609,7 +623,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 				It("Should have a non nil error and not panic", func() {
 					var err error
 					Ω(func() {
-						err = er.RunDbAction([]SystemDump{info["ConsoledbInfo"]}, ImportArchive)
+						err = er.RunDbAction([]SystemDump{info.SystemDumps["ConsoledbInfo"]}, ImportArchive)
 					}).ShouldNot(Panic())
 					Ω(err).ShouldNot(BeNil())
 				})
