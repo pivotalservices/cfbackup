@@ -1,4 +1,4 @@
-package cfbackup_test
+package opsmanager_test
 
 import (
 	"io"
@@ -9,7 +9,9 @@ import (
 	"github.com/cloudfoundry-community/go-cfenv"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "github.com/pivotalservices/cfbackup"
+	"github.com/pivotalservices/cfbackup"
+	"github.com/pivotalservices/cfbackup/fakes"
+	. "github.com/pivotalservices/cfbackup/tiles/opsmanager"
 	. "github.com/pivotalservices/gtils/command"
 	ghttp "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/http/fake"
@@ -32,18 +34,18 @@ var _ = Describe("OpsManager object", func() {
 			BeforeEach(func() {
 				tmpDir, _ = ioutil.TempDir("/tmp", "test")
 				backupDir = path.Join(tmpDir, "backup", "opsmanager")
-				gw := &MockHttpGateway{StatusCode: 200, State: controlInstallationSettings}
+				gw := &fakes.MockHTTPGateway{StatusCode: 200, State: controlInstallationSettings}
 
 				opsManager = &OpsManager{
-					SettingsUploader:    MockMultiPartUploadFunc,
-					AssetsUploader:      MockMultiPartUploadFunc,
+					SettingsUploader:    fakes.MockMultiPartUploadFunc,
+					AssetsUploader:      fakes.MockMultiPartUploadFunc,
 					SettingsRequestor:   gw,
 					AssetsRequestor:     gw,
 					Hostname:            "localhost",
 					Username:            "user",
 					Password:            "password",
-					BackupContext:       NewFakeBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv(), new(DiskProvider)),
-					Executer:            &successExecuter{},
+					BackupContext:       fakes.NewFakeBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv(), new(cfbackup.DiskProvider)),
+					Executer:            &fakes.SuccessExecuter{},
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
 				}
@@ -74,7 +76,7 @@ var _ = Describe("OpsManager object", func() {
 				fakeAssetsUploader.StatusCode = 200
 				tmpDir, _ = ioutil.TempDir("/tmp", "test")
 				backupDir = path.Join(tmpDir, "backup", "opsmanager")
-				gw := &MockHttpGateway{}
+				gw := &fakes.MockHTTPGateway{}
 
 				opsMgr = &OpsManager{
 					SettingsUploader:    fakeSettingsUploader.Upload,
@@ -84,8 +86,8 @@ var _ = Describe("OpsManager object", func() {
 					Hostname:            "localhost",
 					Username:            "user",
 					Password:            "password",
-					BackupContext:       NewFakeBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv(), new(DiskProvider)),
-					Executer:            &successExecuter{},
+					BackupContext:       fakes.NewFakeBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv(), new(cfbackup.DiskProvider)),
+					Executer:            &fakes.SuccessExecuter{},
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
 				}
@@ -112,18 +114,18 @@ var _ = Describe("OpsManager object", func() {
 			BeforeEach(func() {
 				tmpDir, _ = ioutil.TempDir("/tmp", "test")
 				backupDir = path.Join(tmpDir, "backup", "opsmanager")
-				gw := &MockHttpGateway{}
+				gw := &fakes.MockHTTPGateway{}
 
 				opsManager = &OpsManager{
-					SettingsUploader:    MockMultiPartUploadFunc,
-					AssetsUploader:      MockMultiPartUploadFunc,
+					SettingsUploader:    fakes.MockMultiPartUploadFunc,
+					AssetsUploader:      fakes.MockMultiPartUploadFunc,
 					SettingsRequestor:   gw,
 					AssetsRequestor:     gw,
 					Hostname:            "localhost",
 					Username:            "user",
 					Password:            "password",
-					BackupContext:       NewFakeBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv(), new(DiskProvider)),
-					Executer:            &failExecuter{},
+					BackupContext:       fakes.NewFakeBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv(), new(cfbackup.DiskProvider)),
+					Executer:            &fakes.FailExecuter{},
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
 				}
@@ -144,18 +146,18 @@ var _ = Describe("OpsManager object", func() {
 			BeforeEach(func() {
 				tmpDir, _ = ioutil.TempDir("/tmp", "test")
 				backupDir = path.Join(tmpDir, "backup", "opsmanager")
-				gw := &MockHttpGateway{}
+				gw := &fakes.MockHTTPGateway{}
 
 				opsManager = &OpsManager{
-					SettingsUploader:    MockMultiPartUploadFunc,
-					AssetsUploader:      MockMultiPartUploadFunc,
+					SettingsUploader:    fakes.MockMultiPartUploadFunc,
+					AssetsUploader:      fakes.MockMultiPartUploadFunc,
 					SettingsRequestor:   gw,
 					AssetsRequestor:     gw,
 					Hostname:            "localhost",
 					Username:            "user",
 					Password:            "password",
-					BackupContext:       NewFakeBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv(), new(DiskProvider)),
-					Executer:            &successExecuter{},
+					BackupContext:       fakes.NewFakeBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv(), new(cfbackup.DiskProvider)),
+					Executer:            &fakes.SuccessExecuter{},
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
 				}
@@ -175,7 +177,7 @@ var _ = Describe("OpsManager object", func() {
 			BeforeEach(func() {
 				tmpDir, _ = ioutil.TempDir("/tmp", "test")
 				backupDir = path.Join(tmpDir, "backup", "opsmanager")
-				gw := &MockHttpGateway{StatusCode: 500, State: failureString}
+				gw := &fakes.MockHTTPGateway{StatusCode: 500, State: fakes.FailureString}
 
 				opsManager = &OpsManager{
 					SettingsUploader:    ghttp.MultiPartUpload,
@@ -185,8 +187,8 @@ var _ = Describe("OpsManager object", func() {
 					Hostname:            "localhost",
 					Username:            "user",
 					Password:            "password",
-					BackupContext:       NewFakeBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv(), new(DiskProvider)),
-					Executer:            &failExecuter{},
+					BackupContext:       fakes.NewFakeBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv(), new(cfbackup.DiskProvider)),
+					Executer:            &fakes.FailExecuter{},
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
 				}
@@ -204,18 +206,18 @@ var _ = Describe("OpsManager object", func() {
 			BeforeEach(func() {
 				tmpDir, _ = ioutil.TempDir("/tmp", "test")
 				backupDir = path.Join(tmpDir, "backup", "opsmanager")
-				gw := &MockHttpGateway{StatusCode: 500, State: failureString}
+				gw := &fakes.MockHTTPGateway{StatusCode: 500, State: fakes.FailureString}
 
 				opsManager = &OpsManager{
-					SettingsUploader:    MockMultiPartUploadFunc,
-					AssetsUploader:      MockMultiPartUploadFunc,
+					SettingsUploader:    fakes.MockMultiPartUploadFunc,
+					AssetsUploader:      fakes.MockMultiPartUploadFunc,
 					SettingsRequestor:   gw,
 					AssetsRequestor:     gw,
 					Hostname:            "localhost",
 					Username:            "user",
 					Password:            "password",
-					BackupContext:       NewFakeBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv(), new(DiskProvider)),
-					Executer:            &failExecuter{},
+					BackupContext:       fakes.NewFakeBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv(), new(cfbackup.DiskProvider)),
+					Executer:            &fakes.FailExecuter{},
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
 				}
@@ -240,16 +242,16 @@ var _ = Describe("OpsManager object", func() {
 			BeforeEach(func() {
 				tmpDir, _ = ioutil.TempDir("/tmp", "test")
 				backupDir = path.Join(tmpDir, "backup", "opsmanager")
-				fakeHttpRequestor := &MockHttpGateway{StatusCode: http.StatusUnauthorized, State: controlBody}
+				fakeHttpRequestor := &fakes.MockHTTPGateway{StatusCode: http.StatusUnauthorized, State: controlBody}
 
 				opsManager = &OpsManager{
 					SettingsRequestor:   fakeHttpRequestor,
 					Hostname:            "localhost",
 					Username:            "user",
 					Password:            "password",
-					BackupContext:       NewFakeBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv(), new(DiskProvider)),
-					Executer:            &successExecuter{},
-					LocalExecuter:       NewLocalMockExecuter(),
+					BackupContext:       fakes.NewFakeBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv(), new(cfbackup.DiskProvider)),
+					Executer:            &fakes.SuccessExecuter{},
+					LocalExecuter:       fakes.NewLocalMockExecuter(),
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
 				}
@@ -271,9 +273,9 @@ var _ = Describe("OpsManager object", func() {
 					Hostname:            "localhost",
 					Username:            "user",
 					Password:            "password",
-					BackupContext:       NewFakeBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv(), new(DiskProvider)),
-					Executer:            &failExecuter{},
-					LocalExecuter:       NewLocalMockExecuter(),
+					BackupContext:       fakes.NewFakeBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv(), new(cfbackup.DiskProvider)),
+					Executer:            &fakes.FailExecuter{},
+					LocalExecuter:       fakes.NewLocalMockExecuter(),
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
 				}
@@ -300,15 +302,15 @@ var _ = Describe("OpsManager object", func() {
 			BeforeEach(func() {
 				tmpDir, _ = ioutil.TempDir("/tmp", "test")
 				backupDir = path.Join(tmpDir, "backup", "opsmanager")
-				gw := &MockHttpGateway{StatusCode: 200, State: successString}
+				gw := &fakes.MockHTTPGateway{StatusCode: 200, State: fakes.SuccessString}
 				opsManager = &OpsManager{
 					SettingsRequestor:   gw,
 					Hostname:            "localhost",
 					Username:            "user",
 					Password:            "password",
-					BackupContext:       NewFakeBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv(), new(DiskProvider)),
-					Executer:            &successExecuter{},
-					LocalExecuter:       NewLocalMockExecuter(),
+					BackupContext:       fakes.NewFakeBackupContext(path.Join(tmpDir, "backup"), cfenv.CurrentEnv(), new(cfbackup.DiskProvider)),
+					Executer:            &fakes.SuccessExecuter{},
+					LocalExecuter:       fakes.NewLocalMockExecuter(),
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
 				}
@@ -319,7 +321,7 @@ var _ = Describe("OpsManager object", func() {
 				filepath := path.Join(backupDir, "installation.json")
 				b, _ := ioutil.ReadFile(filepath)
 				Ω(err).Should(BeNil())
-				Ω(b).Should(Equal([]byte(successString)))
+				Ω(b).Should(Equal([]byte(fakes.SuccessString)))
 			})
 
 			It("should return nil error and write ", func() {

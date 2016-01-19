@@ -1,4 +1,4 @@
-package cfbackup
+package elasticruntime
 
 import (
 	"encoding/json"
@@ -9,6 +9,7 @@ import (
 	"path"
 
 	"github.com/cloudfoundry-community/go-cfenv"
+	"github.com/pivotalservices/cfbackup"
 	ghttp "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/log"
 	"github.com/xchapter7x/lo"
@@ -16,11 +17,11 @@ import (
 
 // NewElasticRuntime initializes an ElasticRuntime intance
 var NewElasticRuntime = func(jsonFile string, target string, sshKey string) *ElasticRuntime {
-	systemsInfo := NewSystemsInfo(jsonFile, sshKey)
+	systemsInfo := cfbackup.NewSystemsInfo(jsonFile, sshKey)
 	context := &ElasticRuntime{
 		SSHPrivateKey:     sshKey,
 		JSONFile:          jsonFile,
-		BackupContext:     NewBackupContext(target, cfenv.CurrentEnv()),
+		BackupContext:     cfbackup.NewBackupContext(target, cfenv.CurrentEnv()),
 		SystemsInfo:       systemsInfo,
 		PersistentSystems: systemsInfo.PersistentSystems(),
 	}
@@ -29,18 +30,18 @@ var NewElasticRuntime = func(jsonFile string, target string, sshKey string) *Ela
 
 // Backup performs a backup of a Pivotal Elastic Runtime deployment
 func (context *ElasticRuntime) Backup() (err error) {
-	return context.backupRestore(ExportArchive)
+	return context.backupRestore(cfbackup.ExportArchive)
 }
 
 // Restore performs a restore of a Pivotal Elastic Runtime deployment
 func (context *ElasticRuntime) Restore() (err error) {
-	err = context.backupRestore(ImportArchive)
+	err = context.backupRestore(cfbackup.ImportArchive)
 	return
 }
 
 func (context *ElasticRuntime) backupRestore(action int) (err error) {
 	var (
-		ccJobs []CCJob
+		ccJobs []cfbackup.CCJob
 	)
 
 	if err = context.ReadAllUserCredentials(); err == nil && context.directorCredentialsValid() {
@@ -50,8 +51,8 @@ func (context *ElasticRuntime) backupRestore(action int) (err error) {
 			return erro
 		}
 		if ccJobs, err = context.getAllCloudControllerVMs(); err == nil {
-			directorInfo := context.SystemsInfo.SystemDumps[ERDirector]
-			cloudController := NewCloudController(directorInfo.Get(SDIP), directorInfo.Get(SDUser), directorInfo.Get(SDPass), context.InstallationName, manifest, ccJobs)
+			directorInfo := context.SystemsInfo.SystemDumps[cfbackup.ERDirector]
+			cloudController := cfbackup.NewCloudController(directorInfo.Get(cfbackup.SDIP), directorInfo.Get(cfbackup.SDUser), directorInfo.Get(cfbackup.SDPass), context.InstallationName, manifest, ccJobs)
 			lo.G.Debug("Setting up CC jobs")
 			defer cloudController.Start()
 			cloudController.Stop()
@@ -67,16 +68,16 @@ func (context *ElasticRuntime) backupRestore(action int) (err error) {
 			err = ErrEREmptyDBList
 		}
 	} else if err == nil {
-		err = ErrERDirectorCreds
+		err = cfbackup.ErrERDirectorCreds
 	}
 	return
 }
 
-func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []CCJob, err error) {
+func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []cfbackup.CCJob, err error) {
 
 	lo.G.Debug("Entering getAllCloudControllerVMs() function")
-	directorInfo := context.SystemsInfo.SystemDumps[ERDirector]
-	connectionURL := fmt.Sprintf(ERVmsURL, directorInfo.Get(SDIP), context.InstallationName)
+	directorInfo := context.SystemsInfo.SystemDumps[cfbackup.ERDirector]
+	connectionURL := fmt.Sprintf(ERVmsURL, directorInfo.Get(cfbackup.SDIP), context.InstallationName)
 	lo.G.Debug("getAllCloudControllerVMs() function", log.Data{"connectionURL": connectionURL, "directorInfo": directorInfo})
 	gateway := context.HTTPGateway
 	if gateway == nil {
@@ -85,24 +86,24 @@ func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []CCJob, err er
 	lo.G.Debug("Retrieving CC vms")
 	if resp, err := gateway.Get(ghttp.HttpRequestEntity{
 		Url:         connectionURL,
-		Username:    directorInfo.Get(SDUser),
-		Password:    directorInfo.Get(SDPass),
+		Username:    directorInfo.Get(cfbackup.SDUser),
+		Password:    directorInfo.Get(cfbackup.SDPass),
 		ContentType: "application/json",
 	})(); err == nil {
-		var jsonObj []VMObject
+		var jsonObj []cfbackup.VMObject
 
 		lo.G.Debug("Unmarshalling CC vms")
 		defer resp.Body.Close()
 		body, err := ioutil.ReadAll(resp.Body)
 		if err = json.Unmarshal(body, &jsonObj); err == nil {
-			ccvms, err = GetCCVMs(jsonObj)
+			ccvms, err = cfbackup.GetCCVMs(jsonObj)
 		}
 	}
 	return
 }
 
 //RunDbAction - run a db action dump/import against a list of systemdump types
-func (context *ElasticRuntime) RunDbAction(dbInfoList []SystemDump, action int) (err error) {
+func (context *ElasticRuntime) RunDbAction(dbInfoList []cfbackup.SystemDump, action int) (err error) {
 
 	for _, info := range dbInfoList {
 		lo.G.Debug(fmt.Sprintf("RunDbAction info: %+v", info))
@@ -117,29 +118,29 @@ func (context *ElasticRuntime) RunDbAction(dbInfoList []SystemDump, action int) 
 	return
 }
 
-func (context *ElasticRuntime) readWriterArchive(dbInfo SystemDump, databaseDir string, action int) (err error) {
-	filename := fmt.Sprintf(ERBackupFileFormat, dbInfo.Get(SDComponent))
+func (context *ElasticRuntime) readWriterArchive(dbInfo cfbackup.SystemDump, databaseDir string, action int) (err error) {
+	filename := fmt.Sprintf(ERBackupFileFormat, dbInfo.Get(cfbackup.SDComponent))
 	filepath := path.Join(databaseDir, filename)
 
-	var pb PersistanceBackup
+	var pb cfbackup.PersistanceBackup
 
 	if pb, err = dbInfo.GetPersistanceBackup(); err == nil {
 		switch action {
-		case ImportArchive:
-			lo.G.Debug("Restoring %s", dbInfo.Get(SDComponent))
+		case cfbackup.ImportArchive:
+			lo.G.Debug("Restoring %s", dbInfo.Get(cfbackup.SDComponent))
 			var backupReader io.ReadCloser
 			if backupReader, err = context.Reader(filepath); err == nil {
 				defer backupReader.Close()
 				err = pb.Import(backupReader)
-				lo.G.Debug("Done restoring %s", dbInfo.Get(SDComponent))
+				lo.G.Debug("Done restoring %s", dbInfo.Get(cfbackup.SDComponent))
 			}
-		case ExportArchive:
-			lo.G.Info("Exporting %s", dbInfo.Get(SDComponent))
+		case cfbackup.ExportArchive:
+			lo.G.Info("Exporting %s", dbInfo.Get(cfbackup.SDComponent))
 			var backupWriter io.WriteCloser
 			if backupWriter, err = context.Writer(filepath); err == nil {
 				defer backupWriter.Close()
 				err = pb.Dump(backupWriter)
-				lo.G.Debug("Done backing up %s", dbInfo.Get(SDComponent))
+				lo.G.Debug("Done backing up %s", dbInfo.Get(cfbackup.SDComponent))
 			}
 		}
 	}
@@ -150,27 +151,27 @@ func (context *ElasticRuntime) readWriterArchive(dbInfo SystemDump, databaseDir 
 func (context *ElasticRuntime) ReadAllUserCredentials() (err error) {
 	var (
 		fileRef *os.File
-		jsonObj InstallationCompareObject
+		jsonObj cfbackup.InstallationCompareObject
 	)
 	defer fileRef.Close()
 
 	if fileRef, err = os.Open(context.JSONFile); err == nil {
-		if jsonObj, err = ReadAndUnmarshal(fileRef); err == nil {
+		if jsonObj, err = cfbackup.ReadAndUnmarshal(fileRef); err == nil {
 			err = context.assignCredentialsAndInstallationName(jsonObj)
 		}
 	}
 	return
 }
 
-func (context *ElasticRuntime) assignCredentialsAndInstallationName(jsonObj InstallationCompareObject) (err error) {
+func (context *ElasticRuntime) assignCredentialsAndInstallationName(jsonObj cfbackup.InstallationCompareObject) (err error) {
 
 	if err = context.assignCredentials(jsonObj); err == nil {
-		context.InstallationName, err = GetDeploymentName(jsonObj)
+		context.InstallationName, err = cfbackup.GetDeploymentName(jsonObj)
 	}
 	return
 }
 
-func (context *ElasticRuntime) assignCredentials(jsonObj InstallationCompareObject) (err error) {
+func (context *ElasticRuntime) assignCredentials(jsonObj cfbackup.InstallationCompareObject) (err error) {
 
 	for name, sysInfo := range context.SystemsInfo.SystemDumps {
 		var (
@@ -178,15 +179,15 @@ func (context *ElasticRuntime) assignCredentials(jsonObj InstallationCompareObje
 			pass  string
 			vpass string
 		)
-		sysInfo.Set(SDVcapUser, ERDefaultSystemUser)
-		sysInfo.Set(SDUser, sysInfo.Get(SDIdentity))
+		sysInfo.Set(cfbackup.SDVcapUser, ERDefaultSystemUser)
+		sysInfo.Set(cfbackup.SDUser, sysInfo.Get(cfbackup.SDIdentity))
 
-		if ip, pass, err = GetPasswordAndIP(jsonObj, sysInfo.Get(SDProduct), sysInfo.Get(SDComponent), sysInfo.Get(SDIdentity)); err == nil {
-			sysInfo.Set(SDIP, ip)
-			sysInfo.Set(SDPass, pass)
-			lo.G.Debug("%s credentials for %s from installation.json are %s", name, sysInfo.Get(SDComponent), sysInfo.Get(SDIdentity), pass)
-			_, vpass, err = GetPasswordAndIP(jsonObj, sysInfo.Get(SDProduct), sysInfo.Get(SDComponent), sysInfo.Get(SDVcapUser))
-			sysInfo.Set(SDVcapPass, vpass)
+		if ip, pass, err = cfbackup.GetPasswordAndIP(jsonObj, sysInfo.Get(cfbackup.SDProduct), sysInfo.Get(cfbackup.SDComponent), sysInfo.Get(cfbackup.SDIdentity)); err == nil {
+			sysInfo.Set(cfbackup.SDIP, ip)
+			sysInfo.Set(cfbackup.SDPass, pass)
+			lo.G.Debug("%s credentials for %s from installation.json are %s", name, sysInfo.Get(cfbackup.SDComponent), sysInfo.Get(cfbackup.SDIdentity), pass)
+			_, vpass, err = cfbackup.GetPasswordAndIP(jsonObj, sysInfo.Get(cfbackup.SDProduct), sysInfo.Get(cfbackup.SDComponent), sysInfo.Get(cfbackup.SDVcapUser))
+			sysInfo.Set(cfbackup.SDVcapPass, vpass)
 			context.SystemsInfo.SystemDumps[name] = sysInfo
 		}
 	}
@@ -194,18 +195,18 @@ func (context *ElasticRuntime) assignCredentials(jsonObj InstallationCompareObje
 }
 
 func (context *ElasticRuntime) directorCredentialsValid() (ok bool) {
-	var directorInfo SystemDump
+	var directorInfo cfbackup.SystemDump
 
-	if directorInfo, ok = context.SystemsInfo.SystemDumps[ERDirector]; ok {
-		connectionURL := fmt.Sprintf(ERDirectorInfoURL, directorInfo.Get(SDIP))
+	if directorInfo, ok = context.SystemsInfo.SystemDumps[cfbackup.ERDirector]; ok {
+		connectionURL := fmt.Sprintf(cfbackup.ERDirectorInfoURL, directorInfo.Get(cfbackup.SDIP))
 		gateway := context.HTTPGateway
 		if gateway == nil {
 			gateway = ghttp.NewHttpGateway()
 		}
 		_, err := gateway.Get(ghttp.HttpRequestEntity{
 			Url:         connectionURL,
-			Username:    directorInfo.Get(SDUser),
-			Password:    directorInfo.Get(SDPass),
+			Username:    directorInfo.Get(cfbackup.SDUser),
+			Password:    directorInfo.Get(cfbackup.SDPass),
 			ContentType: "application/json",
 		})()
 		ok = (err == nil)
@@ -214,8 +215,8 @@ func (context *ElasticRuntime) directorCredentialsValid() (ok bool) {
 }
 
 func (context *ElasticRuntime) getManifest() (manifest string, err error) {
-	directorInfo, _ := context.SystemsInfo.SystemDumps[ERDirector]
-	director := NewDirector(directorInfo.Get(SDIP), directorInfo.Get(SDUser), directorInfo.Get(SDPass), 25555)
+	directorInfo, _ := context.SystemsInfo.SystemDumps[cfbackup.ERDirector]
+	director := cfbackup.NewDirector(directorInfo.Get(cfbackup.SDIP), directorInfo.Get(cfbackup.SDUser), directorInfo.Get(cfbackup.SDPass), 25555)
 	mfs, err := director.GetDeploymentManifest(context.InstallationName)
 	if err != nil {
 		return

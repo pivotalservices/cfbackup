@@ -11,50 +11,11 @@ import (
 
 type (
 
-	// ElasticRuntime contains information about a Pivotal Elastic Runtime deployment
-	ElasticRuntime struct {
-		BackupContext
-		JSONFile          string
-		SystemsInfo       SystemsInfo
-		PersistentSystems []SystemDump
-		HTTPGateway       ghttp.HttpGateway
-		InstallationName  string
-		SSHPrivateKey     string
-	}
-
-	//ElasticRuntimeBuilder -- an object that can build an elastic runtime pre-initialized
-	ElasticRuntimeBuilder struct{}
-
 	//NFSBackup - this is a nfs backup object
 	NFSBackup struct {
 		Caller    command.Executer
 		RemoteOps remoteOpsInterface
 	}
-
-	// OpsManager contains the location and credentials of a Pivotal Ops Manager instance
-	OpsManager struct {
-		BackupContext
-		Hostname            string
-		Username            string
-		Password            string
-		TempestPassword     string
-		DbEncryptionKey     string
-		Executer            command.Executer
-		LocalExecuter       command.Executer
-		SettingsUploader    httpUploader
-		AssetsUploader      httpUploader
-		SettingsRequestor   httpRequestor
-		AssetsRequestor     httpRequestor
-		DeploymentDir       string
-		OpsmanagerBackupDir string
-		SSHPrivateKey       string
-		SSHUsername         string
-		SSHPassword         string
-		SSHPort             int
-	}
-
-	//OpsManagerBuilder - an object that can build ops manager objects
-	OpsManagerBuilder struct{}
 
 	//BackupContext - stores the base context information for a backup/restore
 	BackupContext struct {

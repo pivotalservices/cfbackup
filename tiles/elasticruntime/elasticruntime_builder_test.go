@@ -1,4 +1,4 @@
-package cfbackup_test
+package elasticruntime_test
 
 import (
 	"io"
@@ -6,7 +6,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "github.com/pivotalservices/cfbackup"
+	. "github.com/pivotalservices/cfbackup/tiles/elasticruntime"
 	"github.com/pivotalservices/cfops/tileregistry"
 )
 
@@ -26,16 +26,22 @@ var _ = Describe("ElasticRuntimeBuilder", func() {
 
 		Context("when called with a tileSpec", func() {
 			var (
-				controlFixtureFile = "fixtures/installation-settings-1-4-variant.json"
+				controlFixtureFile = "../../fixtures/installation-settings-1-4-variant.json"
 				controlTileSpec    tileregistry.TileSpec
 				err                error
+				fileRef            *os.File
 			)
 			BeforeEach(func() {
 				controlTileSpec = tileregistry.TileSpec{}
 				GetInstallationSettings = func(tileSpec tileregistry.TileSpec) (settings io.Reader, err error) {
-					settings, err = os.Open(controlFixtureFile)
+					fileRef, err = os.Open(controlFixtureFile)
+					settings = fileRef
 					return
 				}
+			})
+
+			AfterEach(func() {
+				fileRef.Close()
 			})
 
 			It("then it should return an initialized ElasticRuntime as a tileregistry.Tile interface", func() {
@@ -47,16 +53,22 @@ var _ = Describe("ElasticRuntimeBuilder", func() {
 
 		Context("when the installationsettings file contains a valid key", func() {
 			var (
-				controlFixtureFile = "fixtures/installation-settings-1-6-aws.json"
+				controlFixtureFile = "../../fixtures/installation-settings-1-6-aws.json"
 				controlTileSpec    tileregistry.TileSpec
 				err                error
+				fileRef            *os.File
 			)
 			BeforeEach(func() {
 				controlTileSpec = tileregistry.TileSpec{}
 				GetInstallationSettings = func(tileSpec tileregistry.TileSpec) (settings io.Reader, err error) {
-					settings, err = os.Open(controlFixtureFile)
+					fileRef, err = os.Open(controlFixtureFile)
+					settings = fileRef
 					return
 				}
+			})
+
+			AfterEach(func() {
+				fileRef.Close()
 			})
 
 			It("then it should return an initialized ElasticRuntime as a tileregistry.Tile interface", func() {

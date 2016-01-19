@@ -16,8 +16,10 @@ var _ = Describe("ConfigurationParser", func() {
 	})
 	Describe("NewConfigurationParserFromReader", func() {
 		readerAWS, _ := os.Open("./fixtures/installation-settings-1-6-aws.json")
+		defer readerAWS.Close()
 		keyConfigParser := NewConfigurationParserFromReader(readerAWS)
 		reader, _ := os.Open("./fixtures/installation-settings-1-6.json")
+		defer reader.Close()
 		passConfigParser := NewConfigurationParserFromReader(reader)
 		describeGetIaaS(keyConfigParser, passConfigParser)
 	})
