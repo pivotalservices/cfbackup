@@ -169,12 +169,14 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
+				installation := InstallationSettings{}
 				er = ElasticRuntime{
-					JSONFile:          installationSettingsFilePath,
-					HTTPGateway:       &MockHttpGateway{},
-					BackupContext:     NewBackupContext(target, cfenv.CurrentEnv()),
-					SystemsInfo:       info,
-					PersistentSystems: ps,
+					InstallationSettings: installation,
+					JSONFile:             installationSettingsFilePath,
+					HTTPGateway:          &MockHttpGateway{},
+					BackupContext:        NewBackupContext(target, cfenv.CurrentEnv()),
+					SystemsInfo:          info,
+					PersistentSystems:    ps,
 				}
 			})
 
@@ -301,11 +303,13 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
+				installation := InstallationSettings{}
 				er = ElasticRuntime{
-					JSONFile:      installationSettingsFilePath,
-					HTTPGateway:   &MockHttpGateway{true, 500, `{"state":"notdone"}`},
-					BackupContext: NewBackupContext(target, cfenv.CurrentEnv()),
-					SystemsInfo:   info,
+					InstallationSettings: installation,
+					JSONFile:             installationSettingsFilePath,
+					HTTPGateway:          &MockHttpGateway{true, 500, `{"state":"notdone"}`},
+					BackupContext:        NewBackupContext(target, cfenv.CurrentEnv()),
+					SystemsInfo:          info,
 				}
 			})
 
@@ -370,11 +374,13 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
+				installation := InstallationSettings{}
 				er = ElasticRuntime{
-					JSONFile:      installationSettingsFilePath,
-					HTTPGateway:   &MockHttpGateway{},
-					BackupContext: NewBackupContext(target, cfenv.CurrentEnv()),
-					SystemsInfo:   info,
+					InstallationSettings: installation,
+					JSONFile:             installationSettingsFilePath,
+					HTTPGateway:          &MockHttpGateway{},
+					BackupContext:        NewBackupContext(target, cfenv.CurrentEnv()),
+					SystemsInfo:          info,
 				}
 				er.ReadAllUserCredentials()
 			})
@@ -478,11 +484,13 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
+				installation := InstallationSettings{}
 				er = ElasticRuntime{
-					JSONFile:      installationSettingsFilePath,
-					HTTPGateway:   &MockHttpGateway{},
-					BackupContext: NewBackupContext(target, cfenv.CurrentEnv()),
-					SystemsInfo:   info,
+					InstallationSettings: installation,
+					JSONFile:             installationSettingsFilePath,
+					HTTPGateway:          &MockHttpGateway{},
+					BackupContext:        NewBackupContext(target, cfenv.CurrentEnv()),
+					SystemsInfo:          info,
 				}
 				er.ReadAllUserCredentials()
 			})
@@ -532,11 +540,13 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
+				installation := InstallationSettings{}
 				er = ElasticRuntime{
-					JSONFile:      installationSettingsFilePath,
-					HTTPGateway:   &MockHttpGateway{},
-					BackupContext: NewBackupContext(target, cfenv.CurrentEnv()),
-					SystemsInfo:   info,
+					InstallationSettings: installation,
+					JSONFile:             installationSettingsFilePath,
+					HTTPGateway:          &MockHttpGateway{},
+					BackupContext:        NewBackupContext(target, cfenv.CurrentEnv()),
+					SystemsInfo:          info,
 				}
 				er.ReadAllUserCredentials()
 			})
@@ -588,11 +598,13 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
+				installation := InstallationSettings{}
 				er = ElasticRuntime{
-					JSONFile:      installationSettingsFilePath,
-					HTTPGateway:   &MockHttpGateway{},
-					BackupContext: NewBackupContext(target, cfenv.CurrentEnv()),
-					SystemsInfo:   info,
+					InstallationSettings: installation,
+					JSONFile:             installationSettingsFilePath,
+					HTTPGateway:          &MockHttpGateway{},
+					BackupContext:        NewBackupContext(target, cfenv.CurrentEnv()),
+					SystemsInfo:          info,
 				}
 				er.ReadAllUserCredentials()
 			})

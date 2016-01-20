@@ -1,8 +1,7 @@
 package cfbackup_test
 
 import (
-	"io"
-	"os"
+	"fmt"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -16,6 +15,10 @@ var _ = Describe("ElasticRuntimeBuilder", func() {
 			var controlTileSpec tileregistry.TileSpec
 			BeforeEach(func() {
 				controlTileSpec = tileregistry.TileSpec{}
+				NewOpsManGateway = func(url, opsmanUser, opsmanPassword string) OpsManagerGateway {
+					fmt.Println("IM IN MY FAKE!!!!")
+					return &FakeOpsManagerGateway{}
+				}
 			})
 
 			It("then it should return an error", func() {
@@ -28,20 +31,20 @@ var _ = Describe("ElasticRuntimeBuilder", func() {
 			var (
 				controlFixtureFile = "fixtures/installation-settings-1-4-variant.json"
 				controlTileSpec    tileregistry.TileSpec
-				err                error
 			)
 			BeforeEach(func() {
 				controlTileSpec = tileregistry.TileSpec{}
-				GetInstallationSettings = func(tileSpec tileregistry.TileSpec) (settings io.Reader, err error) {
-					settings, err = os.Open(controlFixtureFile)
-					return
+				NewOpsManGateway = func(url, opsmanUser, opsmanPassword string) OpsManagerGateway {
+					return &FakeOpsManagerGateway{controlFixtureFile}
 				}
 			})
 
 			It("then it should return an initialized ElasticRuntime as a tileregistry.Tile interface", func() {
-				tile, _ := new(ElasticRuntimeBuilder).New(controlTileSpec)
-				Ω(err).ShouldNot(HaveOccurred())
-				Ω(tile).Should(BeAssignableToTypeOf(new(ElasticRuntime)))
+				_, err := new(ElasticRuntimeBuilder).New(controlTileSpec)
+				Ω(err).Should(HaveOccurred())
+				Ω(err).Should(Equal(ErrNoSSLKeyFound))
+				// Ω(err).ShouldNot(HaveOccurred())
+				// Ω(tile).Should(BeAssignableToTypeOf(new(ElasticRuntime)))
 			})
 		})
 
@@ -49,24 +52,22 @@ var _ = Describe("ElasticRuntimeBuilder", func() {
 			var (
 				controlFixtureFile = "fixtures/installation-settings-1-6-aws.json"
 				controlTileSpec    tileregistry.TileSpec
-				err                error
 			)
 			BeforeEach(func() {
 				controlTileSpec = tileregistry.TileSpec{}
-				GetInstallationSettings = func(tileSpec tileregistry.TileSpec) (settings io.Reader, err error) {
-					settings, err = os.Open(controlFixtureFile)
-					return
+				NewOpsManGateway = func(url, opsmanUser, opsmanPassword string) OpsManagerGateway {
+					return &FakeOpsManagerGateway{controlFixtureFile}
 				}
 			})
 
 			It("then it should return an initialized ElasticRuntime as a tileregistry.Tile interface", func() {
-				tile, _ := new(ElasticRuntimeBuilder).New(controlTileSpec)
+				tile, err := new(ElasticRuntimeBuilder).New(controlTileSpec)
 				Ω(err).ShouldNot(HaveOccurred())
 				Ω(tile).Should(BeAssignableToTypeOf(new(ElasticRuntime)))
 			})
 
 			It("then it should properly set the SSHPrivateKey in the elastic runtime object", func() {
-				tile, _ := new(ElasticRuntimeBuilder).New(controlTileSpec)
+				tile, err := new(ElasticRuntimeBuilder).New(controlTileSpec)
 				Ω(err).ShouldNot(HaveOccurred())
 				Ω(tile.(*ElasticRuntime).SSHPrivateKey).ShouldNot(BeEmpty())
 			})

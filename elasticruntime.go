@@ -15,14 +15,15 @@ import (
 )
 
 // NewElasticRuntime initializes an ElasticRuntime intance
-var NewElasticRuntime = func(jsonFile string, target string, sshKey string) *ElasticRuntime {
-	systemsInfo := NewSystemsInfo(jsonFile, sshKey)
+// var NewElasticRuntime = func(installation InstallationSettings, jsonFile string, target string, sshKey string) *ElasticRuntime {
+func NewElasticRuntime(installation InstallationSettings, target string, sshKey string) *ElasticRuntime {
+	systemsInfo := NewSystemsInfo(installation, sshKey)
 	context := &ElasticRuntime{
-		SSHPrivateKey:     sshKey,
-		JSONFile:          jsonFile,
-		BackupContext:     NewBackupContext(target, cfenv.CurrentEnv()),
-		SystemsInfo:       systemsInfo,
-		PersistentSystems: systemsInfo.PersistentSystems(),
+		InstallationSettings: installation,
+		SSHPrivateKey:        sshKey,
+		BackupContext:        NewBackupContext(target, cfenv.CurrentEnv()),
+		SystemsInfo:          systemsInfo,
+		PersistentSystems:    systemsInfo.PersistentSystems(),
 	}
 	return context
 }
@@ -172,22 +173,22 @@ func (context *ElasticRuntime) assignCredentialsAndInstallationName(jsonObj Inst
 
 func (context *ElasticRuntime) assignCredentials(jsonObj InstallationCompareObject) (err error) {
 
-	for name, sysInfo := range context.SystemsInfo.SystemDumps {
+	for name, sysDump := range context.SystemsInfo.SystemDumps {
 		var (
 			ip    string
 			pass  string
 			vpass string
 		)
-		sysInfo.Set(SDVcapUser, ERDefaultSystemUser)
-		sysInfo.Set(SDUser, sysInfo.Get(SDIdentity))
+		sysDump.Set(SDVcapUser, ERDefaultSystemUser)
+		sysDump.Set(SDUser, sysDump.Get(SDIdentity))
 
-		if ip, pass, err = GetPasswordAndIP(jsonObj, sysInfo.Get(SDProduct), sysInfo.Get(SDComponent), sysInfo.Get(SDIdentity)); err == nil {
-			sysInfo.Set(SDIP, ip)
-			sysInfo.Set(SDPass, pass)
-			lo.G.Debug("%s credentials for %s from installation.json are %s", name, sysInfo.Get(SDComponent), sysInfo.Get(SDIdentity), pass)
-			_, vpass, err = GetPasswordAndIP(jsonObj, sysInfo.Get(SDProduct), sysInfo.Get(SDComponent), sysInfo.Get(SDVcapUser))
-			sysInfo.Set(SDVcapPass, vpass)
-			context.SystemsInfo.SystemDumps[name] = sysInfo
+		if ip, pass, err = GetPasswordAndIP(jsonObj, sysDump.Get(SDProduct), sysDump.Get(SDComponent), sysDump.Get(SDIdentity)); err == nil {
+			sysDump.Set(SDIP, ip)
+			sysDump.Set(SDPass, pass)
+			lo.G.Debug("%s credentials for %s from installation.json are %s", name, sysDump.Get(SDComponent), sysDump.Get(SDIdentity), pass)
+			_, vpass, err = GetPasswordAndIP(jsonObj, sysDump.Get(SDProduct), sysDump.Get(SDComponent), sysDump.Get(SDVcapUser))
+			sysDump.Set(SDVcapPass, vpass)
+			context.SystemsInfo.SystemDumps[name] = sysDump
 		}
 	}
 	return

@@ -14,12 +14,13 @@ type (
 	// ElasticRuntime contains information about a Pivotal Elastic Runtime deployment
 	ElasticRuntime struct {
 		BackupContext
-		JSONFile          string
-		SystemsInfo       SystemsInfo
-		PersistentSystems []SystemDump
-		HTTPGateway       ghttp.HttpGateway
-		InstallationName  string
-		SSHPrivateKey     string
+		InstallationSettings InstallationSettings
+		JSONFile             string
+		SystemsInfo          SystemsInfo
+		PersistentSystems    []SystemDump
+		HTTPGateway          ghttp.HttpGateway
+		InstallationName     string
+		SSHPrivateKey        string
 	}
 
 	//ElasticRuntimeBuilder -- an object that can build an elastic runtime pre-initialized
@@ -76,18 +77,42 @@ type (
 		Restore() error
 	}
 
-	//InstallationSettings - an object to house installationsettings elements from the json
+	// InstallationSettings - an object to house installationsettings elements from the json
 	InstallationSettings struct {
-		Infrastructure Infrastructure
+		Infrastructure Infrastructure `json:"infrastructure"`
+		Products       []Products     `json:"products"`
 	}
-	//Infrastructure - a struct to house Infrastructure block elements from the json
+
+	// Infrastructure - a struct to house Infrastructure block elements from the json
 	Infrastructure struct {
+		Type       string            `json:"type"`
 		IaaSConfig IaaSConfiguration `json:"iaas_configuration"`
 	}
-	//IaaSConfiguration - a struct to house the IaaSConfiguration block elements from the json
+
+	// IaaSConfiguration - a struct to house the IaaSConfiguration block elements from the json
 	IaaSConfiguration struct {
 		SSHPrivateKey string `json:"ssh_private_key"`
 	}
+
+	// Products contains installation settings for a product
+	Products struct {
+		Type string              `json:"type"`
+		IPS  map[string][]string `json:"ips"`
+		Jobs []Jobs              `json:"jobs"`
+	}
+
+	// Jobs contains job settings for a product
+	Jobs struct {
+		Type       string       `json:"type"`
+		Properties []Properties `json:"properties"`
+	}
+
+	// Properties contains property settings for a job
+	Properties struct {
+		Definition string      `json:"definition"`
+		Value      interface{} `json:"value"`
+	}
+
 	//ConfigurationParser - the parser to handle installation settings file parsing
 	ConfigurationParser struct {
 		installationSettings InstallationSettings

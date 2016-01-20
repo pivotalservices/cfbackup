@@ -2,9 +2,11 @@ package cfbackup_test
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
@@ -248,4 +250,39 @@ func (d *FakeStorageProvider) Reader(path ...string) (io.ReadCloser, error) {
 
 func (d *FakeStorageProvider) Writer(path ...string) (closer io.WriteCloser, err error) {
 	return closer, nil
+}
+
+type FakeOpsManagerGateway struct {
+	ControlFixtureFile string
+}
+
+func (gateway FakeOpsManagerGateway) GetInstallationSettings(resp interface{}) APIResponse {
+	fmt.Println("WE ARE IN MY FAKE GATEWAY")
+	if gateway.ControlFixtureFile == "" {
+		return NewAPIResponseWithError("installation does not exist", fmt.Errorf("ControlFixtureFile is nil"))
+	}
+
+	err := GetInstallationSettingsFromFile(gateway.ControlFixtureFile, resp.(*InstallationSettings))
+
+	if err != nil {
+		fmt.Printf("we have a GetInstallationSettingsFromFile error")
+		return NewAPIResponseWithError("invalid installation", err)
+	}
+	fmt.Println("we have a GetInstallationSettingsFromFile response")
+
+	return NewSuccessfulAPIResponse()
+}
+
+func GetInstallationSettingsFromFile(installationTmpFilePath string, is *InstallationSettings) error {
+	fmt.Println("installationTmpFilePath %s", installationTmpFilePath)
+	installationTmpFile, err := os.Open(installationTmpFilePath)
+	if err != nil {
+		fmt.Printf("we have a bad installationTmpFile!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+		return err
+	}
+	defer installationTmpFile.Close()
+	b, err := ioutil.ReadAll(installationTmpFile)
+	json.Unmarshal(b, is)
+	// fmt.Printf("FAKE GetInstallationSettingsFromFile installation after being unmarshaled: %v", is)
+	return err
 }

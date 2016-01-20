@@ -10,8 +10,12 @@ import (
 
 var _ = Describe("ConfigurationParser", func() {
 	Describe("NewConfigurationParser", func() {
-		keyConfigParser := NewConfigurationParser("./fixtures/installation-settings-1-6-aws.json")
-		passConfigParser := NewConfigurationParser("./fixtures/installation-settings-1-6.json")
+		keyIs := InstallationSettings{}
+		GetInstallationSettingsFromFile("./fixtures/installation-settings-1-6-aws.json", &keyIs)
+		keyConfigParser := NewConfigurationParser(keyIs)
+		passIs := InstallationSettings{}
+		GetInstallationSettingsFromFile("./fixtures/installation-settings-1-6.json", &passIs)
+		passConfigParser := NewConfigurationParser(passIs)
 		describeGetIaaS(keyConfigParser, passConfigParser)
 	})
 	Describe("NewConfigurationParserFromReader", func() {

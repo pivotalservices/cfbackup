@@ -2,59 +2,57 @@ package cfbackup
 
 // NewSystemsInfo creates a map of SystemDumps that are configured
 // based on the installation settings fetched from ops manager
-func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo {
-	var (
-		uaadbInfo = &PgInfo{
-			SystemInfo: SystemInfo{
-				Product:       "cf",
-				Component:     "uaadb",
-				Identity:      "root",
-				SSHPrivateKey: sshKey,
-			},
-			Database: "uaa",
-		}
-		consoledbInfo = &PgInfo{
-			SystemInfo: SystemInfo{
-				Product:       "cf",
-				Component:     "consoledb",
-				Identity:      "root",
-				SSHPrivateKey: sshKey,
-			},
-			Database: "console",
-		}
-		ccdbInfo = &PgInfo{
-			SystemInfo: SystemInfo{
-				Product:       "cf",
-				Component:     "ccdb",
-				Identity:      "admin",
-				SSHPrivateKey: sshKey,
-			},
-			Database: "ccdb",
-		}
-		mysqldbInfo = &MysqlInfo{
-			SystemInfo: SystemInfo{
-				Product:       "cf",
-				Component:     "mysql",
-				Identity:      "root",
-				SSHPrivateKey: sshKey,
-			},
-			Database: "mysql",
-		}
-		directorInfo = &SystemInfo{
-			Product:       BoshName(),
-			Component:     "director",
-			Identity:      "director",
+func NewSystemsInfo(installation InstallationSettings, sshKey string) SystemsInfo {
+	uaadbInfo := &PgInfo{
+		SystemInfo: SystemInfo{
+			Product:       "cf",
+			Component:     "uaadb",
+			Identity:      "root",
 			SSHPrivateKey: sshKey,
-		}
-		nfsInfo = &NfsInfo{
-			SystemInfo: SystemInfo{
-				Product:       "cf",
-				Component:     "nfs_server",
-				Identity:      "vcap",
-				SSHPrivateKey: sshKey,
-			},
-		}
-	)
+		},
+		Database: "uaa",
+	}
+	consoledbInfo := &PgInfo{
+		SystemInfo: SystemInfo{
+			Product:       "cf",
+			Component:     "consoledb",
+			Identity:      "root",
+			SSHPrivateKey: sshKey,
+		},
+		Database: "console",
+	}
+	ccdbInfo := &PgInfo{
+		SystemInfo: SystemInfo{
+			Product:       "cf",
+			Component:     "ccdb",
+			Identity:      "admin",
+			SSHPrivateKey: sshKey,
+		},
+		Database: "ccdb",
+	}
+	mysqldbInfo := &MysqlInfo{
+		SystemInfo: SystemInfo{
+			Product:       "cf",
+			Component:     "mysql",
+			Identity:      "root",
+			SSHPrivateKey: sshKey,
+		},
+		Database: "mysql",
+	}
+	directorInfo := &SystemInfo{
+		Product:       BoshName(),
+		Component:     "director",
+		Identity:      "director",
+		SSHPrivateKey: sshKey,
+	}
+	nfsInfo := &NfsInfo{
+		SystemInfo: SystemInfo{
+			Product:       "cf",
+			Component:     "nfs_server",
+			Identity:      "vcap",
+			SSHPrivateKey: sshKey,
+		},
+	}
 	return SystemsInfo{
 		SystemDumps: map[string]SystemDump{
 			ERDirector: directorInfo,

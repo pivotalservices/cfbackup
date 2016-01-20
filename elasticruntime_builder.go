@@ -1,43 +1,56 @@
 package cfbackup
 
 import (
-	"io"
-	"io/ioutil"
-	"os"
+	"fmt"
 
 	"github.com/pivotalservices/cfops/tileregistry"
 )
 
-//New -- method to generate an initialized elastic runtime
-func (s *ElasticRuntimeBuilder) New(tileSpec tileregistry.TileSpec) (elasticRuntime tileregistry.Tile, err error) {
-	var (
-		installationSettings io.Reader
-		installationTmpFile  *os.File
-		sshKey               = ""
-	)
+// New -- method to generate an initialized elastic runtime
+func (s *ElasticRuntimeBuilder) New(tileSpec tileregistry.TileSpec) (tileregistry.Tile, error) {
 
-	if installationSettings, err = GetInstallationSettings(tileSpec); err == nil {
-		installationTmpFile, err = ioutil.TempFile("", OpsMgrInstallationSettingsFilename)
-		defer installationTmpFile.Close()
-		io.Copy(installationTmpFile, installationSettings)
-		config := NewConfigurationParser(installationTmpFile.Name())
-
-		if iaas, err := config.GetIaaS(); err == nil {
-			sshKey = iaas.SSHPrivateKey
-		}
-		elasticRuntime = NewElasticRuntime(installationTmpFile.Name(), tileSpec.ArchiveDirectory, sshKey)
+	// Get installation
+	url := fmt.Sprintf(OpsMgrInstallationSettingsURL, tileSpec.OpsManagerHost)
+	fmt.Println("Calling NewOpsManGateway...")
+	gateway := NewOpsManGateway(url, tileSpec.OpsManagerUser, tileSpec.OpsManagerPass)
+	installation, err := getInstallationSettings(gateway)
+	if err != nil {
+		fmt.Println("*************** error getting installation settings for tile")
+		return nil, fmt.Errorf("error getting installation settings for tile %v, %s", tileSpec, err.Error())
 	}
-	return
+	fmt.Printf("2. installation after being unmarshaled: %v", installation)
+
+	// Get ssh key
+	// fmt.Println("******CREATING PARSER")
+	config := NewConfigurationParser(*installation)
+	// fmt.Println("ABOUT TO GET IAAS")
+	iaas, err := config.GetIaaS()
+	// fmt.Println("I HAVE IAAS.... I THINK")
+	if err != nil {
+		fmt.Println("I HAVE AN ERROR: %s", err.Error())
+		return nil, err
+	}
+	fmt.Printf("iaas: %v", iaas)
+	sshKey := iaas.SSHPrivateKey
+
+	return NewElasticRuntime(*installation, tileSpec.ArchiveDirectory, sshKey), nil
 }
 
-//GetInstallationSettings - makes a call to ops manager and returns a io.reader containing the contents of the installation settings file.
-var GetInstallationSettings = func(tileSpec tileregistry.TileSpec) (settings io.Reader, err error) {
-	var (
-		opsManager *OpsManager
-	)
-
-	if opsManager, err = NewOpsManager(tileSpec.OpsManagerHost, tileSpec.AdminUser, tileSpec.AdminPass, tileSpec.OpsManagerUser, tileSpec.OpsManagerPass, tileSpec.ArchiveDirectory); err == nil {
-		settings, err = opsManager.GetInstallationSettings()
+func getInstallationSettings(gateway OpsManagerGateway) (*InstallationSettings, error) {
+	installation := &InstallationSettings{}
+	fmt.Println("calling GetInstallationSettings...")
+	apiResponse := gateway.GetInstallationSettings(installation)
+	// fmt.Printf("1. installation after being unmarshaled: %v", installation)
+	if apiResponse.IsError() {
+		fmt.Println("*************** returning error from getInstallationSettings()")
+		return nil, fmt.Errorf("error getting installation settings: %s", apiResponse.Message)
 	}
-	return
+
+	return installation, nil
+}
+
+// NewOpsManGateway returns a new OpsManagerGateway
+var NewOpsManGateway = func(url, opsmanUser, opsmanPassword string) OpsManagerGateway {
+	fmt.Println("IM IN THE REAL DEAL!!!!")
+	return NewOpsManagerGateway(url, opsmanUser, opsmanPassword)
 }
