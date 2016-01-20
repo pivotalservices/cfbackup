@@ -36,8 +36,8 @@ func describeGetIaaS(keyConfigParser, passConfigParser *ConfigurationParser) {
 				configParser = keyConfigParser
 			})
 			It("then we should return a valid iaas object", func() {
-				iaas, err := configParser.GetIaaS()
-				Ω(err).ShouldNot(HaveOccurred())
+				iaas, hasKey := configParser.GetIaaS()
+				Ω(hasKey).Should(BeTrue())
 				Ω(iaas.SSHPrivateKey).Should(Equal(controlKey))
 			})
 		})
@@ -45,10 +45,9 @@ func describeGetIaaS(keyConfigParser, passConfigParser *ConfigurationParser) {
 			BeforeEach(func() {
 				configParser = passConfigParser
 			})
-			It("then it should return a no-key found error", func() {
-				_, err := configParser.GetIaaS()
-				Ω(err).Should(HaveOccurred())
-				Ω(err).Should(Equal(ErrNoSSLKeyFound))
+			It("then it should yield a false haskey", func() {
+				_, hasKey := configParser.GetIaaS()
+				Ω(hasKey).Should(BeFalse())
 			})
 		})
 	})
