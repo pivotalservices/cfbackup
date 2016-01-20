@@ -61,7 +61,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 			ERConsole:  consoledbInfo,
 			ERUaa:      uaadbInfo,
 			ERCc:       ccdbInfo,
-			ERMySql:    mysqldbInfo,
+			ERMySQL:    mysqldbInfo,
 			ERNfs:      nfsInfo,
 		},
 	}

@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	. "github.com/pivotalservices/cfbackup"
+
+	"github.com/pivotalservices/cfbackup/fakes"
 	"github.com/pivotalservices/gtils/command"
 	"github.com/pivotalservices/gtils/mock"
 
@@ -37,7 +39,7 @@ var _ = Describe("nfs", func() {
 			BeforeEach(func() {
 				lf := strings.NewReader(controlString)
 				buffer = gbytes.NewBuffer()
-				nfs = getNfs(buffer, &SuccessMockNFSExecuter{})
+				nfs = fakes.GetNfs(buffer, &fakes.SuccessMockNFSExecuter{})
 				err = nfs.Import(lf)
 			})
 
@@ -55,13 +57,13 @@ var _ = Describe("nfs", func() {
 			BeforeEach(func() {
 				lf := strings.NewReader(controlString)
 				buffer = gbytes.NewBuffer()
-				nfs = getNfs(buffer, &FailureMockNFSExecuter{})
+				nfs = fakes.GetNfs(buffer, &fakes.FailureMockNFSExecuter{})
 				err = nfs.Import(lf)
 			})
 
 			It("should return non-nil execution error", func() {
 				Ω(err).ShouldNot(BeNil())
-				Ω(err).Should(Equal(mockNfsCommandError))
+				Ω(err).Should(Equal(fakes.ErrMockNfsCommand))
 			})
 
 			It("should write the local file contents to the remote", func() {
@@ -72,7 +74,7 @@ var _ = Describe("nfs", func() {
 		Context("error on file upload", func() {
 			BeforeEach(func() {
 				buffer = gbytes.NewBuffer()
-				nfs = getNfs(buffer, &SuccessMockNFSExecuter{})
+				nfs = fakes.GetNfs(buffer, &fakes.SuccessMockNFSExecuter{})
 			})
 
 			Context("Read failure", func() {
@@ -95,7 +97,7 @@ var _ = Describe("nfs", func() {
 				Context("Write failure", func() {
 					BeforeEach(func() {
 						lf := mock.NewReadWriteCloser(nil, mock.ErrWriteFailure, nil)
-						nfs = getNfs(lf, &SuccessMockNFSExecuter{})
+						nfs = fakes.GetNfs(lf, &fakes.SuccessMockNFSExecuter{})
 						err = nfs.Import(lf)
 					})
 
@@ -112,7 +114,7 @@ var _ = Describe("nfs", func() {
 				Context("Close failure", func() {
 					BeforeEach(func() {
 						lf := mock.NewReadWriteCloser(nil, nil, mock.ErrCloseFailure)
-						nfs = getNfs(lf, &SuccessMockNFSExecuter{})
+						nfs = fakes.GetNfs(lf, &fakes.SuccessMockNFSExecuter{})
 						err = nfs.Import(lf)
 					})
 
@@ -138,27 +140,27 @@ var _ = Describe("nfs", func() {
 
 		Context("sucessfully calling Dump", func() {
 			BeforeEach(func() {
-				nfs.Caller = &SuccessMockNFSExecuter{}
+				nfs.Caller = &fakes.SuccessMockNFSExecuter{}
 			})
 
 			It("Should return nil error and a success message in the writer", func() {
 				var b bytes.Buffer
 				err := nfs.Dump(&b)
 				Ω(err).Should(BeNil())
-				Ω(b.String()).Should(Equal(nfsSuccessString))
+				Ω(b.String()).Should(Equal(fakes.NfsSuccessString))
 			})
 		})
 
 		Context("failed calling Dump", func() {
 			BeforeEach(func() {
-				nfs.Caller = &FailureMockNFSExecuter{}
+				nfs.Caller = &fakes.FailureMockNFSExecuter{}
 			})
 
 			It("Should return non nil error and a failure output in the writer", func() {
 				var b bytes.Buffer
 				err := nfs.Dump(&b)
 				Ω(err).ShouldNot(BeNil())
-				Ω(b.String()).Should(Equal(nfsFailureString))
+				Ω(b.String()).Should(Equal(fakes.NfsFailureString))
 			})
 		})
 
@@ -169,7 +171,7 @@ var _ = Describe("nfs", func() {
 				BeforeEach(func() {
 					origExecuterFunction = NfsNewRemoteExecuter
 					NfsNewRemoteExecuter = func(command.SshConfig) (command.Executer, error) {
-						return &SuccessMockNFSExecuter{}, nil
+						return &fakes.SuccessMockNFSExecuter{}, nil
 					}
 				})
 
@@ -191,7 +193,7 @@ var _ = Describe("nfs", func() {
 				BeforeEach(func() {
 					origExecuterFunction = NfsNewRemoteExecuter
 					NfsNewRemoteExecuter = func(command.SshConfig) (ce command.Executer, err error) {
-						ce = &FailureMockNFSExecuter{}
+						ce = &fakes.FailureMockNFSExecuter{}
 						err = fmt.Errorf("we have an error")
 						return
 					}

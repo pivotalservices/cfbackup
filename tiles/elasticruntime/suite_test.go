@@ -1,4 +1,4 @@
-package cfbackup_test
+package elasticruntime_test
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestBackup(t *testing.T) {
+func TestSuite(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Backup Suite")
+	RunSpecs(t, "Test Suite")
 }

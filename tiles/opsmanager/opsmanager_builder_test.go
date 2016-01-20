@@ -1,4 +1,4 @@
-package cfbackup_test
+package opsmanager_test
 
 import (
 	"io/ioutil"
@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
-	. "github.com/pivotalservices/cfbackup"
+	. "github.com/pivotalservices/cfbackup/tiles/opsmanager"
 	"github.com/pivotalservices/cfops/tileregistry"
 )
 
@@ -46,7 +46,7 @@ var _ = Describe("OpsManagerBuilder", func() {
 			)
 
 			BeforeEach(func() {
-				fileBytes, _ := ioutil.ReadFile("./fixtures/installation-settings-1-6-aws.json")
+				fileBytes, _ := ioutil.ReadFile("../../fixtures/installation-settings-1-6-aws.json")
 				server = ghttp.NewTLSServer()
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
