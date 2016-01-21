@@ -27,11 +27,13 @@ var _ = Describe("SystemsInfo", func() {
 				Ω(systemDumps[ERConsole]).ShouldNot(BeNil())
 				Ω(systemDumps[ERCc]).ShouldNot(BeNil())
 				Ω(systemDumps[ERUaa]).ShouldNot(BeNil())
+				Ω(len(systemsInfo.PersistentSystems())).Should(Equal(6))
 			})
 			It("should have a systemDumps with the correct number of other SystemInfos", func() {
 				Ω(systemDumps[ERMySQL]).ShouldNot(BeNil())
 				Ω(systemDumps[ERDirector]).ShouldNot(BeNil())
 				Ω(systemDumps[ERNfs]).ShouldNot(BeNil())
+				Ω(len(systemsInfo.PersistentSystems())).Should(Equal(6))
 			})
 		})
 
@@ -43,11 +45,13 @@ var _ = Describe("SystemsInfo", func() {
 				Ω(systemDumps[ERConsole]).Should(BeNil())
 				Ω(systemDumps[ERCc]).Should(BeNil())
 				Ω(systemDumps[ERUaa]).Should(BeNil())
+				Ω(len(systemsInfo.PersistentSystems())).Should(Equal(3))
 			})
 			It("should have a systemDumps with the correct number of other SystemInfos", func() {
 				Ω(systemDumps[ERMySQL]).ShouldNot(BeNil())
 				Ω(systemDumps[ERDirector]).ShouldNot(BeNil())
 				Ω(systemDumps[ERNfs]).ShouldNot(BeNil())
+				Ω(len(systemsInfo.PersistentSystems())).Should(Equal(3))
 			})
 		})
 
@@ -59,11 +63,13 @@ var _ = Describe("SystemsInfo", func() {
 				Ω(systemDumps[ERConsole]).Should(BeNil())
 				Ω(systemDumps[ERCc]).Should(BeNil())
 				Ω(systemDumps[ERUaa]).Should(BeNil())
+				Ω(len(systemsInfo.PersistentSystems())).Should(Equal(3))
 			})
 			It("should have a systemDumps with the correct number of other SystemInfos", func() {
 				Ω(systemDumps[ERMySQL]).ShouldNot(BeNil())
 				Ω(systemDumps[ERDirector]).ShouldNot(BeNil())
 				Ω(systemDumps[ERNfs]).ShouldNot(BeNil())
+				Ω(len(systemsInfo.PersistentSystems())).Should(Equal(3))
 			})
 		})
 	})
