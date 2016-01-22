@@ -14,6 +14,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 	lo.G.Debugf("we have a some installationSettings  %v", installationSettings)
 
 	var systemDumps = make(map[string]SystemDump)
+	dumps := []SystemDump{}
 
 	for _, product := range installationSettings.Products {
 		identifier := product.Identifer
@@ -31,6 +32,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 						},
 						Database: "console",
 					}
+					dumps = append(dumps, systemDumps[ERConsole])
 
 					systemDumps[ERCc] = &PgInfo{
 						SystemInfo: SystemInfo{
@@ -41,6 +43,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 						},
 						Database: "ccdb",
 					}
+					dumps = append(dumps, systemDumps[ERCc])
 
 					systemDumps[ERUaa] = &PgInfo{
 						SystemInfo: SystemInfo{
@@ -51,6 +54,8 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 						},
 						Database: "uaa",
 					}
+					dumps = append(dumps, systemDumps[ERUaa])
+					break
 				}
 			}
 		}
@@ -64,6 +69,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 		},
 		Database: "mysql",
 	}
+	dumps = append(dumps, systemDumps[ERMySQL])
 	systemDumps[ERDirector] = &SystemInfo{
 		Product:       BoshName(),
 		Component:     "director",
@@ -78,22 +84,18 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 			SSHPrivateKey: sshKey,
 		},
 	}
+	dumps = append(dumps, systemDumps[ERNfs])
 
 	return SystemsInfo{
 		SystemDumps: systemDumps,
+		Dumps:       dumps,
 	}
 }
 
 // PersistentSystems returns a slice of all the
 // configured SystemDump for an installation
 func (s SystemsInfo) PersistentSystems() []SystemDump {
-	v := make([]SystemDump, len(s.SystemDumps))
-	idx := 0
-	for _, value := range s.SystemDumps {
-		v[idx] = value
-		idx++
-	}
-	return v
+	return s.Dumps
 }
 
 func isPostgres(jobdb string, instances []Instances) bool {
