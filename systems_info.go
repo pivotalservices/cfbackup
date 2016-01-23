@@ -16,48 +16,41 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 	var systemDumps = make(map[string]SystemDump)
 	dumps := []SystemDump{}
 
-	for _, product := range installationSettings.Products {
-		identifier := product.Identifer
-		if identifier == "cf" {
-			for _, job := range product.Jobs {
-
-				if isPostgres(job.Identifier, job.Instances) {
-
-					systemDumps[ERConsole] = &PgInfo{
-						SystemInfo: SystemInfo{
-							Product:       "cf",
-							Component:     "consoledb",
-							Identity:      "root",
-							SSHPrivateKey: sshKey,
-						},
-						Database: "console",
-					}
-					dumps = append(dumps, systemDumps[ERConsole])
-
-					systemDumps[ERCc] = &PgInfo{
-						SystemInfo: SystemInfo{
-							Product:       "cf",
-							Component:     "ccdb",
-							Identity:      "admin",
-							SSHPrivateKey: sshKey,
-						},
-						Database: "ccdb",
-					}
-					dumps = append(dumps, systemDumps[ERCc])
-
-					systemDumps[ERUaa] = &PgInfo{
-						SystemInfo: SystemInfo{
-							Product:       "cf",
-							Component:     "uaadb",
-							Identity:      "root",
-							SSHPrivateKey: sshKey,
-						},
-						Database: "uaa",
-					}
-					dumps = append(dumps, systemDumps[ERUaa])
-					break
-				}
+	for _, job := range configParser.FindCFPostgresJobs() {
+		switch job.Identifier {
+		case "consoledb":
+			systemDumps[ERConsole] = &PgInfo{
+				SystemInfo: SystemInfo{
+					Product:       "cf",
+					Component:     "consoledb",
+					Identity:      "root",
+					SSHPrivateKey: sshKey,
+				},
+				Database: "console",
 			}
+			dumps = append(dumps, systemDumps[ERConsole])
+		case "ccdb":
+			systemDumps[ERCc] = &PgInfo{
+				SystemInfo: SystemInfo{
+					Product:       "cf",
+					Component:     "ccdb",
+					Identity:      "admin",
+					SSHPrivateKey: sshKey,
+				},
+				Database: "ccdb",
+			}
+			dumps = append(dumps, systemDumps[ERCc])
+		case "uaadb":
+			systemDumps[ERUaa] = &PgInfo{
+				SystemInfo: SystemInfo{
+					Product:       "cf",
+					Component:     "uaadb",
+					Identity:      "root",
+					SSHPrivateKey: sshKey,
+				},
+				Database: "uaa",
+			}
+			dumps = append(dumps, systemDumps[ERUaa])
 		}
 	}
 	systemDumps[ERMySQL] = &MysqlInfo{
@@ -96,20 +89,4 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 // configured SystemDump for an installation
 func (s SystemsInfo) PersistentSystems() []SystemDump {
 	return s.Dumps
-}
-
-func isPostgres(jobdb string, instances []Instances) bool {
-	pgdbs := []string{"ccdb", "uaadb", "consoledb"}
-
-	for _, pgdb := range pgdbs {
-		if pgdb == jobdb {
-			for _, instances := range instances {
-				val := instances.Value
-				if val >= 1 {
-					return true
-				}
-			}
-		}
-	}
-	return false
 }
