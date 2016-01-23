@@ -1,17 +1,10 @@
 package cfbackup
 
-import "github.com/xchapter7x/lo"
-
 // NewSystemsInfo creates a map of SystemDumps that are configured
 // based on the installation settings fetched from ops manager
 func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo {
 
-	lo.G.Debugf("we have an sys info installation settings file %s", installationSettingsFile)
-
 	configParser := NewConfigurationParser(installationSettingsFile)
-	installationSettings := configParser.installationSettings
-
-	lo.G.Debugf("we have a some installationSettings  %v", installationSettings)
 
 	var systemDumps = make(map[string]SystemDump)
 	dumps := []SystemDump{}
