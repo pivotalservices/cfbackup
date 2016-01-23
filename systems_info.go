@@ -1,5 +1,7 @@
 package cfbackup
 
+import "fmt"
+
 // NewSystemsInfo creates a map of SystemDumps that are configured
 // based on the installation settings fetched from ops manager
 func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo {
@@ -75,12 +77,12 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 // PersistentSystems returns a slice of all the
 // jobs that need to be backed up
 func (s SystemsInfo) PersistentSystems() []SystemDump {
-	ps := []string{"ccdb", "uaadb", "consoledb", "nfs_server", "mysql"}
+	ps := []string{ERCc, ERUaa, ERConsole, ERNfs, ERMySQL}
 	jobs := []SystemDump{}
 
 	for _, info := range ps {
-		_, ok := s.SystemDumps[info]
-		if ok {
+		fmt.Printf("info:%+v\n", s.SystemDumps[info])
+		if _, ok := s.SystemDumps[info]; ok {
 			jobs = append(jobs, s.SystemDumps[info])
 		}
 	}
