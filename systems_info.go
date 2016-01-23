@@ -7,7 +7,6 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 	configParser := NewConfigurationParser(installationSettingsFile)
 
 	var systemDumps = make(map[string]SystemDump)
-	dumps := []SystemDump{}
 
 	for _, job := range configParser.FindCFPostgresJobs() {
 		switch job.Identifier {
@@ -21,7 +20,6 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 				},
 				Database: "console",
 			}
-			dumps = append(dumps, systemDumps[ERConsole])
 		case "ccdb":
 			systemDumps[ERCc] = &PgInfo{
 				SystemInfo: SystemInfo{
@@ -32,7 +30,6 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 				},
 				Database: "ccdb",
 			}
-			dumps = append(dumps, systemDumps[ERCc])
 		case "uaadb":
 			systemDumps[ERUaa] = &PgInfo{
 				SystemInfo: SystemInfo{
@@ -43,7 +40,6 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 				},
 				Database: "uaa",
 			}
-			dumps = append(dumps, systemDumps[ERUaa])
 		}
 	}
 	systemDumps[ERMySQL] = &MysqlInfo{
@@ -55,7 +51,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 		},
 		Database: "mysql",
 	}
-	dumps = append(dumps, systemDumps[ERMySQL])
+
 	systemDumps[ERDirector] = &SystemInfo{
 		Product:       BoshName(),
 		Component:     "director",
@@ -70,16 +66,23 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 			SSHPrivateKey: sshKey,
 		},
 	}
-	dumps = append(dumps, systemDumps[ERNfs])
 
 	return SystemsInfo{
 		SystemDumps: systemDumps,
-		Dumps:       dumps,
 	}
 }
 
 // PersistentSystems returns a slice of all the
-// configured SystemDump for an installation
+// jobs that need to be backed up
 func (s SystemsInfo) PersistentSystems() []SystemDump {
-	return s.Dumps
+	ps := []string{"ccdb", "uaadb", "consoledb", "nfs_server", "mysql"}
+	jobs := []SystemDump{}
+
+	for _, info := range ps {
+		_, ok := s.SystemDumps[info]
+		if ok {
+			jobs = append(jobs, s.SystemDumps[info])
+		}
+	}
+	return jobs
 }
