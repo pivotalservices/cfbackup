@@ -144,7 +144,6 @@ type (
 	//SystemsInfo holds the values for all the supported SystemDump used by an installation
 	SystemsInfo struct {
 		SystemDumps map[string]SystemDump
-		Dumps       []SystemDump // TODO rename this in another commit
 	}
 
 	connBucketInterface interface {

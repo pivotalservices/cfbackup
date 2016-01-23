@@ -1,5 +1,7 @@
 package cfbackup
 
+import "fmt"
+
 // NewSystemsInfo creates a map of SystemDumps that are configured
 // based on the installation settings fetched from ops manager
 func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo {
@@ -7,7 +9,6 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 	configParser := NewConfigurationParser(installationSettingsFile)
 
 	var systemDumps = make(map[string]SystemDump)
-	dumps := []SystemDump{}
 
 	for _, job := range configParser.FindCFPostgresJobs() {
 		switch job.Identifier {
@@ -21,7 +22,6 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 				},
 				Database: "console",
 			}
-			dumps = append(dumps, systemDumps[ERConsole])
 		case "ccdb":
 			systemDumps[ERCc] = &PgInfo{
 				SystemInfo: SystemInfo{
@@ -32,7 +32,6 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 				},
 				Database: "ccdb",
 			}
-			dumps = append(dumps, systemDumps[ERCc])
 		case "uaadb":
 			systemDumps[ERUaa] = &PgInfo{
 				SystemInfo: SystemInfo{
@@ -43,7 +42,6 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 				},
 				Database: "uaa",
 			}
-			dumps = append(dumps, systemDumps[ERUaa])
 		}
 	}
 	systemDumps[ERMySQL] = &MysqlInfo{
@@ -55,7 +53,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 		},
 		Database: "mysql",
 	}
-	dumps = append(dumps, systemDumps[ERMySQL])
+
 	systemDumps[ERDirector] = &SystemInfo{
 		Product:       BoshName(),
 		Component:     "director",
@@ -70,16 +68,23 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 			SSHPrivateKey: sshKey,
 		},
 	}
-	dumps = append(dumps, systemDumps[ERNfs])
 
 	return SystemsInfo{
 		SystemDumps: systemDumps,
-		Dumps:       dumps,
 	}
 }
 
 // PersistentSystems returns a slice of all the
-// configured SystemDump for an installation
+// jobs that need to be backed up
 func (s SystemsInfo) PersistentSystems() []SystemDump {
-	return s.Dumps
+	ps := []string{ERCc, ERUaa, ERConsole, ERNfs, ERMySQL}
+	jobs := []SystemDump{}
+
+	for _, info := range ps {
+		fmt.Printf("info:%+v\n", s.SystemDumps[info])
+		if _, ok := s.SystemDumps[info]; ok {
+			jobs = append(jobs, s.SystemDumps[info])
+		}
+	}
+	return jobs
 }
