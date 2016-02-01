@@ -44,7 +44,7 @@ func (s *ConfigurationParser) FindJobsByProductID(id string) []Jobs {
 	cfJobs := []Jobs{}
 
 	for _, product := range s.GetProducts() {
-		identifier := product.Identifer
+		identifier := product.Identifier
 		if identifier == id {
 			for _, job := range product.Jobs {
 				cfJobs = append(cfJobs, job)
