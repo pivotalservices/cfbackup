@@ -43,7 +43,7 @@ func (s *ConfigurationParser) GetIaaS() (config IaaSConfiguration, hasSSHKey boo
 func (s *ConfigurationParser) FindJobsByProductID(id string) []Jobs {
 	cfJobs := []Jobs{}
 
-	for _, product := range s.getProducts() {
+	for _, product := range s.GetProducts() {
 		identifier := product.Identifer
 		if identifier == id {
 			for _, job := range product.Jobs {
@@ -66,13 +66,6 @@ func (s *ConfigurationParser) FindCFPostgresJobs() []Jobs {
 	return jobs
 }
 
-// getProducts returns all the products from an Ops Manager installation
-func (s *ConfigurationParser) getProducts() []Products {
-	return s.installationSettings.Products
-}
-
-// isPostgres checks if a job is a postgres database and returns true
-// if there are any instances
 func isPostgres(job string, instances []Instances) bool {
 	pgdbs := []string{"ccdb", "uaadb", "consoledb"}
 
@@ -87,4 +80,9 @@ func isPostgres(job string, instances []Instances) bool {
 		}
 	}
 	return false
+}
+
+//GetProducts - get the products array
+func (s *ConfigurationParser) GetProducts() (products []Products) {
+	return s.installationSettings.Products
 }
