@@ -56,7 +56,7 @@ type (
 
 	// Products contains installation settings for a product
 	Products struct {
-		Identifer                          string              `json:"identifier"`
+		Identifier                         string              `json:"identifier"`
 		IPS                                map[string][]string `json:"ips"`
 		Jobs                               []Jobs              `json:"jobs"`
 		ProductVersion                     string              `json:"product_version"`
