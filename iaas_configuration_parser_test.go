@@ -23,7 +23,25 @@ var _ = Describe("ConfigurationParser", func() {
 		passConfigParser := NewConfigurationParserFromReader(reader)
 		describeGetIaaS(keyConfigParser, passConfigParser)
 	})
+	checkGetProducts(3, "./fixtures/installation-settings-1-6-default.json")
+	checkGetProducts(7, "./fixtures/installation-settings-1-6-aws.json")
+
 })
+
+func checkGetProducts(expectedCount int, fixturePath string){
+	Describe("given a configuration parser", func() {
+		var fixtureProductControlCount = expectedCount
+		configParser := NewConfigurationParser(fixturePath)
+		Context("when calling GetProducts()", func() {
+			It("then it should parse out all of the products in the given installation settings", func() {
+				products := configParser.GetProducts()
+				Ω(len(products)).Should(Equal(fixtureProductControlCount))
+			})
+
+		})
+
+	})
+}
 
 func describeGetIaaS(keyConfigParser, passConfigParser *ConfigurationParser) {
 	Describe("given a GetIaaS() method", func() {
