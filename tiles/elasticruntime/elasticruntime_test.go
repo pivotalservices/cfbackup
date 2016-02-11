@@ -26,6 +26,7 @@ var (
 
 type PgInfoMock struct {
 	cfbackup.SystemInfo
+	ErrState   error
 	failImport bool
 	failDump   bool
 }
@@ -36,6 +37,13 @@ func (s *PgInfoMock) GetPersistanceBackup() (dumper cfbackup.PersistanceBackup, 
 		failDump:   s.failDump,
 	}
 	return
+}
+
+func (s *PgInfoMock) Error() error {
+	if s.ErrState == nil {
+		s.ErrState = s.SystemInfo.Error()
+	}
+	return s.ErrState
 }
 
 type mockDumper struct {
@@ -584,9 +592,51 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 					Ω(err).Should(BeNil())
 				})
 			})
+		})
 
-			Context("Restore", func() {
+		Context("with an systemDump object in a error state", func() {
+			var (
+				product    = "cf"
+				component  = "uaadb"
+				username   = "root"
+				target     string
+				ErrControl = errors.New("fake systemDump error")
+				err        error
+				er         ElasticRuntime
+				info       = cfbackup.SystemsInfo{
+					SystemDumps: map[string]cfbackup.SystemDump{
+						"UaadbInfo": &PgInfoMock{
+							ErrState: ErrControl,
+							SystemInfo: cfbackup.SystemInfo{
+								Product:   product,
+								Component: component,
+								Identity:  username,
+							},
+						},
+					},
+				}
+			)
 
+			BeforeEach(func() {
+				target, _ = ioutil.TempDir("/tmp", "spec")
+				er = ElasticRuntime{
+					JSONFile:      installationSettingsFilePath,
+					HTTPGateway:   &fakes.MockHTTPGateway{},
+					BackupContext: cfbackup.NewBackupContext(target, cfenv.CurrentEnv()),
+					SystemsInfo:   info,
+				}
+				er.ReadAllUserCredentials()
+				err = er.RunDbAction([]cfbackup.SystemDump{info.SystemDumps["UaadbInfo"]}, cfbackup.ExportArchive)
+
+			})
+
+			AfterEach(func() {
+				os.Remove(target)
+			})
+
+			It("should fail fast and tell us the error", func() {
+				Ω(err).Should(HaveOccurred())
+				Ω(err).Should(Equal(ErrControl))
 			})
 		})
 
