@@ -45,10 +45,10 @@ func (s *NFSBackup) Import(lfile io.Reader) (err error) {
 	}
 	if err == nil {
 	    lo.G.Debug("backup from %s completed", s.RemoteOps.Path())
-		s.RemoteOps.RemoveRemoteFile()
 	} else {
 	    lo.G.Debug("backup from %s completed with error %s", s.RemoteOps.Path(), err)
 	}
+	s.RemoteOps.RemoveRemoteFile()
 	return
 }
 
