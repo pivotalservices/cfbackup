@@ -38,13 +38,14 @@ func (s *NFSBackup) Dump(dest io.Writer) (err error) {
 
 //Import - will upload the contents of the given io.reader to the remote execution target and execute the restore command against the uploaded file.
 func (s *NFSBackup) Import(lfile io.Reader) (err error) {
-    lo.G.Debug("uploading file for backup")
-    if err = s.RemoteOps.UploadFile(lfile); err == nil {
-        lo.G.Debug("starting backup from %s", s.RemoteOps.Path())
-		err = s.Caller.Execute(ioutil.Discard, s.getRestoreCommand())
-		lo.G.Debug("backup from %s completed", s.RemoteOps.Path())
+	lo.G.Debug("uploading file for backup")
+	if err = s.RemoteOps.UploadFile(lfile); err == nil {
+		lo.G.Debug("starting backup from %s", s.RemoteOps.Path())
+		if err = s.Caller.Execute(ioutil.Discard, s.getRestoreCommand()); err == nil {
+			lo.G.Debug("backup from %s completed", s.RemoteOps.Path())
+			err = s.RemoteOps.RemoveRemoteFile()
+		}
 	}
-    err = s.RemoteOps.RemoveRemoteFile()
 	return
 }
 
