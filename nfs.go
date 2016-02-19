@@ -40,9 +40,9 @@ func (s *NFSBackup) Dump(dest io.Writer) (err error) {
 func (s *NFSBackup) Import(lfile io.Reader) (err error) {
     lo.G.Debug("uploading file for backup")
     if err = s.RemoteOps.UploadFile(lfile); err == nil {
-        lo.G.Debug("starting backup from %s", s.RemoteOps.Path)
+        lo.G.Debug("starting backup from %s", s.RemoteOps.Path())
 		err = s.Caller.Execute(ioutil.Discard, s.getRestoreCommand())
-		lo.G.Debug("backup from %s completed", s.RemoteOps.Path)
+		lo.G.Debug("backup from %s completed", s.RemoteOps.Path())
 	}
     err = s.RemoteOps.RemoveRemoteFile()
 	return
