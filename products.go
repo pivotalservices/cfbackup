@@ -2,13 +2,20 @@ package cfbackup
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/xchapter7x/lo"
 )
 
 //GetIPsByJob - get array of ips for a job
-func (s *Products) GetIPsByJob(jobname string) (ips []string, err error) {
-
+func (s *Products) GetIPsByJob(jobname string) (ips []string) {
+	
+	for vmName, ipList := range s.IPS {
+	    if strings.HasPrefix(vmName, jobname+"-") {
+			ips = ipList
+			break
+		}
+	}
 	return
 }
 
