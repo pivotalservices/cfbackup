@@ -96,6 +96,12 @@ var _ = Describe("ElasticRuntime", func() {
 		testERWithVersionSpecificFile(installationSettingsFilePath)
 		os.Setenv(ERVersionEnvFlag, "")
 	})
+	XDescribe("ElasticRuntime Version 1.7", func() {
+		os.Setenv(ERVersionEnvFlag, ERVersion16)
+		var installationSettingsFilePath = "../../fixtures/installation-settings-1.7.json"
+		testERWithVersionSpecificFile(installationSettingsFilePath)
+		os.Setenv(ERVersionEnvFlag, "")
+	})
 
 	Describe("Given: a er version feature toggle", func() {
 		Context("when toggled to v1.6", func() {
