@@ -75,10 +75,18 @@ type (
 		Identifier       string                   `json:"identifier"`
 		Properties       []Properties             `json:"properties"`
 		Instances        []Instances              `json:"instances"`
-		GUID             string                   `json: "guid"`
-		InstallationName string                   `json: "installation_name"`
-		Partitions       []map[string]interface{} `json: "partitions"`
-		Resources        []map[string]interface{} `json: "resources"`
+		GUID             string                   `json:"guid"`
+		InstallationName string                   `json:"installation_name"`
+		Partitions       []map[string]interface{} `json:"partitions"`
+		Resources        []map[string]interface{} `json:"resources"`
+		VMCredentials    map[string]string        `json:"vm_credentials"`
+	}
+
+	// VMCredentials contains property settings for a job
+	VMCredentials struct {
+		UserID   string
+		Password string
+		SSLKey   string
 	}
 
 	// Properties contains property settings for a job
