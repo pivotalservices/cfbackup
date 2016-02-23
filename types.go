@@ -63,11 +63,11 @@ type (
 		AZReference                        []string            `json:"availability_zone_references"`
 		DisabledPostDeployErrandNames      []string            `json:"disabled_post_deploy_errand_names"`
 		DeploymentNetworkReference         string              `json:"deployment_network_reference"`
-		GUID                               string              `json: "guid"`
+		GUID                               string              `json:"guid"`
 		InfrastructureNetworkReference     string              `json:"infrastructure_network_reference"`
 		InstallationName                   string              `json:"installation_name"`
-		SingletonAvailabilityZoneReference string              `json: "sigleton_availability_zone_reference"`
-		Stemcell                           interface{}         `json: "stemcell"`
+		SingletonAvailabilityZoneReference string              `json:"sigleton_availability_zone_reference"`
+		Stemcell                           interface{}         `json:"stemcell"`
 	}
 
 	// Jobs contains job settings for a product
