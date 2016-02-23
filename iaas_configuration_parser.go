@@ -2,8 +2,10 @@ package cfbackup
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
+
 	"github.com/xchapter7x/lo"
 )
 
@@ -45,8 +47,8 @@ func (s *ConfigurationParser) GetIaaS() (config IaaSConfiguration, hasSSHKey boo
 }
 
 // FindJobsByProductID finds all the jobs in an installation by product id
-func (s *ConfigurationParser) FindJobsByProductID(id string) []Jobs {
-	cfJobs := []Jobs{}
+func (s *ConfigurationParser) FindJobsByProductID(id string) ([]Jobs) {
+    cfJobs := []Jobs{}
 
 	for _, product := range s.GetProducts() {
 		identifier := product.Identifier
@@ -59,15 +61,34 @@ func (s *ConfigurationParser) FindJobsByProductID(id string) []Jobs {
 	return cfJobs
 }
 
-// FindCFPostgresJobs finds all the postgres jobs in the cf product
-func (s *ConfigurationParser) FindCFPostgresJobs() []Jobs {
-	jobs := []Jobs{}
+// FindByProductID finds a product by product id
+func (s *ConfigurationParser) FindByProductID(id string) (productResponse Products, err error) {
+	var found bool
+	for _, product := range s.GetProducts() {
+		identifier := product.Identifier
+		if identifier == id {
+			productResponse = product
+			found = true
+			break
+		}
+	}
+	if !found {
+		err = fmt.Errorf("Product not found %s", id)
+	}
 
-	for _, job := range s.FindJobsByProductID("cf") {
+	return
+}
+
+// FindCFPostgresJobs finds all the postgres jobs in the cf product
+func (s *ConfigurationParser) FindCFPostgresJobs() (jobs []Jobs) {
+
+	jobsList := s.FindJobsByProductID("cf")
+	for _, job := range jobsList {
 		if isPostgres(job.Identifier, job.Instances) {
 			jobs = append(jobs, job)
 		}
 	}
+
 	return jobs
 }
 

@@ -74,7 +74,7 @@
 					]
 				}
 			},
-			"cf-0e4f2e8b3ee972771b6e": {
+			"cf-f21eea2dbdb8555f89fb": {
 				"consul_server-907f17f68dc8371ecc84": {
 					"c2a389dd5f225e57fafd": [
 						"10.65.167.33"
@@ -431,8 +431,8 @@
 			"identifier": "p-bosh"
 		},
 		{
-			"guid": "cf-0e4f2e8b3ee972771b6e",
-			"installation_name": "cf-0e4f2e8b3ee972771b6e",
+			"guid": "cf-f21eea2dbdb8555f89fb",
+			"installation_name": "cf-f21eea2dbdb8555f89fb",
 			"product_version": "1.7.0.0.alpha.1923.1ecd09c",
 			"singleton_availability_zone_reference": "c2a389dd5f225e57fafd",
 			"network_reference": "1faaf9daff683bedb139",
