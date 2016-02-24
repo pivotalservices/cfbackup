@@ -2,11 +2,44 @@ package cfbackup
 
 import "fmt"
 
-// GetIPsByProductAndJob finds a product and jobName
-func (s *InstallationSettings) GetIPsByProductAndJob(productName string, jobName string) (ips []string) {
+// FindIPsByProductAndJob finds a product and jobName
+func (s *InstallationSettings) FindIPsByProductAndJob(productName string, jobName string) (IPs []string, err error) {
 
 	if s.isLegacyFormat() {
+		IPs, err = s.extractLegacyIPsForProductAndJob(productName, jobName)
+	} else {
+		IPs, err = s.extractIPsForProductAndJob(productName, jobName)
+	}
+	return
+}
 
+func (s *InstallationSettings) extractLegacyIPsForProductAndJob(productName, jobName string) (IPs []string, err error) {
+	var product Products
+	if product, err = s.FindByProductID(productName); err == nil {
+		IPs = product.GetIPsByJob(jobName)
+	}
+	return
+}
+
+func (s *InstallationSettings) extractIPsForProductAndJob(productName, jobName string) (IPs []string, err error) {
+	var product Products
+	if product, err = s.FindByProductID(productName); err == nil {
+		var job Jobs
+		if job, err = product.GetJob(jobName); err == nil {
+			IPs, err = s.findIPs(product, job)
+		}
+	}
+	return
+}
+
+func (s *InstallationSettings) findIPs(product Products, job Jobs) (IPs []string, err error) {
+	var IPsResponse []string
+	for _, azGUID := range product.AZReference {
+		if IPsResponse, err = s.IPAssignments.FindIPsByProductGUIDAndJobGUIDAndAvailabilityZoneGUID(product.GUID, job.GUID, azGUID); err == nil {
+			for _, ip := range IPsResponse {
+				IPs = append(IPs, ip)
+			}
+		}
 	}
 	return
 }
@@ -30,8 +63,8 @@ func (s *InstallationSettings) FindByProductID(id string) (productResponse Produ
 }
 
 // FindJobsByProductID finds all the jobs in an installation by product id
-func (s *InstallationSettings) FindJobsByProductID(id string) ([]Jobs) {
-    cfJobs := []Jobs{}
+func (s *InstallationSettings) FindJobsByProductID(id string) []Jobs {
+	cfJobs := []Jobs{}
 
 	for _, product := range s.Products {
 		identifier := product.Identifier
@@ -72,6 +105,7 @@ func isPostgres(job string, instances []Instances) bool {
 	}
 	return false
 }
+
 func (s *InstallationSettings) isLegacyFormat() bool {
-    return true
+	return s.IPAssignments.Assignments == nil
 }

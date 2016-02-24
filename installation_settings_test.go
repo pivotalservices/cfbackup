@@ -30,10 +30,11 @@ func checkInstallationSettingsMethods(fixturePath string, productName string, jo
 			installationSettings = configParser.InstallationSettings
 		})
 
-		XDescribe(fmt.Sprintf("given a GetIPsByProductAndJob() %s, %s", productName, jobName), func() {
+		Describe(fmt.Sprintf("given a FindIPsByProductAndJob() %s, %s", productName, jobName), func() {
 			Context("when called with a productName and jobName", func() {
 				It("then it should return ips for the job", func() {
-					ips := installationSettings.GetIPsByProductAndJob(productName, jobName)
+					ips, err := installationSettings.FindIPsByProductAndJob(productName, jobName)
+					Ω(err).ShouldNot(HaveOccurred())
 					Ω(len(ips)).Should(Equal(ipsCount))
 				})
 			})
