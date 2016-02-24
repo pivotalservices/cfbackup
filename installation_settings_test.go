@@ -10,7 +10,7 @@ import (
 
 var _ = Describe("given a InstallationSettings object", func() {
 	Context("When properly initialized", func() {
-		checkInstallationSettingsMethods("./fixtures/installation-settings-1-7.json", "cf", "nfs_server", 0)
+		checkInstallationSettingsMethods("./fixtures/installation-settings-1-7.json", "cf", "nfs_server", 1)
 		checkInstallationSettingsMethods("./fixtures/installation-settings-1-6.json", "cf", "nfs_server", 1)
 		checkInstallationSettingsMethods("./fixtures/installation-settings-1-6-default.json", "cf", "nfs_server", 1)
 		checkInstallationSettingsMethods("./fixtures/installation-settings-1-5.json", "cf", "nfs_server", 1)

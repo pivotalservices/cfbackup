@@ -22,7 +22,25 @@ func (s *InstallationSettings) extractLegacyIPsForProductAndJob(productName, job
 }
 
 func (s *InstallationSettings) extractIPsForProductAndJob(productName, jobName string) (IPs []string, err error) {
-	//fmt.Println(s.IPAssignments)
+	var product Products
+	if product, err = s.FindByProductID(productName); err == nil {
+		var job Jobs
+		if job, err = product.GetJob(jobName); err == nil {
+			IPs, err = s.findIPs(product, job)
+		}
+	}
+	return
+}
+
+func (s *InstallationSettings) findIPs(product Products, job Jobs) (IPs []string, err error) {
+	var IPsResponse []string
+	for _, azGUID := range product.AZReference {
+		if IPsResponse, err = s.IPAssignments.FindIPsByProductGUIDAndJobGUIDAndAvailabilityZoneGUID(product.GUID, job.GUID, azGUID); err == nil {
+			for _, ip := range IPsResponse {
+				IPs = append(IPs, ip)
+			}
+		}
+	}
 	return
 }
 
