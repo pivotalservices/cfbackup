@@ -10,7 +10,7 @@ import (
 
 var _ = Describe("given a InstallationSettings object", func() {
 	Context("When properly initialized", func() {
-		checkInstallationSettingsMethods("./fixtures/installation-settings-1-7.json", "cf", "nfs_server", 1)
+		checkInstallationSettingsMethods("./fixtures/installation-settings-1-7.json", "cf", "nfs_server", 0)
 		checkInstallationSettingsMethods("./fixtures/installation-settings-1-6.json", "cf", "nfs_server", 1)
 		checkInstallationSettingsMethods("./fixtures/installation-settings-1-6-default.json", "cf", "nfs_server", 1)
 		checkInstallationSettingsMethods("./fixtures/installation-settings-1-5.json", "cf", "nfs_server", 1)
@@ -30,10 +30,11 @@ func checkInstallationSettingsMethods(fixturePath string, productName string, jo
 			installationSettings = configParser.InstallationSettings
 		})
 
-		XDescribe(fmt.Sprintf("given a GetIPsByProductAndJob() %s, %s", productName, jobName), func() {
+		Describe(fmt.Sprintf("given a FindIPsByProductAndJob() %s, %s", productName, jobName), func() {
 			Context("when called with a productName and jobName", func() {
 				It("then it should return ips for the job", func() {
-					ips := installationSettings.GetIPsByProductAndJob(productName, jobName)
+					ips, err := installationSettings.FindIPsByProductAndJob(productName, jobName)
+					Ω(err).ShouldNot(HaveOccurred())
 					Ω(len(ips)).Should(Equal(ipsCount))
 				})
 			})
