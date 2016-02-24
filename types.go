@@ -41,12 +41,16 @@ type (
 	InstallationSettings struct {
 		Infrastructure Infrastructure `json:"infrastructure"`
 		Products       []Products     `json:"products"`
-		IPAssignments  IPAssignments    `json:"ip_assignments"`
+		IPAssignments  IPAssignments  `json:"ip_assignments"`
 	}
 
-    //IPAssignments - an object to house ip_assignments elements from the json	
+	AssignmentsProduct map[string]AssignmentsJob
+	AssignmentsJob     map[string]AssignmentsAZ
+	AssignmentsAZ      map[string][]string
+
+	//IPAssignments - an object to house ip_assignments elements from the json
 	IPAssignments struct {
-		Assignments map[string]map[string]map[string][]string `json:"assignments"`
+		Assignments AssignmentsProduct `json:"assignments"`
 	}
 	//Infrastructure - a struct to house Infrastructure block elements from the json
 	Infrastructure struct {
