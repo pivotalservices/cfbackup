@@ -10,19 +10,34 @@ import (
 
 var _ = Describe("given a InstallationSettings object", func() {
 	Context("When properly initialized", func() {
-		checkInstallationSettingsMethods("./fixtures/installation-settings-1-7.json", "cf", "nfs_server", 1)
-		checkInstallationSettingsMethods("./fixtures/installation-settings-1-6.json", "cf", "nfs_server", 1)
-		checkInstallationSettingsMethods("./fixtures/installation-settings-1-6-default.json", "cf", "nfs_server", 1)
-		checkInstallationSettingsMethods("./fixtures/installation-settings-1-5.json", "cf", "nfs_server", 1)
+		checkInstallationSettingsIPMethods("./fixtures/installation-settings-1-7.json", "cf", "nfs_server", 1)
+		checkInstallationSettingsIPMethods("./fixtures/installation-settings-1-6.json", "cf", "nfs_server", 1)
+		checkInstallationSettingsIPMethods("./fixtures/installation-settings-1-6-default.json", "cf", "nfs_server", 1)
+		checkInstallationSettingsIPMethods("./fixtures/installation-settings-1-5.json", "cf", "nfs_server", 1)
 		
-		checkInstallationSettingsFindMethods("./fixtures/installation-settings-1-7.json", []string{"cf", "p-bosh"}, 0)
-		checkInstallationSettingsFindMethods("./fixtures/installation-settings-1-6.json", []string{"cf", "p-bosh"}, 3)
-		checkInstallationSettingsFindMethods("./fixtures/installation-settings-1-6-default.json", []string{"cf", "p-bosh"}, 0)
-		checkInstallationSettingsFindMethods("./fixtures/installation-settings-1-5.json", []string{"cf"}, 3)
+		checkInstallationSettingsCredentialsMethods("./fixtures/installation-settings-1-7.json", "cf", "nfs_server")
+		checkInstallationSettingsCredentialsMethods("./fixtures/installation-settings-1-6.json", "cf", "nfs_server")
+		checkInstallationSettingsCredentialsMethods("./fixtures/installation-settings-1-6-default.json", "cf", "nfs_server")
+		checkInstallationSettingsCredentialsMethods("./fixtures/installation-settings-1-5.json", "cf", "nfs_server")
+		
+		checkInstallationSettingsFindMethods("./fixtures/installation-settings-1-7.json", []string{"cf", "p-bosh"})
+		checkInstallationSettingsFindMethods("./fixtures/installation-settings-1-6.json", []string{"cf", "p-bosh"})
+		checkInstallationSettingsFindMethods("./fixtures/installation-settings-1-6-default.json", []string{"cf", "p-bosh"})
+		checkInstallationSettingsFindMethods("./fixtures/installation-settings-1-5.json", []string{"cf", "microbosh"})
+		
+		checkInstallationSettingsFindMethodsWithInvalidProducts("./fixtures/installation-settings-1-7.json")
+		checkInstallationSettingsFindMethodsWithInvalidProducts("./fixtures/installation-settings-1-6.json")
+		checkInstallationSettingsFindMethodsWithInvalidProducts("./fixtures/installation-settings-1-6-default.json")
+		checkInstallationSettingsFindMethodsWithInvalidProducts("./fixtures/installation-settings-1-5.json")
+		
+		checkInstallationSettingsPostgresJobs("./fixtures/installation-settings-1-7.json", 0)
+		checkInstallationSettingsPostgresJobs("./fixtures/installation-settings-1-6.json", 3)
+		checkInstallationSettingsPostgresJobs("./fixtures/installation-settings-1-6-default.json", 0)
+		checkInstallationSettingsPostgresJobs("./fixtures/installation-settings-1-5.json", 3)
 	})
 })
 
-func checkInstallationSettingsMethods(fixturePath string, productName string, jobName string, ipsCount int) {
+func checkInstallationSettingsIPMethods(fixturePath string, productName string, jobName string, ipsCount int) {
 	Context(fmt.Sprintf("when called with a given %s fixture", fixturePath), func() {
 		var installationSettings InstallationSettings
 		BeforeEach(func() {
@@ -42,7 +57,28 @@ func checkInstallationSettingsMethods(fixturePath string, productName string, jo
 	})
 }
 
-func checkInstallationSettingsFindMethods(fixturePath string, productNames []string, pgJobCount int) {
+func checkInstallationSettingsCredentialsMethods(fixturePath string, productName string, jobName string) {
+	Context(fmt.Sprintf("when called with a given %s fixture", fixturePath), func() {
+		var installationSettings InstallationSettings
+		BeforeEach(func() {
+			configParser := NewConfigurationParser(fixturePath)
+			installationSettings = configParser.InstallationSettings
+		})
+
+		Describe(fmt.Sprintf("given a FindVMCredentialsByProductAndJob() %s, %s", productName, jobName), func() {
+			Context("when called with a productName and jobName", func() {
+				It("then it should return vmcredentials for the job", func() {
+					vmcredentials, err := installationSettings.FindVMCredentialsByProductAndJob(productName, jobName)
+					Ω(err).ShouldNot(HaveOccurred())
+					Ω(vmcredentials.UserID).ShouldNot(BeEmpty())
+					Ω(vmcredentials.Password+vmcredentials.SSLKey).ShouldNot(BeEmpty())
+				})
+			})
+		})
+	})
+}
+
+func checkInstallationSettingsFindMethods(fixturePath string, productNames []string) {
 	Context(fmt.Sprintf("when called with a given %s fixture", fixturePath), func() {
 		var installationSettings InstallationSettings
 		BeforeEach(func() {
@@ -72,6 +108,16 @@ func checkInstallationSettingsFindMethods(fixturePath string, productNames []str
 				})
 			}
 		})
+	})
+}
+
+func checkInstallationSettingsFindMethodsWithInvalidProducts(fixturePath string) {
+	Context(fmt.Sprintf("when called with a given %s fixture", fixturePath), func() {
+		var installationSettings InstallationSettings
+		BeforeEach(func() {
+			configParser := NewConfigurationParser(fixturePath)
+			installationSettings = configParser.InstallationSettings
+		})
 		Describe("given a FindByProductID method", func() {
 			Context("when called with a non-existing product id", func() {
 				It("then it should return an empty object error", func() {
@@ -87,6 +133,15 @@ func checkInstallationSettingsFindMethods(fixturePath string, productNames []str
 					Ω(len(jobs)).Should(Equal(0))
 				})
 			})
+		})
+	})
+}
+func checkInstallationSettingsPostgresJobs(fixturePath string, pgJobCount int) {
+	Context(fmt.Sprintf("when called with a given %s fixture", fixturePath), func() {
+		var installationSettings InstallationSettings
+		BeforeEach(func() {
+			configParser := NewConfigurationParser(fixturePath)
+			installationSettings = configParser.InstallationSettings
 		})
 		Describe("given a FindCFPostgresJobs", func() {
 			It("then it should return the correct number of jobs", func() {

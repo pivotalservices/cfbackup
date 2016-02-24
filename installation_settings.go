@@ -2,6 +2,14 @@ package cfbackup
 
 import "fmt"
 
+//FindVMCredentialsByProductAndJob gets VMCredentials for a given product and job
+func (s *InstallationSettings) FindVMCredentialsByProductAndJob(productName, jobName string) (vmCredentials VMCredentials, err error) {
+    var product Products
+    if product, err = s.FindByProductID(productName); err == nil {
+        vmCredentials, err = product.GetVMCredentialsByJob(jobName)
+    }
+    return 
+}
 // FindIPsByProductAndJob finds a product and jobName
 func (s *InstallationSettings) FindIPsByProductAndJob(productName string, jobName string) (IPs []string, err error) {
 

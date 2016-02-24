@@ -30,5 +30,25 @@ func checkIPAssignmentsMethods(fixturePath string, productGuid string, jobGuid s
 				})
 			})
 		})
+		Describe("given a FindIPsByProductAndJob()", func() {
+			Context("when called with an invalid productGUID", func() {
+				It("then it should return an error", func() {
+                    _, err := ipAssignments.FindIPsByProductGUIDAndJobGUIDAndAvailabilityZoneGUID("invalid productGUID", "", "")
+					Ω(err).Should(HaveOccurred())
+				})
+			})
+			Context("when called with a valid productGUID and invalid jobGUID", func() {
+				It("then it should return an error", func() {
+                    _, err := ipAssignments.FindIPsByProductGUIDAndJobGUIDAndAvailabilityZoneGUID("cf-f21eea2dbdb8555f89fb", "invalid job GUID", "")
+					Ω(err).Should(HaveOccurred())
+				})
+			})
+			Context("when called with a valid productGUID, jobGUID and invalid azGUID", func() {
+				It("then it should return an error", func() {
+                    _, err := ipAssignments.FindIPsByProductGUIDAndJobGUIDAndAvailabilityZoneGUID("cf-f21eea2dbdb8555f89fb", "nfs_server-9356c51805ff7b093988", "invalid AZGUID")
+					Ω(err).Should(HaveOccurred())
+				})
+			})
+		})
 	})
 }
