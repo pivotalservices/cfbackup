@@ -70,20 +70,19 @@ func (s mockDumper) Import(i io.Reader) (err error) {
 }
 
 var _ = Describe("ElasticRuntime", func() {
-	/*Describe("ElasticRuntime Version 1.3", func() {
-		var installationSettingsFilePath = "../../fixtures/installation-settings-1-3.json"
-		testERWithVersionSpecificFile(installationSettingsFilePath)
-	})
-
 	Describe("Elastic Runtime v1.4 file variant with getpassword IP index error", func() {
 		var installationSettingsFilePath = "../../fixtures/installation-settings-1-4-variant.json"
 		testERWithVersionSpecificFile(installationSettingsFilePath)
+		testPostgresDBBackups(installationSettingsFilePath)
+		testMySQLDBBackups(installationSettingsFilePath)
 	})
 
 	Describe("ElasticRuntime Version 1.4", func() {
 		var installationSettingsFilePath = "../../fixtures/installation-settings-1-4.json"
 		testERWithVersionSpecificFile(installationSettingsFilePath)
-	})*/
+		testPostgresDBBackups(installationSettingsFilePath)
+		testMySQLDBBackups(installationSettingsFilePath)
+	})
 
 	Describe("ElasticRuntime Version 1.5", func() {
 		var installationSettingsFilePath = "../../fixtures/installation-settings-1-5.json"
