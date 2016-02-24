@@ -12,6 +12,7 @@ var _ = Describe("given a InstallationSettings object", func() {
 	Context("When properly initialized", func() {
 		checkInstallationSettingsIPMethods("./fixtures/installation-settings-1-7.json", "cf", "nfs_server", 1)
 		checkInstallationSettingsIPMethods("./fixtures/installation-settings-1-6.json", "cf", "nfs_server", 1)
+		checkInstallationSettingsIPMethods("./fixtures/installation-settings-1-6.json", "cf", "mysql", 1)
 		checkInstallationSettingsIPMethods("./fixtures/installation-settings-1-6-default.json", "cf", "nfs_server", 1)
 		checkInstallationSettingsIPMethods("./fixtures/installation-settings-1-5.json", "cf", "nfs_server", 1)
 		
@@ -72,6 +73,15 @@ func checkInstallationSettingsCredentialsMethods(fixturePath string, productName
 					Ω(err).ShouldNot(HaveOccurred())
 					Ω(vmcredentials.UserID).ShouldNot(BeEmpty())
 					Ω(vmcredentials.Password+vmcredentials.SSLKey).ShouldNot(BeEmpty())
+				})
+			})
+		})
+		Describe(fmt.Sprintf("given a FindJobByProductAndJobName() %s, %s", productName, jobName), func() {
+			Context("when called with a productName and jobName", func() {
+				It("then it should return job for the jobName", func() {
+					job, err := installationSettings.FindJobByProductAndJobName(productName, jobName)
+					Ω(err).ShouldNot(HaveOccurred())
+					Ω(job).ShouldNot(Equal(Jobs{}))
 				})
 			})
 		})

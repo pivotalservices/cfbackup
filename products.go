@@ -9,11 +9,9 @@ import (
 
 //GetIPsByJob - get array of ips for a job
 func (s *Products) GetIPsByJob(jobname string) (ips []string) {
-	
 	for vmName, ipList := range s.IPS {
 	    if strings.HasPrefix(vmName, jobname+"-") {
-			ips = ipList
-			break
+			ips = append(ips,ipList...)
 		}
 	}
 	return
@@ -63,7 +61,7 @@ func (s *Products) GetVMCredentialsByJob(jobName string) (vmCredentials VMCreden
 
 func (s *Products) extractLegacyCredentials(job Jobs) (vmCredentials VMCredentials) {
 	lo.G.Debug("legacy: ", job)
-	propMap := s.getPropertyValues(job, "vm_credentials")
+	propMap := s.GetPropertyValues(job, "vm_credentials")
 	vmCredentials.UserID = propMap["identity"]
 	vmCredentials.Password = propMap["password"]
 	return
@@ -80,7 +78,8 @@ func (s *Products) isLegacyFormat(job Jobs) bool {
 	return job.VMCredentials == nil
 }
 
-func (s *Products) getPropertyValues(job Jobs, identifier string) (propertyMap map[string]string) {
+//GetPropertyValues = returns a map of property values for an identifier
+func (s *Products) GetPropertyValues(job Jobs, identifier string) (propertyMap map[string]string) {
 	properties := job.Properties
 	propertyMap = make(map[string]string)
 	for _, property := range properties {

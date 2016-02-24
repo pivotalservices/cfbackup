@@ -44,8 +44,11 @@ type (
 		IPAssignments  IPAssignments  `json:"ip_assignments"`
 	}
 
+    //AssignmentsProduct - a map string representing product assignments
 	AssignmentsProduct map[string]AssignmentsJob
+	//AssignmentsJob - a map representing job assignments
 	AssignmentsJob     map[string]AssignmentsAZ
+	//AssignmentsAZ - a map []string representing a list of az assignments
 	AssignmentsAZ      map[string][]string
 
 	//IPAssignments - an object to house ip_assignments elements from the json
@@ -143,7 +146,7 @@ type (
 		systemInfo        map[string]SystemDump
 		Product           string
 		Component         string
-		Identity          string
+		Identifier        string
 		Ip                string
 		User              string
 		Pass              string

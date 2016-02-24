@@ -24,14 +24,14 @@ var (
 	ErrorDump   = errors.New("failed dump")
 )
 
-type PgInfoMock struct {
+type DBInfoMock struct {
 	cfbackup.SystemInfo
 	ErrState   error
 	failImport bool
 	failDump   bool
 }
 
-func (s *PgInfoMock) GetPersistanceBackup() (dumper cfbackup.PersistanceBackup, err error) {
+func (s *DBInfoMock) GetPersistanceBackup() (dumper cfbackup.PersistanceBackup, err error) {
 	dumper = &mockDumper{
 		failImport: s.failImport,
 		failDump:   s.failDump,
@@ -39,7 +39,7 @@ func (s *PgInfoMock) GetPersistanceBackup() (dumper cfbackup.PersistanceBackup, 
 	return
 }
 
-func (s *PgInfoMock) Error() error {
+func (s *DBInfoMock) Error() error {
 	if s.ErrState == nil {
 		s.ErrState = s.SystemInfo.Error()
 	}
@@ -70,7 +70,7 @@ func (s mockDumper) Import(i io.Reader) (err error) {
 }
 
 var _ = Describe("ElasticRuntime", func() {
-	Describe("ElasticRuntime Version 1.3", func() {
+	/*Describe("ElasticRuntime Version 1.3", func() {
 		var installationSettingsFilePath = "../../fixtures/installation-settings-1-3.json"
 		testERWithVersionSpecificFile(installationSettingsFilePath)
 	})
@@ -83,23 +83,29 @@ var _ = Describe("ElasticRuntime", func() {
 	Describe("ElasticRuntime Version 1.4", func() {
 		var installationSettingsFilePath = "../../fixtures/installation-settings-1-4.json"
 		testERWithVersionSpecificFile(installationSettingsFilePath)
-	})
+	})*/
 
 	Describe("ElasticRuntime Version 1.5", func() {
 		var installationSettingsFilePath = "../../fixtures/installation-settings-1-5.json"
 		testERWithVersionSpecificFile(installationSettingsFilePath)
+		testPostgresDBBackups(installationSettingsFilePath)
+		testMySQLDBBackups(installationSettingsFilePath)
 	})
 
 	Describe("ElasticRuntime Version 1.6", func() {
 		os.Setenv(ERVersionEnvFlag, ERVersion16)
 		var installationSettingsFilePath = "../../fixtures/installation-settings-1-6.json"
 		testERWithVersionSpecificFile(installationSettingsFilePath)
+		testPostgresDBBackups(installationSettingsFilePath)
+		testMySQLDBBackups(installationSettingsFilePath)
 		os.Setenv(ERVersionEnvFlag, "")
+		
 	})
-	XDescribe("ElasticRuntime Version 1.7", func() {
+	Describe("ElasticRuntime Version 1.7", func() {
 		os.Setenv(ERVersionEnvFlag, ERVersion16)
-		var installationSettingsFilePath = "../../fixtures/installation-settings-1.7.json"
+		var installationSettingsFilePath = "../../fixtures/installation-settings-1-7.json"
 		testERWithVersionSpecificFile(installationSettingsFilePath)
+		testMySQLDBBackups(installationSettingsFilePath)
 		os.Setenv(ERVersionEnvFlag, "")
 	})
 
@@ -163,70 +169,68 @@ var _ = Describe("ElasticRuntime", func() {
 	})
 })
 
-func testERWithVersionSpecificFile(installationSettingsFilePath string) {
-
-	Describe("Backup / Restore", func() {
-
-		oldNewDirector := cfbackup.NewDirector
-
-		BeforeEach(func() {
-			oldNewDirector = cfbackup.NewDirector
-			cfbackup.NewDirector = fakes.NewFakeDirector
-		})
-
-		AfterEach(func() {
-			cfbackup.NewDirector = oldNewDirector
-		})
-		Context("with valid properties (DirectorInfo)", func() {
+func testMySQLDBBackups(installationSettingsFilePath string) {
+	Describe("Mysql Backup / Restore", func() {
+		Context("with a valid product and component for mysql", func() {
 			var (
-				product   = cfbackup.BoshName()
-				component = "director"
-				username  = "director"
-				target    string
-				er        ElasticRuntime
-				info      = cfbackup.SystemsInfo{
+				product    = "cf"
+				component  = "mysql"
+				identifier = "mysql_admin_credentials"
+				target     string
+				er         ElasticRuntime
+				info       = cfbackup.SystemsInfo{
 					SystemDumps: map[string]cfbackup.SystemDump{
-						"DirectorInfo": &cfbackup.SystemInfo{
-							Product:   product,
-							Component: component,
-							Identity:  username,
-						},
-						"ConsoledbInfo": &PgInfoMock{
+						"MySqlDBInfo": &DBInfoMock{
 							SystemInfo: cfbackup.SystemInfo{
-								Product:   product,
-								Component: component,
-								Identity:  username,
+								Product:    product,
+								Component:  component,
+								Identifier: identifier,
 							},
 						},
 					},
 				}
-				ps = []cfbackup.SystemDump{info.SystemDumps["ConsoledbInfo"]}
 			)
 
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					JSONFile:          installationSettingsFilePath,
-					HTTPGateway:       &fakes.MockHTTPGateway{},
-					BackupContext:     cfbackup.NewBackupContext(target, cfenv.CurrentEnv()),
-					SystemsInfo:       info,
-					PersistentSystems: ps,
+					JSONFile:      installationSettingsFilePath,
+					HTTPGateway:   &fakes.MockHTTPGateway{},
+					BackupContext: cfbackup.NewBackupContext(target, cfenv.CurrentEnv()),
+					SystemsInfo:   info,
 				}
+				er.ReadAllUserCredentials()
 			})
 
 			AfterEach(func() {
 				os.Remove(target)
 			})
 
-			Context("With valid list of stores", func() {
-				Context("Backup", func() {
-					It("Should return nil error", func() {
-						err := er.Backup()
-						Ω(err).Should(BeNil())
-					})
+			Context("Backup", func() {
+				It("Should write the dumped output to a file in the databaseDir", func() {
+					er.RunDbAction([]cfbackup.SystemDump{info.SystemDumps["MySqlDBInfo"]}, cfbackup.ExportArchive)
+					filename := fmt.Sprintf("%s.backup", component)
+					exists, _ := osutils.Exists(path.Join(target, filename))
+					Ω(exists).Should(BeTrue())
 				})
 
-				Context("Restore", func() {
+				It("Should have a nil error and not panic", func() {
+					var err error
+					Ω(func() {
+						err = er.RunDbAction([]cfbackup.SystemDump{info.SystemDumps["MySqlDBInfo"]}, cfbackup.ExportArchive)
+					}).ShouldNot(Panic())
+					Ω(err).Should(BeNil())
+				})
+			})
+
+			Context("Restore", func() {
+				It("should return error if local file does not exist", func() {
+					err := er.RunDbAction([]cfbackup.SystemDump{info.SystemDumps["MySqlDBInfo"]}, cfbackup.ImportArchive)
+					Ω(err).ShouldNot(BeNil())
+					Ω(err).Should(BeAssignableToTypeOf(ErrERInvalidPath))
+				})
+
+				Context("local file exists", func() {
 					var filename = fmt.Sprintf("%s.backup", component)
 
 					BeforeEach(func() {
@@ -238,166 +242,61 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 						os.Remove(path.Join(target, filename))
 					})
 
-					It("Should return nil error ", func() {
-						err := er.Restore()
+					It("should upload file to remote w/o error", func() {
+						err := er.RunDbAction([]cfbackup.SystemDump{info.SystemDumps["MySqlDBInfo"]}, cfbackup.ImportArchive)
 						Ω(err).Should(BeNil())
 					})
-				})
-			})
 
-			Context("With empty list of stores", func() {
-				var psOrig []cfbackup.SystemDump
-				BeforeEach(func() {
-					psOrig = ps
-					er.PersistentSystems = []cfbackup.SystemDump{}
-				})
+					Context("write failure", func() {
+						var origInfo map[string]cfbackup.SystemDump
 
-				AfterEach(func() {
-					er.PersistentSystems = psOrig
-				})
-				Context("Backup", func() {
-					It("Should return error on empty list of persistence stores", func() {
-						err := er.Backup()
-						Ω(err).ShouldNot(BeNil())
-						Ω(err).Should(Equal(ErrEREmptyDBList))
+						BeforeEach(func() {
+							origInfo = info.SystemDumps
+							info = cfbackup.SystemsInfo{
+								SystemDumps: map[string]cfbackup.SystemDump{
+									"MySqlDBInfo": &DBInfoMock{
+										failImport: true,
+										SystemInfo: cfbackup.SystemInfo{
+											Product:    product,
+											Component:  component,
+											Identifier: identifier,
+										},
+									},
+								},
+							}
+						})
+
+						AfterEach(func() {
+							info.SystemDumps = origInfo
+						})
+						It("should return error", func() {
+							err := er.RunDbAction([]cfbackup.SystemDump{info.SystemDumps["MySqlDBInfo"]}, cfbackup.ImportArchive)
+							Ω(err).ShouldNot(BeNil())
+							Ω(err).ShouldNot(Equal(ErrorImport))
+						})
 					})
-				})
-
-				Context("Restore", func() {
-					It("Should return error on empty list of persistence stores", func() {
-						err := er.Restore()
-						Ω(err).ShouldNot(BeNil())
-						Ω(err).Should(Equal(ErrEREmptyDBList))
-					})
-				})
-			})
-
-			Context("When db backup fails", func() {
-				var psOrig []cfbackup.SystemDump
-				BeforeEach(func() {
-					psOrig = ps
-					er.PersistentSystems = []cfbackup.SystemDump{
-						&PgInfoMock{
-							SystemInfo: cfbackup.SystemInfo{
-								Product:   product,
-								Component: component,
-								Identity:  username,
-							},
-						},
-						&PgInfoMock{
-							SystemInfo: cfbackup.SystemInfo{
-								Product:   product,
-								Component: component,
-								Identity:  username,
-							},
-							failDump: true,
-						},
-					}
-				})
-
-				AfterEach(func() {
-					er.PersistentSystems = psOrig
-				})
-				Context("Backup", func() {
-					It("should return error if db backup fails", func() {
-						err := er.Backup()
-						Ω(err).ShouldNot(BeNil())
-						Ω(err).Should(Equal(ErrERDBBackup))
-					})
-				})
-
-				Context("Restore", func() {
-					It("should return error if db backup fails", func() {
-						err := er.Backup()
-						Ω(err).ShouldNot(BeNil())
-						Ω(err).Should(Equal(ErrERDBBackup))
-					})
-				})
-			})
-
-		})
-
-		Context("with invalid properties", func() {
-			var (
-				product   = "cf"
-				component = "consoledb"
-				username  = "root"
-				target    string
-				er        ElasticRuntime
-				info      = cfbackup.SystemsInfo{
-					SystemDumps: map[string]cfbackup.SystemDump{
-						"ConsoledbInfo": &cfbackup.SystemInfo{
-							Product:   product,
-							Component: component,
-							Identity:  username,
-						},
-					},
-				}
-			)
-
-			BeforeEach(func() {
-				target, _ = ioutil.TempDir("/tmp", "spec")
-				er = ElasticRuntime{
-					JSONFile:      installationSettingsFilePath,
-					HTTPGateway:   &fakes.MockHTTPGateway{true, 500, `{"state":"notdone"}`},
-					BackupContext: cfbackup.NewBackupContext(target, cfenv.CurrentEnv()),
-					SystemsInfo:   info,
-				}
-			})
-
-			AfterEach(func() {
-				os.Remove(target)
-			})
-
-			Context("Backup", func() {
-
-				It("Should not return nil error", func() {
-					err := er.Backup()
-					Ω(err).ShouldNot(BeNil())
-					Ω(err).Should(Equal(ErrERDirectorCreds))
-				})
-
-				It("Should not panic", func() {
-					var err error
-					Ω(func() {
-						err = er.Backup()
-					}).ShouldNot(Panic())
-				})
-			})
-
-			Context("Restore", func() {
-
-				It("Should not return nil error", func() {
-					err := er.Restore()
-					Ω(err).ShouldNot(BeNil())
-					Ω(err).Should(Equal(ErrERDirectorCreds))
-				})
-
-				It("Should not panic", func() {
-					var err error
-					Ω(func() {
-						err = er.Restore()
-					}).ShouldNot(Panic())
 				})
 			})
 		})
 	})
+}
 
-	Describe("RunDbBackups function", func() {
+func testPostgresDBBackups(installationSettingsFilePath string) {
+	Describe("Postgres Backup / Restore", func() {
 		Context("with a valid product and component for ccdb", func() {
 			var (
-				product   = "cf"
-				component = "consoledb"
-				username  = "root"
-				target    string
-				er        ElasticRuntime
-				info      = cfbackup.SystemsInfo{
+				product    = "cf"
+				component  = "consoledb"
+				identifier = "credentials"
+				target     string
+				er         ElasticRuntime
+				info       = cfbackup.SystemsInfo{
 					SystemDumps: map[string]cfbackup.SystemDump{
-						"ConsoledbInfo": &PgInfoMock{
+						"ConsoledbInfo": &DBInfoMock{
 							SystemInfo: cfbackup.SystemInfo{
-								Product:   product,
-								Component: component,
-								Identity:  username,
+								Product:    product,
+								Component:  component,
+								Identifier: identifier,
 							},
 						},
 					},
@@ -467,12 +366,12 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 							origInfo = info.SystemDumps
 							info = cfbackup.SystemsInfo{
 								SystemDumps: map[string]cfbackup.SystemDump{
-									"ConsoledbInfo": &PgInfoMock{
+									"ConsoledbInfo": &DBInfoMock{
 										failImport: true,
 										SystemInfo: cfbackup.SystemInfo{
-											Product:   product,
-											Component: component,
-											Identity:  username,
+											Product:    product,
+											Component:  component,
+											Identifier: identifier,
 										},
 									},
 								},
@@ -494,18 +393,18 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 
 		Context("with a valid product and component for consoledb", func() {
 			var (
-				product   = "cf"
-				component = "consoledb"
-				username  = "root"
-				target    string
-				er        ElasticRuntime
-				info      = cfbackup.SystemsInfo{
+				product    = "cf"
+				component  = "consoledb"
+				identifier = "credentials"
+				target     string
+				er         ElasticRuntime
+				info       = cfbackup.SystemsInfo{
 					SystemDumps: map[string]cfbackup.SystemDump{
-						"ConsoledbInfo": &PgInfoMock{
+						"ConsoledbInfo": &DBInfoMock{
 							SystemInfo: cfbackup.SystemInfo{
-								Product:   product,
-								Component: component,
-								Identity:  username,
+								Product:    product,
+								Component:  component,
+								Identifier: identifier,
 							},
 						},
 					},
@@ -548,18 +447,18 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 
 		Context("with a valid product and component for uaadb", func() {
 			var (
-				product   = "cf"
-				component = "uaadb"
-				username  = "root"
-				target    string
-				er        ElasticRuntime
-				info      = cfbackup.SystemsInfo{
+				product    = "cf"
+				component  = "uaadb"
+				identifier = "credentials"
+				target     string
+				er         ElasticRuntime
+				info       = cfbackup.SystemsInfo{
 					SystemDumps: map[string]cfbackup.SystemDump{
-						"UaadbInfo": &PgInfoMock{
+						"UaadbInfo": &DBInfoMock{
 							SystemInfo: cfbackup.SystemInfo{
-								Product:   product,
-								Component: component,
-								Identity:  username,
+								Product:    product,
+								Component:  component,
+								Identifier: identifier,
 							},
 						},
 					},
@@ -599,24 +498,245 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 				})
 			})
 		})
+	})
+}
+
+func testERWithVersionSpecificFile(installationSettingsFilePath string) {
+
+	Describe("Backup / Restore", func() {
+
+		oldNewDirector := cfbackup.NewDirector
+
+		BeforeEach(func() {
+			oldNewDirector = cfbackup.NewDirector
+			cfbackup.NewDirector = fakes.NewFakeDirector
+		})
+
+		AfterEach(func() {
+			cfbackup.NewDirector = oldNewDirector
+		})
+		Context("with valid properties (DirectorInfo)", func() {
+			var (
+				target string
+				er     ElasticRuntime
+				info   = cfbackup.SystemsInfo{
+					SystemDumps: map[string]cfbackup.SystemDump{
+						"DirectorInfo": &cfbackup.SystemInfo{
+							Product:    cfbackup.BoshName(),
+							Component:  "director",
+							Identifier: "director_credentials",
+						},
+						"MySqldbInfo": &DBInfoMock{
+							SystemInfo: cfbackup.SystemInfo{
+								Product:    "cf",
+								Component:  "mysql",
+								Identifier: "mysql_admin_credentials",
+							},
+						},
+					},
+				}
+				ps = []cfbackup.SystemDump{info.SystemDumps["MySqldbInfo"]}
+			)
+
+			BeforeEach(func() {
+				target, _ = ioutil.TempDir("/tmp", "spec")
+				er = ElasticRuntime{
+					JSONFile:          installationSettingsFilePath,
+					HTTPGateway:       &fakes.MockHTTPGateway{},
+					BackupContext:     cfbackup.NewBackupContext(target, cfenv.CurrentEnv()),
+					SystemsInfo:       info,
+					PersistentSystems: ps,
+				}
+			})
+
+			AfterEach(func() {
+				os.Remove(target)
+			})
+
+			Context("With valid list of stores", func() {
+				Context("Backup", func() {
+					It("Should return nil error", func() {
+						err := er.Backup()
+						Ω(err).Should(BeNil())
+					})
+				})
+
+				Context("Restore", func() {
+					var filename = fmt.Sprintf("%s.backup", "mysql")
+
+					BeforeEach(func() {
+						file, _ := os.Create(path.Join(target, filename))
+						file.Close()
+					})
+
+					AfterEach(func() {
+						os.Remove(path.Join(target, filename))
+					})
+
+					It("Should return nil error ", func() {
+						err := er.Restore()
+						Ω(err).Should(BeNil())
+					})
+				})
+			})
+
+			Context("With empty list of stores", func() {
+				var psOrig []cfbackup.SystemDump
+				BeforeEach(func() {
+					psOrig = ps
+					er.PersistentSystems = []cfbackup.SystemDump{}
+				})
+
+				AfterEach(func() {
+					er.PersistentSystems = psOrig
+				})
+				Context("Backup", func() {
+					It("Should return error on empty list of persistence stores", func() {
+						err := er.Backup()
+						Ω(err).ShouldNot(BeNil())
+						Ω(err).Should(Equal(ErrEREmptyDBList))
+					})
+				})
+
+				Context("Restore", func() {
+					It("Should return error on empty list of persistence stores", func() {
+						err := er.Restore()
+						Ω(err).ShouldNot(BeNil())
+						Ω(err).Should(Equal(ErrEREmptyDBList))
+					})
+				})
+			})
+
+			Context("When their is a failure on one of the systemdumps in the array", func() {
+				var psOrig []cfbackup.SystemDump
+				BeforeEach(func() {
+					psOrig = ps
+					er.PersistentSystems = []cfbackup.SystemDump{
+						&DBInfoMock{
+							SystemInfo: cfbackup.SystemInfo{
+								Product:    "",
+								Component:  "",
+								Identifier: "",
+							},
+						},
+						&DBInfoMock{
+							SystemInfo: cfbackup.SystemInfo{
+								Product:    "",
+								Component:  "",
+								Identifier: "",
+							},
+							failDump: true,
+						},
+					}
+				})
+
+				AfterEach(func() {
+					er.PersistentSystems = psOrig
+				})
+				Context("Backup", func() {
+					It("should return error if db backup fails", func() {
+						err := er.Backup()
+						Ω(err).ShouldNot(BeNil())
+						Ω(err).Should(Equal(ErrERDBBackup))
+					})
+				})
+
+				Context("Restore", func() {
+					It("should return error if db backup fails", func() {
+						err := er.Backup()
+						Ω(err).ShouldNot(BeNil())
+						Ω(err).Should(Equal(ErrERDBBackup))
+					})
+				})
+			})
+
+		})
+
+		Context("with invalid properties", func() {
+			var (
+				product    = "cf"
+				component  = "consoledb"
+				identifier = "credentials"
+				target     string
+				er         ElasticRuntime
+				info       = cfbackup.SystemsInfo{
+					SystemDumps: map[string]cfbackup.SystemDump{
+						"ConsoledbInfo": &cfbackup.SystemInfo{
+							Product:    product,
+							Component:  component,
+							Identifier: identifier,
+						},
+					},
+				}
+			)
+
+			BeforeEach(func() {
+				target, _ = ioutil.TempDir("/tmp", "spec")
+				er = ElasticRuntime{
+					JSONFile:      installationSettingsFilePath,
+					HTTPGateway:   &fakes.MockHTTPGateway{true, 500, `{"state":"notdone"}`},
+					BackupContext: cfbackup.NewBackupContext(target, cfenv.CurrentEnv()),
+					SystemsInfo:   info,
+				}
+			})
+
+			AfterEach(func() {
+				os.Remove(target)
+			})
+
+			Context("Backup", func() {
+
+				It("Should not return nil error", func() {
+					err := er.Backup()
+					Ω(err).ShouldNot(BeNil())
+					Ω(err).Should(Equal(ErrERDirectorCreds))
+				})
+
+				It("Should not panic", func() {
+					var err error
+					Ω(func() {
+						err = er.Backup()
+					}).ShouldNot(Panic())
+				})
+			})
+
+			Context("Restore", func() {
+
+				It("Should not return nil error", func() {
+					err := er.Restore()
+					Ω(err).ShouldNot(BeNil())
+					Ω(err).Should(Equal(ErrERDirectorCreds))
+				})
+
+				It("Should not panic", func() {
+					var err error
+					Ω(func() {
+						err = er.Restore()
+					}).ShouldNot(Panic())
+				})
+			})
+		})
+	})
+
+	Describe("RunDbBackups function", func() {
 
 		Context("with an systemDump object in a error state", func() {
 			var (
 				product    = "cf"
 				component  = "uaadb"
-				username   = "root"
+				identifier = "credentials"
 				target     string
 				ErrControl = errors.New("fake systemDump error")
 				err        error
 				er         ElasticRuntime
 				info       = cfbackup.SystemsInfo{
 					SystemDumps: map[string]cfbackup.SystemDump{
-						"UaadbInfo": &PgInfoMock{
+						"UaadbInfo": &DBInfoMock{
 							ErrState: ErrControl,
 							SystemInfo: cfbackup.SystemInfo{
-								Product:   product,
-								Component: component,
-								Identity:  username,
+								Product:    product,
+								Component:  component,
+								Identifier: identifier,
 							},
 						},
 					},
@@ -648,17 +768,17 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 
 		Context("with a invalid product, username and component", func() {
 			var (
-				product   = "aaaaaaaa"
-				component = "aaaaaaaa"
-				username  = "aaaaaaaa"
-				target    string
-				er        ElasticRuntime
-				info      = cfbackup.SystemsInfo{
+				product    = "aaaaaaaa"
+				component  = "aaaaaaaa"
+				identifier = "aaaaaaaa"
+				target     string
+				er         ElasticRuntime
+				info       = cfbackup.SystemsInfo{
 					SystemDumps: map[string]cfbackup.SystemDump{
 						"ConsoledbInfo": &cfbackup.SystemInfo{
-							Product:   product,
-							Component: component,
-							Identity:  username,
+							Product:    product,
+							Component:  component,
+							Identifier: identifier,
 						},
 					},
 				}

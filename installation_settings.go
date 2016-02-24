@@ -2,14 +2,36 @@ package cfbackup
 
 import "fmt"
 
+//FindPropertyValues - returns a map of property values for a given product, job and identifier
+func (s *InstallationSettings) FindPropertyValues(productName, jobName, identifier string) (propertyMap map[string]string, err error) {
+	var product Products
+	var job Jobs
+	if product, err = s.FindByProductID(productName); err == nil {
+		if job, err = s.FindJobByProductAndJobName(productName, jobName); err == nil {
+			propertyMap = product.GetPropertyValues(job, identifier)
+		}
+	}
+	return
+}
+
+//FindJobByProductAndJobName gets job for a given product and jobName
+func (s *InstallationSettings) FindJobByProductAndJobName(productName, jobName string) (job Jobs, err error) {
+	var product Products
+	if product, err = s.FindByProductID(productName); err == nil {
+		job, err = product.GetJob(jobName)
+	}
+	return
+}
+
 //FindVMCredentialsByProductAndJob gets VMCredentials for a given product and job
 func (s *InstallationSettings) FindVMCredentialsByProductAndJob(productName, jobName string) (vmCredentials VMCredentials, err error) {
-    var product Products
-    if product, err = s.FindByProductID(productName); err == nil {
-        vmCredentials, err = product.GetVMCredentialsByJob(jobName)
-    }
-    return 
+	var product Products
+	if product, err = s.FindByProductID(productName); err == nil {
+		vmCredentials, err = product.GetVMCredentialsByJob(jobName)
+	}
+	return
 }
+
 // FindIPsByProductAndJob finds a product and jobName
 func (s *InstallationSettings) FindIPsByProductAndJob(productName string, jobName string) (IPs []string, err error) {
 
