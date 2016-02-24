@@ -1,7 +1,6 @@
 package cfbackup_test
 
 import (
-	"fmt"
 	"os"
 
 	. "github.com/onsi/ginkgo"
@@ -10,13 +9,6 @@ import (
 )
 
 var _ = Describe("ConfigurationParser", func() {
-	Context("When properly initialized", func() {
-		checkFindMethods("./fixtures/installation-settings-1-7.json", []string{"cf", "p-bosh"}, 0)
-		checkFindMethods("./fixtures/installation-settings-1-6.json", []string{"cf", "p-bosh"}, 3)
-		checkFindMethods("./fixtures/installation-settings-1-6-default.json", []string{"cf", "p-bosh"}, 0)
-		checkFindMethods("./fixtures/installation-settings-1-5.json", []string{"cf"}, 3)
-	})
-
 	Describe("NewConfigurationParser", func() {
 		keyConfigParser := NewConfigurationParser("./fixtures/installation-settings-1-6-aws.json")
 		passConfigParser := NewConfigurationParser("./fixtures/installation-settings-1-6.json")
@@ -36,60 +28,6 @@ var _ = Describe("ConfigurationParser", func() {
 	checkGetProducts(7, "./fixtures/installation-settings-1-6-aws.json")
 
 })
-
-func checkFindMethods(fixturePath string, productNames []string, pgJobCount int) {
-	Context(fmt.Sprintf("when called with a given %s fixture", fixturePath), func() {
-		var configParser *ConfigurationParser
-		BeforeEach(func() {
-			configParser = NewConfigurationParser(fixturePath)
-		})
-		Context(fmt.Sprintf("when called with a list of products %s", productNames), func() {
-			for _, p := range productNames {
-				var productID = p
-				Describe("given a FindByProductID method", func() {
-					Context(fmt.Sprintf("when called with a valid product id %s", productID), func() {
-						It("then it should return a the corresponding product", func() {
-							defaultInitializedProduct := Products{}
-							product, err := configParser.FindByProductID(productID)
-							Ω(err).ShouldNot(HaveOccurred())
-							Ω(product).ShouldNot(Equal(defaultInitializedProduct))
-						})
-					})
-				})
-				Describe("given a FindJobsByProductID", func() {
-					Context("when called with a valid product id", func() {
-						It("then it should return a list of jobs for the corresponding product", func() {
-							jobs := configParser.FindJobsByProductID(productID)
-							Ω(len(jobs)).ShouldNot(Equal(0))
-						})
-					})
-				})
-			}
-		})
-		Describe("given a FindByProductID method", func() {
-			Context("when called with a non-existing product id", func() {
-				It("then it should return an empty object error", func() {
-					_, err := configParser.FindByProductID("i dont exist")
-					Ω(err).Should(HaveOccurred())
-				})
-			})
-		})
-		Describe("given a FindJobsByProductID", func() {
-			Context("when called with a non-existing product id", func() {
-				It("then it should return an empty jobs list", func() {
-					jobs := configParser.FindJobsByProductID("i don't exist")
-					Ω(len(jobs)).Should(Equal(0))
-				})
-			})
-		})
-		Describe("given a FindCFPostgresJobs", func() {
-			It("then it should return the correct number of jobs", func() {
-				jobs := configParser.FindCFPostgresJobs()
-				Ω(len(jobs)).Should(Equal(pgJobCount))
-			})
-		})
-	})
-}
 
 func checkGetProducts(expectedCount int, fixturePath string) {
 	Describe("given a configuration parser", func() {
