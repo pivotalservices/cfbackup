@@ -36,7 +36,7 @@ func GetToken(uaaURL, opsManagerUsername, opsManagerPassword, clientID, clientSe
 				token = t.AccessToken
 			}
 		}
-	} else if res.StatusCode != http.StatusOK {
+	} else if res != nil && res.StatusCode != http.StatusOK {
 		body, _ := ioutil.ReadAll(res.Body)
 		err = errors.New(string(body))
 	}
