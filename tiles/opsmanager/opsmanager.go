@@ -8,7 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"net/url"
+	urllib "net/url"
 	"path"
 
 	"github.com/cloudfoundry-community/go-cfenv"
@@ -161,7 +161,7 @@ func (context *OpsManager) legacyHTTPGet(url string) (resp *http.Response, err e
 
 func (context *OpsManager) oauthHTTPGet(urlString string) (resp *http.Response, err error) {
 	var token string
-	var uaaURL, _ = url.Parse(urlString)
+	var uaaURL, _ = urllib.Parse(urlString)
 	var opsManagerUsername = context.Username
 	var opsManagerPassword = context.Password
 	var clientID = "opsman"
@@ -207,23 +207,27 @@ func (context *OpsManager) importInstallationPart(url, filename, fieldname strin
 	if backupReader, err = context.Reader(context.TargetDir, context.OpsmanagerBackupDir, filename); err == nil {
 		defer backupReader.Close()
 		var resp *http.Response
+		var uaaURL, _ = urllib.Parse(url)
+		var clientID = "opsman"
+		var clientSecret = ""
+		var token, _ = uaa.GetToken("https://"+uaaURL.Host+"/uaa", context.Username, context.Password, clientID, clientSecret)
 		conn := ghttp.ConnAuth{
-			Url:      url,
-			Username: context.Username,
-			Password: context.Password,
+			Url:         url,
+			Username:    context.Username,
+			Password:    context.Password,
+			BearerToken: token,
 		}
-
 		filePath := path.Join(context.TargetDir, context.OpsmanagerBackupDir, filename)
 		bufferedReader := bufio.NewReader(backupReader)
-
 		lo.G.Debug("upload request", log.Data{"fieldname": fieldname, "filePath": filePath, "conn": conn})
-
 		creds := map[string]string{
 			"password": context.Password,
 		}
 		resp, err = upload(conn, fieldname, filePath, -1, bufferedReader, creds)
+
 		if err == nil && resp.StatusCode == http.StatusOK {
 			lo.G.Debug("Request for %s succeeded with status: %s", url, resp.Status)
+
 		} else if resp != nil && resp.StatusCode != http.StatusOK {
 			err = fmt.Errorf("Request for %s failed with status: %s", url, resp.Status)
 		}
