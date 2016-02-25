@@ -1,17 +1,22 @@
 package opsmanager_test
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"os"
 	"path"
 
 	"github.com/cloudfoundry-community/go-cfenv"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	testhttp "github.com/onsi/gomega/ghttp"
 	"github.com/pivotalservices/cfbackup"
 	"github.com/pivotalservices/cfbackup/fakes"
 	. "github.com/pivotalservices/cfbackup/tiles/opsmanager"
+	opsfakes "github.com/pivotalservices/cfbackup/tiles/opsmanager/fakes"
 	. "github.com/pivotalservices/gtils/command"
 	ghttp "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/http/fake"
@@ -25,6 +30,9 @@ var _ = Describe("OpsManager object", func() {
 		backupDir  string
 	)
 	Describe("Given a GetInstallationSettings method", func() {
+		checkAuthorizationMechanismSupport("oauth", http.StatusOK, http.StatusOK, "Bearer")
+		checkAuthorizationMechanismSupport("oauth", http.StatusUnauthorized, http.StatusOK, "Basic")
+
 		Context("when called on a properly initialized opsmanager", func() {
 			var (
 				installationSettings        io.Reader
@@ -332,3 +340,36 @@ var _ = Describe("OpsManager object", func() {
 		})
 	})
 })
+
+var checkAuthorizationMechanismSupport = func(method string, oauthStatusCode, apiStatusCode int, authPrefix string) {
+	Context("when calling against a ops manager which uses "+method, func() {
+		var err error
+		var installationSettings io.Reader
+		var server *testhttp.Server
+		tmpDir, _ := ioutil.TempDir("/tmp", "test")
+
+		BeforeEach(func() {
+			server = opsfakes.NewFakeOpsManagerServer(testhttp.NewTLSServer(), oauthStatusCode, `{"something":"as a auth response"}`, apiStatusCode, `{"something":"as an api call response"}`)
+			urlString, _ := url.Parse(server.URL())
+			fmt.Println(server.URL())
+			opsManager, _ := NewOpsManager(urlString.Host, "user", "pass", "opsUser", "opsPass", tmpDir)
+			installationSettings, err = opsManager.GetInstallationSettings()
+		})
+
+		AfterEach(func() {
+			server.Close()
+			os.Remove(tmpDir)
+		})
+
+		It("then it should successfully call the ops manager api", func() {
+			Ω(err).ShouldNot(HaveOccurred())
+		})
+
+		It("then it should have recieved the proper authorization requests", func() {
+			reqArray := server.ReceivedRequests()
+			Ω(len(reqArray)).Should(Equal(2))
+			Ω(reqArray[0].Header["Authorization"]).Should(BeEmpty())
+			Ω(reqArray[1].Header["Authorization"][0]).Should(HavePrefix(authPrefix))
+		})
+	})
+}
