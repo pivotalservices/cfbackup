@@ -9,6 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
 	. "github.com/pivotalservices/cfbackup/tiles/opsmanager"
+	opsfakes "github.com/pivotalservices/cfbackup/tiles/opsmanager/fakes"
 	"github.com/pivotalservices/cfops/tileregistry"
 )
 
@@ -47,13 +48,7 @@ var _ = Describe("OpsManagerBuilder", func() {
 
 			BeforeEach(func() {
 				fileBytes, _ := ioutil.ReadFile("../../fixtures/installation-settings-1-6-aws.json")
-				server = ghttp.NewTLSServer()
-				server.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyBasicAuth(fakeUser, fakePass),
-						ghttp.RespondWith(http.StatusOK, string(fileBytes[:])),
-					),
-				)
+				server = opsfakes.NewFakeOpsManagerServer(ghttp.NewTLSServer(), http.StatusUnauthorized, `{"something":"failedauth"}`, http.StatusOK, string(fileBytes))
 			})
 
 			AfterEach(func() {
