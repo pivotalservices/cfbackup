@@ -171,9 +171,6 @@ func (context *ElasticRuntime) assignCredentials(installationSettings cfbackup.I
 			ip     string
 			pass   string
 		)
-		//sysInfo.Set(cfbackup.SDVcapUser, ERDefaultSystemUser)
-		//sysInfo.Set(cfbackup.SDUser, sysInfo.Get(cfbackup.SDIdentity))
-
 		productName := sysInfo.Get(cfbackup.SDProduct)
 		jobName := sysInfo.Get(cfbackup.SDComponent)
 		identifier := sysInfo.Get(cfbackup.SDIdentifier)
@@ -182,7 +179,10 @@ func (context *ElasticRuntime) assignCredentials(installationSettings cfbackup.I
 			sysInfo.Set(cfbackup.SDIP, ip)
 			sysInfo.Set(cfbackup.SDVcapPass, pass)
 			sysInfo.Set(cfbackup.SDVcapUser, userID)
-			if userID, pass, err = context.getUserIDPasswordForIdentifier(installationSettings, productName, jobName, identifier); err == nil {
+			if identifier == "vm_credentials" {
+                sysInfo.Set(cfbackup.SDUser, userID)
+				sysInfo.Set(cfbackup.SDPass, pass)
+			} else if userID, pass, err = context.getUserIDPasswordForIdentifier(installationSettings, productName, jobName, identifier); err == nil {
 				sysInfo.Set(cfbackup.SDUser, userID)
 				sysInfo.Set(cfbackup.SDPass, pass)
 			}

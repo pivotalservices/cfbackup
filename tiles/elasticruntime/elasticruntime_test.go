@@ -13,7 +13,6 @@ import (
 	"github.com/pivotalservices/cfbackup/fakes"
 	. "github.com/pivotalservices/cfbackup/tiles/elasticruntime"
 	"github.com/pivotalservices/gtils/osutils"
-	"github.com/pivotalservices/gtils/persistence"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -70,102 +69,42 @@ func (s mockDumper) Import(i io.Reader) (err error) {
 }
 
 var _ = Describe("ElasticRuntime", func() {
-	Describe("Elastic Runtime v1.4 file variant with getpassword IP index error", func() {
-		var installationSettingsFilePath = "../../fixtures/installation-settings-1-4-variant.json"
-		testERWithVersionSpecificFile(installationSettingsFilePath)
-		testPostgresDBBackups(installationSettingsFilePath)
-		testMySQLDBBackups(installationSettingsFilePath)
-	})
-
-	Describe("ElasticRuntime Version 1.4", func() {
-		var installationSettingsFilePath = "../../fixtures/installation-settings-1-4.json"
-		testERWithVersionSpecificFile(installationSettingsFilePath)
-		testPostgresDBBackups(installationSettingsFilePath)
-		testMySQLDBBackups(installationSettingsFilePath)
-	})
-
-	Describe("ElasticRuntime Version 1.5", func() {
-		var installationSettingsFilePath = "../../fixtures/installation-settings-1-5.json"
-		testERWithVersionSpecificFile(installationSettingsFilePath)
-		testPostgresDBBackups(installationSettingsFilePath)
-		testMySQLDBBackups(installationSettingsFilePath)
-	})
-
-	Describe("ElasticRuntime Version 1.6", func() {
-		os.Setenv(ERVersionEnvFlag, ERVersion16)
-		var installationSettingsFilePath = "../../fixtures/installation-settings-1-6.json"
-		testERWithVersionSpecificFile(installationSettingsFilePath)
-		testPostgresDBBackups(installationSettingsFilePath)
-		testMySQLDBBackups(installationSettingsFilePath)
-		os.Setenv(ERVersionEnvFlag, "")
-		
-	})
-	Describe("ElasticRuntime Version 1.7", func() {
-		os.Setenv(ERVersionEnvFlag, ERVersion16)
-		var installationSettingsFilePath = "../../fixtures/installation-settings-1-7.json"
-		testERWithVersionSpecificFile(installationSettingsFilePath)
-		testMySQLDBBackups(installationSettingsFilePath)
-		os.Setenv(ERVersionEnvFlag, "")
-	})
-
-	Describe("Given: a er version feature toggle", func() {
-		Context("when toggled to v1.6", func() {
-			versionBoshName := "p-bosh"
-			versionPGDump := "/var/vcap/packages/postgres-9.4.2/bin/pg_dump"
-			versionPGRestore := "/var/vcap/packages/postgres-9.4.2/bin/pg_restore"
-			oldNewDirector := cfbackup.NewDirector
-
-			BeforeEach(func() {
-				oldNewDirector = cfbackup.NewDirector
-				cfbackup.NewDirector = fakes.NewFakeDirector
-				os.Setenv(ERVersionEnvFlag, ERVersion16)
-				cfbackup.SetPGDumpUtilVersions()
-			})
-
-			AfterEach(func() {
-				cfbackup.NewDirector = oldNewDirector
-				os.Setenv(ERVersionEnvFlag, "")
-				cfbackup.SetPGDumpUtilVersions()
-			})
-
-			It("then it should know the correct bosh name for this version", func() {
-				Ω(cfbackup.BoshName()).Should(Equal(versionBoshName))
-			})
-
-			It("then it should target the proper vendored postgres utils", func() {
-				Ω(persistence.PGDmpDumpBin).Should(Equal(versionPGDump))
-				Ω(persistence.PGDmpRestoreBin).Should(Equal(versionPGRestore))
-			})
+	Describe("Elasic Runtime legacy (pre-1.6)", func() {
+		Describe("Elastic Runtime v1.4 file variant with getpassword IP index error", func() {
+			var installationSettingsFilePath = "../../fixtures/installation-settings-1-4-variant.json"
+			testERWithVersionSpecificFile(installationSettingsFilePath, "microbosh")
+			testPostgresDBBackups(installationSettingsFilePath)
+			testMySQLDBBackups(installationSettingsFilePath)
 		})
-		Context("when NOT toggled to v1.6", func() {
-			versionBoshName := "microbosh"
-			versionPGDump := "/var/vcap/packages/postgres/bin/pg_dump"
-			versionPGRestore := "/var/vcap/packages/postgres/bin/pg_restore"
-			oldNewDirector := cfbackup.NewDirector
 
-			BeforeEach(func() {
-				oldNewDirector = cfbackup.NewDirector
-				cfbackup.NewDirector = fakes.NewFakeDirector
-				os.Setenv(ERVersionEnvFlag, "")
-				cfbackup.SetPGDumpUtilVersions()
-			})
+		Describe("ElasticRuntime Version 1.4", func() {
+			var installationSettingsFilePath = "../../fixtures/installation-settings-1-4.json"
+			testERWithVersionSpecificFile(installationSettingsFilePath, "microbosh")
+			testPostgresDBBackups(installationSettingsFilePath)
+			testMySQLDBBackups(installationSettingsFilePath)
+		})
 
-			AfterEach(func() {
-				cfbackup.NewDirector = oldNewDirector
-				os.Setenv(ERVersionEnvFlag, "")
-				cfbackup.SetPGDumpUtilVersions()
-			})
-
-			It("then it should know the correct bosh name for this version", func() {
-				Ω(cfbackup.BoshName()).Should(Equal(versionBoshName))
-			})
-
-			It("then it should target the proper vendored postgres utils", func() {
-				Ω(persistence.PGDmpDumpBin).Should(Equal(versionPGDump))
-				Ω(persistence.PGDmpRestoreBin).Should(Equal(versionPGRestore))
-			})
+		Describe("ElasticRuntime Version 1.5", func() {
+			var installationSettingsFilePath = "../../fixtures/installation-settings-1-5.json"
+			testERWithVersionSpecificFile(installationSettingsFilePath, "microbosh")
+			testPostgresDBBackups(installationSettingsFilePath)
+			testMySQLDBBackups(installationSettingsFilePath)
 		})
 	})
+	Describe("Elasic Runtime (1.6 and beyond)", func() {
+		Describe("ElasticRuntime Version 1.6", func() {
+			var installationSettingsFilePath = "../../fixtures/installation-settings-1-6.json"
+			testERWithVersionSpecificFile(installationSettingsFilePath, "p-bosh")
+			testPostgresDBBackups(installationSettingsFilePath)
+			testMySQLDBBackups(installationSettingsFilePath)
+		})
+		Describe("ElasticRuntime Version 1.7", func() {
+			var installationSettingsFilePath = "../../fixtures/installation-settings-1-7.json"
+			testERWithVersionSpecificFile(installationSettingsFilePath, "p-bosh")
+			testMySQLDBBackups(installationSettingsFilePath)
+		})
+	})
+
 })
 
 func testMySQLDBBackups(installationSettingsFilePath string) {
@@ -500,13 +439,33 @@ func testPostgresDBBackups(installationSettingsFilePath string) {
 	})
 }
 
-func testERWithVersionSpecificFile(installationSettingsFilePath string) {
-
+func testERWithVersionSpecificFile(installationSettingsFilePath string, boshName string) {
+	var elasticRuntime *ElasticRuntime
+	Describe("NewElasticRuntime", func() {
+		BeforeEach(func() {
+			elasticRuntime = NewElasticRuntime(installationSettingsFilePath, "", "")
+		})
+		Context("with valid installationSettings file", func() {
+			It("ReadAllUserCredentials should return nil error", func() {
+				err := elasticRuntime.ReadAllUserCredentials()
+				Ω(err).Should(BeNil())
+			})
+			It("No PersistentSystems should return nil error", func() {
+				err := elasticRuntime.ReadAllUserCredentials()
+				Ω(err).Should(BeNil())
+				for _, psystem := range elasticRuntime.PersistentSystems {
+					err = psystem.Error()
+					Ω(err).Should(BeNil())
+				}
+			})
+		})
+	})
 	Describe("Backup / Restore", func() {
 
 		oldNewDirector := cfbackup.NewDirector
 
 		BeforeEach(func() {
+
 			oldNewDirector = cfbackup.NewDirector
 			cfbackup.NewDirector = fakes.NewFakeDirector
 		})
@@ -521,7 +480,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 				info   = cfbackup.SystemsInfo{
 					SystemDumps: map[string]cfbackup.SystemDump{
 						"DirectorInfo": &cfbackup.SystemInfo{
-							Product:    cfbackup.BoshName(),
+							Product:    boshName,
 							Component:  "director",
 							Identifier: "director_credentials",
 						},
