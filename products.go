@@ -89,3 +89,13 @@ func (s *Products) GetPropertyValues(job Jobs, identifier string) (propertyMap m
 	}
 	return
 }
+
+//GetAvailabilityZoneNames - returns a list of availability zones
+func (s *Products) GetAvailabilityZoneNames() (availablityZoneNames []string) {
+	if len(s.AZReference) > 0 {
+		availablityZoneNames = s.AZReference
+	} else {
+		availablityZoneNames = append(availablityZoneNames, s.SingletonAvailabilityZoneReference)
+	}
+	return
+}

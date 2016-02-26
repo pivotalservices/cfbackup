@@ -78,7 +78,7 @@ type (
 		GUID                               string              `json:"guid"`
 		InfrastructureNetworkReference     string              `json:"infrastructure_network_reference"`
 		InstallationName                   string              `json:"installation_name"`
-		SingletonAvailabilityZoneReference string              `json:"sigleton_availability_zone_reference"`
+		SingletonAvailabilityZoneReference string              `json:"singleton_availability_zone_reference"`
 		Stemcell                           interface{}         `json:"stemcell"`
 	}
 
