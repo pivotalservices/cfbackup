@@ -300,7 +300,7 @@ func (s *mockTile) Restore() error {
 
 //NewFakeBackupContext --
 func NewFakeBackupContext(target string, env map[string]string, storageProvider cfbackup.StorageProvider) (backupContext cfbackup.BackupContext) {
-	backupContext = cfbackup.NewBackupContext(target, env)
+	backupContext = cfbackup.NewBackupContext(target, env, "")
 	backupContext.StorageProvider = storageProvider
 	return
 }
