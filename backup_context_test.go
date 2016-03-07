@@ -13,7 +13,7 @@ var _ = Describe("BackupContext", func() {
 			var backupContext BackupContext
 			var controlTargetDir = "random/path/to/archive"
 			BeforeEach(func() {
-				backupContext = NewBackupContext(controlTargetDir, cfenv.CurrentEnv())
+				backupContext = NewBackupContext(controlTargetDir, cfenv.CurrentEnv(), "")
 			})
 			It("then it should create a backup context with the targetdir set", func() {
 				Ω(backupContext.TargetDir).Should(Equal(controlTargetDir))
@@ -34,7 +34,7 @@ var _ = Describe("BackupContext", func() {
 					SecretAccessKeyVarname: controlSecret,
 					BucketNameVarname:      controlBucket,
 					IsS3Varname:            controlS3Active,
-				})
+				}, "")
 			})
 			It("then it should create a backup context that can be used for s3 backup/restore ", func() {
 				Ω(backupContext.TargetDir).Should(Equal(controlTargetDir))

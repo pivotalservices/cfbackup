@@ -20,7 +20,7 @@ var NewElasticRuntime = func(jsonFile string, target string, sshKey string) *Ela
 	context := &ElasticRuntime{
 		SSHPrivateKey:     sshKey,
 		JSONFile:          jsonFile,
-		BackupContext:     cfbackup.NewBackupContext(target, cfenv.CurrentEnv()),
+		BackupContext:     cfbackup.NewBackupContext(target, cfenv.CurrentEnv(), ""),
 		SystemsInfo:       systemsInfo,
 		PersistentSystems: systemsInfo.PersistentSystems(),
 	}
@@ -180,7 +180,7 @@ func (context *ElasticRuntime) assignCredentials(installationSettings cfbackup.I
 			sysInfo.Set(cfbackup.SDVcapPass, pass)
 			sysInfo.Set(cfbackup.SDVcapUser, userID)
 			if identifier == "vm_credentials" {
-                sysInfo.Set(cfbackup.SDUser, userID)
+				sysInfo.Set(cfbackup.SDUser, userID)
 				sysInfo.Set(cfbackup.SDPass, pass)
 			} else if userID, pass, err = context.getUserIDPasswordForIdentifier(installationSettings, productName, jobName, identifier); err == nil {
 				sysInfo.Set(cfbackup.SDUser, userID)

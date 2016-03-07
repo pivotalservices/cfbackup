@@ -134,7 +134,7 @@ func testMySQLDBBackups(installationSettingsFilePath string) {
 				er = ElasticRuntime{
 					JSONFile:      installationSettingsFilePath,
 					HTTPGateway:   &fakes.MockHTTPGateway{},
-					BackupContext: cfbackup.NewBackupContext(target, cfenv.CurrentEnv()),
+					BackupContext: cfbackup.NewBackupContext(target, cfenv.CurrentEnv(), ""),
 					SystemsInfo:   info,
 				}
 				er.ReadAllUserCredentials()
@@ -246,7 +246,7 @@ func testPostgresDBBackups(installationSettingsFilePath string) {
 				er = ElasticRuntime{
 					JSONFile:      installationSettingsFilePath,
 					HTTPGateway:   &fakes.MockHTTPGateway{},
-					BackupContext: cfbackup.NewBackupContext(target, cfenv.CurrentEnv()),
+					BackupContext: cfbackup.NewBackupContext(target, cfenv.CurrentEnv(), ""),
 					SystemsInfo:   info,
 				}
 				er.ReadAllUserCredentials()
@@ -354,7 +354,7 @@ func testPostgresDBBackups(installationSettingsFilePath string) {
 				er = ElasticRuntime{
 					JSONFile:      installationSettingsFilePath,
 					HTTPGateway:   &fakes.MockHTTPGateway{},
-					BackupContext: cfbackup.NewBackupContext(target, cfenv.CurrentEnv()),
+					BackupContext: cfbackup.NewBackupContext(target, cfenv.CurrentEnv(), ""),
 					SystemsInfo:   info,
 				}
 				er.ReadAllUserCredentials()
@@ -408,7 +408,7 @@ func testPostgresDBBackups(installationSettingsFilePath string) {
 				er = ElasticRuntime{
 					JSONFile:      installationSettingsFilePath,
 					HTTPGateway:   &fakes.MockHTTPGateway{},
-					BackupContext: cfbackup.NewBackupContext(target, cfenv.CurrentEnv()),
+					BackupContext: cfbackup.NewBackupContext(target, cfenv.CurrentEnv(), ""),
 					SystemsInfo:   info,
 				}
 				er.ReadAllUserCredentials()
@@ -501,7 +501,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string, boshName
 				er = ElasticRuntime{
 					JSONFile:          installationSettingsFilePath,
 					HTTPGateway:       &fakes.MockHTTPGateway{},
-					BackupContext:     cfbackup.NewBackupContext(target, cfenv.CurrentEnv()),
+					BackupContext:     cfbackup.NewBackupContext(target, cfenv.CurrentEnv(), ""),
 					SystemsInfo:       info,
 					PersistentSystems: ps,
 				}
@@ -633,7 +633,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string, boshName
 				er = ElasticRuntime{
 					JSONFile:      installationSettingsFilePath,
 					HTTPGateway:   &fakes.MockHTTPGateway{true, 500, `{"state":"notdone"}`},
-					BackupContext: cfbackup.NewBackupContext(target, cfenv.CurrentEnv()),
+					BackupContext: cfbackup.NewBackupContext(target, cfenv.CurrentEnv(), ""),
 					SystemsInfo:   info,
 				}
 			})
@@ -706,7 +706,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string, boshName
 				er = ElasticRuntime{
 					JSONFile:      installationSettingsFilePath,
 					HTTPGateway:   &fakes.MockHTTPGateway{},
-					BackupContext: cfbackup.NewBackupContext(target, cfenv.CurrentEnv()),
+					BackupContext: cfbackup.NewBackupContext(target, cfenv.CurrentEnv(), ""),
 					SystemsInfo:   info,
 				}
 				er.ReadAllUserCredentials()
@@ -747,7 +747,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string, boshName
 				er = ElasticRuntime{
 					JSONFile:      installationSettingsFilePath,
 					HTTPGateway:   &fakes.MockHTTPGateway{},
-					BackupContext: cfbackup.NewBackupContext(target, cfenv.CurrentEnv()),
+					BackupContext: cfbackup.NewBackupContext(target, cfenv.CurrentEnv(), ""),
 					SystemsInfo:   info,
 				}
 				er.ReadAllUserCredentials()
