@@ -19,7 +19,12 @@ func NewBackupContext(targetDir string, env map[string]string, cryptKey string) 
 	}
 
 	if isValidCryptKey(cryptKey) {
+		var err error
 
+		if backupContext.StorageProvider, err = NewEncryptedStorageProvider(backupContext.StorageProvider, cryptKey); err != nil {
+			lo.G.Error("something went wrong when applying encryption to storage provider: ", err)
+			panic(err)
+		}
 	}
 	return
 }
