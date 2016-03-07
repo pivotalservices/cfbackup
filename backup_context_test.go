@@ -21,6 +21,19 @@ var _ = Describe("BackupContext", func() {
 			})
 		})
 
+		Context("when called with a valid encryption key", func() {
+			var backupContext BackupContext
+			var controlTargetDir = "random/path/to/archive"
+			var controlKey = "1234567891234567"
+			BeforeEach(func() {
+				backupContext = NewBackupContext(controlTargetDir, cfenv.CurrentEnv(), controlKey)
+			})
+
+			It("then it should create a storage provider which encrypts & decrypts", func() {
+				Ω(backupContext.StorageProvider).Should(BeAssignableToTypeOf(&EncryptedStorageProvider{}))
+			})
+		})
+
 		Context("when called with a complete set of s3 information", func() {
 			var backupContext BackupContext
 			var controlTargetDir = "random/path/to/archive"
