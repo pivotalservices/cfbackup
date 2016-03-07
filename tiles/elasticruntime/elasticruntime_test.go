@@ -443,7 +443,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string, boshName
 	var elasticRuntime *ElasticRuntime
 	Describe("NewElasticRuntime", func() {
 		BeforeEach(func() {
-			elasticRuntime = NewElasticRuntime(installationSettingsFilePath, "", "")
+			elasticRuntime = NewElasticRuntime(installationSettingsFilePath, "", "", "")
 		})
 		Context("with valid installationSettings file", func() {
 			It("ReadAllUserCredentials should return nil error", func() {
