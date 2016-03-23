@@ -117,7 +117,7 @@ var _ = Describe("OpsManager object", func() {
 			})
 		})
 
-		Context("calling restore with failed removal of deployment files", func() {
+		Context("calling restore where a deployment manifest deletion is not possible", func() {
 
 			BeforeEach(func() {
 				tmpDir, _ = ioutil.TempDir("/tmp", "test")
@@ -143,9 +143,20 @@ var _ = Describe("OpsManager object", func() {
 				f.Close()
 			})
 
-			It("Should yield error", func() {
-				err := opsManager.Restore()
-				Ω(err).ShouldNot(BeNil())
+			Context("where the clear bosh manifest flag is set to true", func() {
+				It("Should try and fail to remove the bosh-deployment.yml", func() {
+					opsManager.ClearBoshManifest = true
+					err := opsManager.Restore()
+					Ω(err).ShouldNot(BeNil())
+				})
+			})
+
+			Context("where the clear bosh manifest flag is set to false", func() {
+				It("Should not even try to remove the bosh-deployment.yml", func() {
+					opsManager.ClearBoshManifest = false
+					err := opsManager.Restore()
+					Ω(err).Should(BeNil())
+				})
 			})
 		})
 
