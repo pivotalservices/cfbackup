@@ -111,6 +111,10 @@ var _ = Describe("OpsManager object", func() {
 				Ω(fakeAssetsUploader.UploadCallCount).ShouldNot(Equal(0))
 				Ω(fakeAssetsUploader.SpyFileContents).Should(Equal(controlAssetsContents))
 			})
+			It("then it should import the assets archive", func() {
+				Ω(fakeAssetsUploader.UploadCallCount).ShouldNot(Equal(0))
+				Ω(fakeAssetsUploader.SpyFileContents).Should(Equal(controlAssetsContents))
+			})
 			It("then it should not import the settings archive", func() {
 				Ω(fakeSettingsUploader.UploadCallCount).Should(Equal(0))
 				Ω(fakeSettingsUploader.SpyFileContents).Should(BeNil())
@@ -363,7 +367,7 @@ var checkAuthorizationMechanismSupport = func(method string, oauthStatusCode, ap
 			server = opsfakes.NewFakeOpsManagerServer(testhttp.NewTLSServer(), oauthStatusCode, `{"something":"as a auth response"}`, apiStatusCode, `{"something":"as an api call response"}`)
 			urlString, _ := url.Parse(server.URL())
 			fmt.Println(server.URL())
-			opsManager, _ := NewOpsManager(urlString.Host, "user", "pass", "opsUser", "opsPass", tmpDir, "")
+			opsManager, _ := NewOpsManager(urlString.Host, "user", "pass", "opsUser", "opsPass", "opsPassphrase", tmpDir, "")
 			installationSettings, err = opsManager.GetInstallationSettings()
 		})
 
