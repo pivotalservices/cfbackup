@@ -8,9 +8,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
+	"github.com/pivotalservices/cfbackup/tileregistry"
 	. "github.com/pivotalservices/cfbackup/tiles/opsmanager"
 	opsfakes "github.com/pivotalservices/cfbackup/tiles/opsmanager/fakes"
-	"github.com/pivotalservices/cfops/tileregistry"
 )
 
 var _ = Describe("OpsManagerBuilder", func() {
