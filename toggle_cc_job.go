@@ -82,7 +82,7 @@ func (c *CloudController) waitUntilDone(taskID int) (err error) {
 	case bosh.DONE:
 		return
 	default:
-		err = bosh.TaskResultUnknown
+		err = bosh.ErrorTaskResultUnknown
 		return
 	}
 }

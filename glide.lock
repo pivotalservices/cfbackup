@@ -1,0 +1,70 @@
+hash: 96498e7445c0bcebf84d4621df817441ed3c02b569bea269765461414b20d509
+updated: 2016-04-12T00:27:12.188722173-05:00
+imports:
+- name: github.com/cloudfoundry-community/go-cfenv
+  version: b4bebec47a425334d2a076cf99329464c9e611f3
+- name: github.com/golang/protobuf
+  version: 2402d76f3d41f928c7902a765dfc872356dd3aad
+  subpackages:
+  - proto
+- name: github.com/kr/fs
+  version: 2788f0dbd16903de03cb8186e5c7d97b69ad387b
+- name: github.com/mitchellh/mapstructure
+  version: 281073eb9eb092240d33ef253c404f1cca550309
+- name: github.com/onsi/ginkgo
+  version: e43390e35a4a88f3f95d5ddf9055efb7a1170469
+- name: github.com/onsi/gomega
+  version: 0fe204460da2c8fa1babcaac196e694de8f1aaa1
+  subpackages:
+  - ghttp
+  - types
+  - internal/assertion
+  - internal/asyncassertion
+  - internal/testingtsupport
+  - matchers
+  - internal/oraclematcher
+  - format
+  - matchers/support/goraph/bipartitegraph
+  - matchers/support/goraph/edge
+  - matchers/support/goraph/node
+  - matchers/support/goraph/util
+- name: github.com/op/go-logging
+  version: dfaf3dff9b631bc4236201d90d41ee0de9202889
+- name: github.com/pivotal-golang/lager
+  version: 95b2ada4cdf781bdcf07e5207879e034ac8c5314
+- name: github.com/pivotalservices/cfops
+  version: 86f9e514c7063588a15ca62265b8d85935756e99
+  subpackages:
+  - tileregistry
+- name: github.com/pivotalservices/gtils
+  version: 53bee4830c27c4266ef324996f275c7fcdb064af
+  subpackages:
+  - bosh
+  - command
+  - http
+  - log
+  - mock
+  - osutils
+  - persistence
+  - storage
+  - uaa
+- name: github.com/pkg/sftp
+  version: 8a7343c6ed99a2934aea9c08c923c11df775b6db
+- name: github.com/rlmcpherson/s3gof3r
+  version: b574ee38528c51c2c8652b79e71245817c59bd61
+- name: github.com/technoweenie/multipartstreamer
+  version: a90a01d73ae432e2611d178c18367fbaa13e0154
+- name: github.com/xchapter7x/goutil
+  version: 046742e03686eda64c6ac938594120d7fb5b3ecc
+  subpackages:
+  - itertools
+- name: github.com/xchapter7x/lo
+  version: aa2602d0e8e8647f0ce7b53109b37040941915aa
+- name: golang.org/x/crypto
+  version: ""
+  subpackages:
+  - ssh
+  - curve25519
+- name: gopkg.in/yaml.v1
+  version: 9f9df34309c04878acc86042b16630b0f696e1de
+devImports: []
