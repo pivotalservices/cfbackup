@@ -1,20 +1,16 @@
-hash: 96498e7445c0bcebf84d4621df817441ed3c02b569bea269765461414b20d509
-updated: 2016-04-12T00:27:12.188722173-05:00
+hash: 3828e5d36ed83d4f9eae82578695eb6f7947f69684aa310504551bd73f533b5c
+updated: 2016-04-12T00:58:09.973025476-05:00
 imports:
 - name: github.com/cloudfoundry-community/go-cfenv
   version: b4bebec47a425334d2a076cf99329464c9e611f3
-- name: github.com/golang/protobuf
-  version: 2402d76f3d41f928c7902a765dfc872356dd3aad
-  subpackages:
-  - proto
 - name: github.com/kr/fs
   version: 2788f0dbd16903de03cb8186e5c7d97b69ad387b
 - name: github.com/mitchellh/mapstructure
   version: 281073eb9eb092240d33ef253c404f1cca550309
 - name: github.com/onsi/ginkgo
-  version: e43390e35a4a88f3f95d5ddf9055efb7a1170469
+  version: 2c2e9bb47b4e44067024f29339588cac8b34dd12
 - name: github.com/onsi/gomega
-  version: 0fe204460da2c8fa1babcaac196e694de8f1aaa1
+  version: 835b5e4242c715976b98ed6bc6ece1d9c7879f66
   subpackages:
   - ghttp
   - types
@@ -22,22 +18,21 @@ imports:
   - internal/asyncassertion
   - internal/testingtsupport
   - matchers
-  - internal/oraclematcher
   - format
   - matchers/support/goraph/bipartitegraph
   - matchers/support/goraph/edge
   - matchers/support/goraph/node
   - matchers/support/goraph/util
 - name: github.com/op/go-logging
-  version: dfaf3dff9b631bc4236201d90d41ee0de9202889
+  version: 970db520ece77730c7e4724c61121037378659d9
 - name: github.com/pivotal-golang/lager
-  version: 95b2ada4cdf781bdcf07e5207879e034ac8c5314
+  version: 7639e31ce6622c55c15aa64144b85d5f4873d127
 - name: github.com/pivotalservices/cfops
-  version: 86f9e514c7063588a15ca62265b8d85935756e99
+  version: fc33e383ee8a518438b18e763268b81ec2f0fae6
   subpackages:
   - tileregistry
 - name: github.com/pivotalservices/gtils
-  version: 53bee4830c27c4266ef324996f275c7fcdb064af
+  version: 30b7bd6468fb8fa1e1c938b665ce08a9f9e102de
   subpackages:
   - bosh
   - command
@@ -49,9 +44,9 @@ imports:
   - storage
   - uaa
 - name: github.com/pkg/sftp
-  version: 8a7343c6ed99a2934aea9c08c923c11df775b6db
+  version: e84cc8c755ca39b7b64f510fe1fffc1b51f210a5
 - name: github.com/rlmcpherson/s3gof3r
-  version: b574ee38528c51c2c8652b79e71245817c59bd61
+  version: 39f5507f61031141057f3f880d9fb9eb97b8afd7
 - name: github.com/technoweenie/multipartstreamer
   version: a90a01d73ae432e2611d178c18367fbaa13e0154
 - name: github.com/xchapter7x/goutil
