@@ -6,8 +6,8 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/pivotalservices/cfbackup/tileregistry"
 	. "github.com/pivotalservices/cfbackup/tiles/elasticruntime"
-	"github.com/pivotalservices/cfops/tileregistry"
 )
 
 var _ = Describe("ElasticRuntimeBuilder", func() {

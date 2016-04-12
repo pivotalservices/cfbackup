@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/pivotalservices/cfbackup"
+	"github.com/pivotalservices/cfbackup/tileregistry"
 	"github.com/pivotalservices/cfbackup/tiles/opsmanager"
-	"github.com/pivotalservices/cfops/tileregistry"
 )
 
 //New -- method to generate an initialized elastic runtime

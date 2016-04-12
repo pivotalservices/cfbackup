@@ -5,9 +5,6 @@ import:
 - package: github.com/onsi/gomega
   subpackages:
   - ghttp
-- package: github.com/pivotalservices/cfops
-  subpackages:
-  - tileregistry
 - package: github.com/pivotalservices/gtils
   subpackages:
   - bosh

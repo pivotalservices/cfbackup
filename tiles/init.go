@@ -3,7 +3,7 @@ package cfbackup
 import (
 	"github.com/pivotalservices/cfbackup/tiles/elasticruntime"
 	"github.com/pivotalservices/cfbackup/tiles/opsmanager"
-	"github.com/pivotalservices/cfops/tileregistry"
+	"github.com/pivotalservices/cfbackup/tileregistry"
 )
 
 func init() {
