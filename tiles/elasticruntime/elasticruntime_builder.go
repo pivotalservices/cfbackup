@@ -11,7 +11,7 @@ import (
 )
 
 //New -- method to generate an initialized elastic runtime
-func (s *ElasticRuntimeBuilder) New(tileSpec tileregistry.TileSpec) (elasticRuntime tileregistry.Tile, err error) {
+func (s *ElasticRuntimeBuilder) New(tileSpec tileregistry.TileSpec) (elasticRuntimeCloser tileregistry.TileCloser, err error) {
 	var (
 		installationSettings io.Reader
 		installationTmpFile  *os.File
@@ -27,7 +27,14 @@ func (s *ElasticRuntimeBuilder) New(tileSpec tileregistry.TileSpec) (elasticRunt
 		if iaas, hasKey := config.GetIaaS(); hasKey {
 			sshKey = iaas.SSHPrivateKey
 		}
-		elasticRuntime = NewElasticRuntime(installationTmpFile.Name(), tileSpec.ArchiveDirectory, sshKey, tileSpec.CryptKey)
+		elasticRuntime := NewElasticRuntime(installationTmpFile.Name(), tileSpec.ArchiveDirectory, sshKey, tileSpec.CryptKey)
+		elasticRuntimeCloser = struct {
+			tileregistry.Tile
+			tileregistry.Closer
+		}{
+			elasticRuntime,
+			new(tileregistry.DoNothingCloser),
+		}
 	}
 	return
 }

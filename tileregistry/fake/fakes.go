@@ -13,8 +13,15 @@ type TileGenerator struct {
 }
 
 //New --
-func (s *TileGenerator) New(tileSpec tileregistry.TileSpec) (tileregistry.Tile, error) {
-	return s.TileSpy, s.ErrFake
+func (s *TileGenerator) New(tileSpec tileregistry.TileSpec) (tileregistry.TileCloser, error) {
+	tileCloser := struct {
+		tileregistry.Tile
+		tileregistry.Closer
+	}{
+		s.TileSpy,
+		new(tileregistry.DoNothingCloser),
+	}
+	return tileCloser, s.ErrFake
 }
 
 //Tile --
