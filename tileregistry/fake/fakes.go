@@ -10,6 +10,17 @@ type TileGenerator struct {
 	tileregistry.TileGenerator
 	TileSpy tileregistry.Tile
 	ErrFake error
+	Closer  tileregistry.Closer
+}
+
+//Closer --
+type Closer struct {
+	Executions int
+}
+
+//Close --
+func (closer *Closer) Close() {
+	closer.Executions++
 }
 
 //New --
@@ -19,7 +30,7 @@ func (s *TileGenerator) New(tileSpec tileregistry.TileSpec) (tileregistry.TileCl
 		tileregistry.Closer
 	}{
 		s.TileSpy,
-		new(tileregistry.DoNothingCloser),
+		s.Closer,
 	}
 	return tileCloser, s.ErrFake
 }
