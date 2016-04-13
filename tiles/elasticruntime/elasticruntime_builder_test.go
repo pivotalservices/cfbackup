@@ -1,9 +1,6 @@
 package elasticruntime_test
 
 import (
-	"io"
-	"os"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/pivotalservices/cfbackup/tileregistry"
@@ -24,62 +21,5 @@ var _ = Describe("ElasticRuntimeBuilder", func() {
 			})
 		})
 
-		Context("when called with a tileSpec", func() {
-			var (
-				controlFixtureFile = "../../fixtures/installation-settings-1-4-variant.json"
-				controlTileSpec    tileregistry.TileSpec
-				fileRef            *os.File
-			)
-			BeforeEach(func() {
-				controlTileSpec = tileregistry.TileSpec{}
-				GetInstallationSettings = func(tileSpec tileregistry.TileSpec) (settings io.Reader, err error) {
-					fileRef, _ = os.Open(controlFixtureFile)
-					settings = fileRef
-					return
-				}
-			})
-
-			AfterEach(func() {
-				fileRef.Close()
-			})
-
-			It("then it should return an initialized ElasticRuntime as a tileregistry.Tile interface", func() {
-				tile, err := new(ElasticRuntimeBuilder).New(controlTileSpec)
-				Ω(err).ShouldNot(HaveOccurred())
-				Ω(tile).Should(BeAssignableToTypeOf(new(ElasticRuntime)))
-			})
-		})
-
-		Context("when the installationsettings file contains a valid key", func() {
-			var (
-				controlFixtureFile = "../../fixtures/installation-settings-1-6-aws.json"
-				controlTileSpec    tileregistry.TileSpec
-				fileRef            *os.File
-			)
-			BeforeEach(func() {
-				controlTileSpec = tileregistry.TileSpec{}
-				GetInstallationSettings = func(tileSpec tileregistry.TileSpec) (settings io.Reader, err error) {
-					fileRef, _ = os.Open(controlFixtureFile)
-					settings = fileRef
-					return
-				}
-			})
-
-			AfterEach(func() {
-				fileRef.Close()
-			})
-
-			It("then it should return an initialized ElasticRuntime as a tileregistry.Tile interface", func() {
-				tile, err := new(ElasticRuntimeBuilder).New(controlTileSpec)
-				Ω(err).ShouldNot(HaveOccurred())
-				Ω(tile).Should(BeAssignableToTypeOf(new(ElasticRuntime)))
-			})
-
-			It("then it should properly set the SSHPrivateKey in the elastic runtime object", func() {
-				tile, err := new(ElasticRuntimeBuilder).New(controlTileSpec)
-				Ω(err).ShouldNot(HaveOccurred())
-				Ω(tile.(*ElasticRuntime).SSHPrivateKey).ShouldNot(BeEmpty())
-			})
-		})
 	})
 })
