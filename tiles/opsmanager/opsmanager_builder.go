@@ -3,6 +3,8 @@ package opsmanager
 import (
 	"github.com/pivotalservices/cfbackup"
 	"github.com/pivotalservices/cfbackup/tileregistry"
+	"github.com/pivotalservices/gtils/command"
+	"github.com/pivotalservices/opsmanclient"
 	"github.com/xchapter7x/lo"
 )
 
@@ -17,8 +19,8 @@ func (s *OpsManagerBuilder) New(tileSpec tileregistry.TileSpec) (opsManagerTileC
 
 		if iaas, hasKey := config.GetIaaS(); hasKey {
 			lo.G.Debug("we found a iaas info block")
-			var executor command.Executor
-			if executor, err = opsManager.Client.NewSSHExecuter(tileSpec.OpsManagerUser, tileSpec.OpsManagerPass, tileSpec.OpsManagerHost, iaas.SSHPrivateKey, 22); err == nil {
+			var executor command.Executer
+			if executor, err = opsmanclient.NewSSHExecuter(tileSpec.OpsManagerUser, tileSpec.OpsManagerPass, tileSpec.OpsManagerHost, iaas.SSHPrivateKey, 22); err == nil {
 				opsManager.setSSHExecutor(executor)
 			}
 
