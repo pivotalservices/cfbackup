@@ -1,5 +1,5 @@
-hash: 4cad5472c2070cc06184f5616026ad6b867423a9bfac7682e46a47843641ce21
-updated: 2016-04-22T09:05:10.643176533-06:00
+hash: 0bcb48c8d01e08170c780689043ed8ea153742ce6a7f01db1100156a454dd17f
+updated: 2016-04-22T11:30:55.851773815-06:00
 imports:
 - name: github.com/cloudfoundry-community/go-cfenv
   version: b4bebec47a425334d2a076cf99329464c9e611f3
@@ -41,7 +41,6 @@ imports:
   - uaa
 - name: github.com/pivotalservices/opsmanclient
   version: e2369fb88f28ac2cab02aa43dcaeb8cf84fe8ed1
-  repo: git@github.com:pivotalservices/opsmanclient
   subpackages:
   - http
 - name: github.com/pkg/sftp
