@@ -17,7 +17,10 @@ func (s *OpsManagerBuilder) New(tileSpec tileregistry.TileSpec) (opsManagerTileC
 
 		if iaas, hasKey := config.GetIaaS(); hasKey {
 			lo.G.Debug("we found a iaas info block")
-			opsManager.SetSSHPrivateKey(iaas.SSHPrivateKey)
+			var executor command.Executor
+			if executor, err = opsManager.Client.NewSSHExecuter(tileSpec.OpsManagerUser, tileSpec.OpsManagerPass, tileSpec.OpsManagerHost, iaas.SSHPrivateKey, 22); err == nil {
+				opsManager.setSSHExecutor(executor)
+			}
 
 		} else {
 			lo.G.Debug("No IaaS PEM key found. Defaulting to using ssh username and password credentials")

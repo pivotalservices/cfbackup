@@ -21,3 +21,4 @@ import:
   - itertools
 - package: github.com/xchapter7x/lo
 - package: gopkg.in/yaml.v1
+- package: github.com/pivotalservices/opsmanclient

@@ -14,25 +14,34 @@ type (
 	// OpsManager contains the location and credentials of a Pivotal Ops Manager instance
 	OpsManager struct {
 		cfbackup.BackupContext
-		Hostname            string
-		Username            string
-		Password            string
-		Passphrase          string
-		TempestPassword     string
-		DbEncryptionKey     string
-		Executer            command.Executer
-		LocalExecuter       command.Executer
-		SettingsUploader    httpUploader
-		AssetsUploader      httpUploader
-		SettingsRequestor   httpRequestor
-		AssetsRequestor     httpRequestor
-		DeploymentDir       string
+		Executor command.Executer
+		Client
+		// Hostname            string
+		// Username            string
+		// Password            string
+		// Passphrase          string
+		// TempestPassword     string
+		// DbEncryptionKey     string
+		// LocalExecuter       command.Executer
+		// SettingsUploader    httpUploader
+		// AssetsUploader      httpUploader
+		// SettingsRequestor   httpRequestor
+		// AssetsRequestor     httpRequestor
+		// DeploymentDir       string
 		OpsmanagerBackupDir string
-		SSHPrivateKey       string
-		SSHUsername         string
-		SSHPassword         string
-		SSHPort             int
-		ClearBoshManifest   bool
+		// SSHPrivateKey       string
+		// SSHUsername         string
+		// SSHPassword         string
+		// SSHPort             int
+		ClearBoshManifest bool
+	}
+
+	// Client used to call the Ops Manager API
+	Client interface {
+		GetInstallationSettingsBuffered() (io.Reader, error)
+		SaveDeployments(e command.Executer, bw io.WriteCloser) error
+		SaveInstallation(backupWriter io.WriteCloser) error
+		ImportInstallation(e command.Executer, backupDir string, backupReader io.ReadCloser, removeBoshManifest bool) error
 	}
 
 	//OpsManagerBuilder - an object that can build ops manager objects
