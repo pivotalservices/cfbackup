@@ -1,5 +1,5 @@
 hash: dec94b37bfeaa1b1d5772b9f23b6b0e261c70370b3247eb2e6176e055b8644c0
-updated: 2016-04-12T14:59:31.051676129-05:00
+updated: 2016-04-28T09:39:55.306601376-07:00
 imports:
 - name: github.com/cloudfoundry-community/go-cfenv
   version: b4bebec47a425334d2a076cf99329464c9e611f3
@@ -28,7 +28,7 @@ imports:
 - name: github.com/pivotal-golang/lager
   version: 7639e31ce6622c55c15aa64144b85d5f4873d127
 - name: github.com/pivotalservices/gtils
-  version: 30b7bd6468fb8fa1e1c938b665ce08a9f9e102de
+  version: 02f6e3fc7007ce437a04c201c60025dcda26fe04
   subpackages:
   - bosh
   - command
@@ -52,7 +52,7 @@ imports:
 - name: github.com/xchapter7x/lo
   version: aa2602d0e8e8647f0ce7b53109b37040941915aa
 - name: golang.org/x/crypto
-  version: d68c3ecb62c850b645dc072a8d78006286bf81ca
+  version: 285fb2ed20d1dc450fc743a1b3ff7c36bef372b9
   subpackages:
   - ssh
   - curve25519
