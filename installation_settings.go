@@ -95,12 +95,22 @@ func (s *InstallationSettings) extractIPsForProductAndJob(productName, jobName s
 
 func (s *InstallationSettings) findIPs(product Products, job Jobs) (IPs []string, err error) {
 	var IPsResponse []string
+	var foundAssignmentAZ = false
+	var errAssignmentAZ error
+
 	for _, azGUID := range product.GetAvailabilityZoneNames() {
-		if IPsResponse, err = s.IPAssignments.FindIPsByProductGUIDAndJobGUIDAndAvailabilityZoneGUID(product.GUID, job.GUID, azGUID); err == nil {
+		if IPsResponse, errAssignmentAZ = s.IPAssignments.FindIPsByProductGUIDAndJobGUIDAndAvailabilityZoneGUID(product.GUID, job.GUID, azGUID); errAssignmentAZ == nil {
+			foundAssignmentAZ = true
 			for _, ip := range IPsResponse {
 				IPs = append(IPs, ip)
 			}
+		} else {
+			err = errAssignmentAZ
 		}
+	}
+
+	if foundAssignmentAZ {
+		err = nil
 	}
 	return
 }
