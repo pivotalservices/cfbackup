@@ -153,7 +153,7 @@ func (s *InstallationSettings) FindCFPostgresJobs() (jobs []Jobs) {
 
 	jobsList := s.FindJobsByProductID("cf")
 	for _, job := range jobsList {
-		if isPostgres(job.Identifier, job.Instances) {
+		if isPostgres(job.Identifier, job.GetInstances()) {
 			jobs = append(jobs, job)
 		}
 	}
