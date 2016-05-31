@@ -101,6 +101,7 @@ type (
 		Identifier       string                   `json:"identifier"`
 		Properties       []Properties             `json:"properties"`
 		Instances        []Instances              `json:"instances"`
+		Instance         Instances                `json:"instance"` //this element replaces Instances in 1.7. keeping both for compatibility
 		GUID             string                   `json:"guid"`
 		InstallationName string                   `json:"installation_name"`
 		Partitions       []map[string]interface{} `json:"partitions"`
