@@ -13,11 +13,13 @@ var (
 		"":    legacyBoshName,
 	}
 	pgDumpBin = map[string]string{
+		"1.7": latestPGDumpBin,
 		"1.5": legacyPGDumpBin,
 		"1.4": legacyPGDumpBin,
 		"":    legacyPGDumpBin,
 	}
 	pgRestoreBin = map[string]string{
+		"1.7": latestPGRestoreBin,
 		"1.5": legacyPGRestoreBin,
 		"1.4": legacyPGRestoreBin,
 		"":    legacyPGRestoreBin,
@@ -27,6 +29,8 @@ var (
 const (
 	defaultBoshName     = "p-bosh"
 	legacyBoshName      = "microbosh"
+	latestPGDumpBin     = "/var/vcap/packages/postgres-9.4.6/bin/pg_dump"
+	latestPGRestoreBin  = "/var/vcap/packages/postgres-9.4.6/bin/pg_restore"
 	defaultPGDumpBin    = "/var/vcap/packages/postgres-9.4.2/bin/pg_dump"
 	defaultPGRestoreBin = "/var/vcap/packages/postgres-9.4.2/bin/pg_restore"
 	legacyPGDumpBin     = "/var/vcap/packages/postgres/bin/pg_dump"

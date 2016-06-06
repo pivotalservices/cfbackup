@@ -70,9 +70,9 @@ var _ = Describe("given a InstallationSettings object", func() {
 		checkInstallationSettingsPostgresJobs("./fixtures/installation-settings-1-4.json", 3)
 		checkInstallationSettingsPostgresJobs("./fixtures/installation-settings-1-4-variant.json", 3)
 
-		checkInstallationSettingsPostgresInitialization("./fixtures/installation-settings-1-7.json", "/var/vcap/packages/postgres-9.4.2/bin/pg_dump", "/var/vcap/packages/postgres-9.4.2/bin/pg_restore")
-		checkInstallationSettingsPostgresInitialization("./fixtures/installation-settings-1-7-pgsql.json", "/var/vcap/packages/postgres-9.4.2/bin/pg_dump", "/var/vcap/packages/postgres-9.4.2/bin/pg_restore")
-		checkInstallationSettingsPostgresInitialization("./fixtures/installation-settings-1-7-multiaz-unbalanced.json", "/var/vcap/packages/postgres-9.4.2/bin/pg_dump", "/var/vcap/packages/postgres-9.4.2/bin/pg_restore")
+		checkInstallationSettingsPostgresInitialization("./fixtures/installation-settings-1-7.json", "/var/vcap/packages/postgres-9.4.6/bin/pg_dump", "/var/vcap/packages/postgres-9.4.6/bin/pg_restore")
+		checkInstallationSettingsPostgresInitialization("./fixtures/installation-settings-1-7-pgsql.json", "/var/vcap/packages/postgres-9.4.6/bin/pg_dump", "/var/vcap/packages/postgres-9.4.6/bin/pg_restore")
+		checkInstallationSettingsPostgresInitialization("./fixtures/installation-settings-1-7-multiaz-unbalanced.json", "/var/vcap/packages/postgres-9.4.6/bin/pg_dump", "/var/vcap/packages/postgres-9.4.6/bin/pg_restore")
 		checkInstallationSettingsPostgresInitialization("./fixtures/installation-settings-1-6.json", "/var/vcap/packages/postgres-9.4.2/bin/pg_dump", "/var/vcap/packages/postgres-9.4.2/bin/pg_restore")
 		checkInstallationSettingsPostgresInitialization("./fixtures/installation-settings-1-6-default.json", "/var/vcap/packages/postgres-9.4.2/bin/pg_dump", "/var/vcap/packages/postgres-9.4.2/bin/pg_restore")
 		checkInstallationSettingsPostgresInitialization("./fixtures/installation-settings-1-5.json", "/var/vcap/packages/postgres/bin/pg_dump", "/var/vcap/packages/postgres/bin/pg_restore")
