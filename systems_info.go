@@ -52,32 +52,36 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 			}
 		}
 	}
-	systemDumps[ERMySQL] = &MysqlInfo{
-		SystemInfo: SystemInfo{
-			Product:           "cf",
-			Component:         "mysql",
-			Identifier:          "mysql_admin_credentials",
-			SSHPrivateKey:     sshKey,
-			RemoteArchivePath: mysqlRemoteArchivePath,
-		},
-		Database: "mysql",
+	if installationSettings.FindJobInstanceCount("cf", "mysql") > 0 {
+		systemDumps[ERMySQL] = &MysqlInfo{
+			SystemInfo: SystemInfo{
+				Product:           "cf",
+				Component:         "mysql",
+				Identifier:        "mysql_admin_credentials",
+				SSHPrivateKey:     sshKey,
+				RemoteArchivePath: mysqlRemoteArchivePath,
+			},
+			Database: "mysql",
+		}
 	}
 
 	systemDumps[ERDirector] = &SystemInfo{
 		Product:           installationSettings.GetBoshName(),
 		Component:         "director",
-		Identifier:          "director_credentials",
+		Identifier:        "director_credentials",
 		SSHPrivateKey:     sshKey,
 		RemoteArchivePath: defaultRemoteArchivePath,
 	}
-	systemDumps[ERNfs] = &NfsInfo{
-		SystemInfo: SystemInfo{
-			Product:           "cf",
-			Component:         "nfs_server",
-			Identifier:          "vm_credentials",
-			SSHPrivateKey:     sshKey,
-			RemoteArchivePath: nfsRemoteArchivePath,
-		},
+	if installationSettings.FindJobInstanceCount("cf", "nfs_server") > 0 {
+		systemDumps[ERNfs] = &NfsInfo{
+			SystemInfo: SystemInfo{
+				Product:           "cf",
+				Component:         "nfs_server",
+				Identifier:        "vm_credentials",
+				SSHPrivateKey:     sshKey,
+				RemoteArchivePath: nfsRemoteArchivePath,
+			},
+		}
 	}
 
 	return SystemsInfo{
