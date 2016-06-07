@@ -64,7 +64,7 @@ func (context *ElasticRuntime) backupRestore(action int) (err error) {
 				err = ErrERDBBackup
 			}
 		} else {
-			err = ErrEREmptyDBList
+			lo.G.Info("There is no internal persistent system used by ERT, skip db action")
 		}
 	} else if err == nil {
 		err = cfbackup.ErrERDirectorCreds
