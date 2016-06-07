@@ -20,6 +20,5 @@ var _ = Describe("ElasticRuntimeBuilder", func() {
 				Ω(err).Should(HaveOccurred())
 			})
 		})
-
 	})
 })
