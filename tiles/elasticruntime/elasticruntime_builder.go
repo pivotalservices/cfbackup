@@ -2,8 +2,6 @@ package elasticruntime
 
 import (
 	"io"
-	"io/ioutil"
-	"os"
 
 	"github.com/pivotalservices/cfbackup"
 	"github.com/pivotalservices/cfbackup/tileregistry"
@@ -14,26 +12,26 @@ import (
 func (s *ElasticRuntimeBuilder) New(tileSpec tileregistry.TileSpec) (elasticRuntimeCloser tileregistry.TileCloser, err error) {
 	var (
 		installationSettings io.Reader
-		installationTmpFile  *os.File
+		tmpfile              *TempFile
 		sshKey               = ""
 	)
+	if tmpfile, err = NewTempFile(opsmanager.OpsMgrInstallationSettingsFilename); err == nil {
 
-	if installationSettings, err = GetInstallationSettings(tileSpec); err == nil {
-		installationTmpFile, err = ioutil.TempFile("", opsmanager.OpsMgrInstallationSettingsFilename)
-		defer installationTmpFile.Close()
-		io.Copy(installationTmpFile, installationSettings)
-		config := cfbackup.NewConfigurationParser(installationTmpFile.Name())
+		if installationSettings, err = GetInstallationSettings(tileSpec); err == nil {
+			io.Copy(tmpfile.FileRef, installationSettings)
+			config := cfbackup.NewConfigurationParser(tmpfile.FileRef.Name())
 
-		if iaas, hasKey := config.GetIaaS(); hasKey {
-			sshKey = iaas.SSHPrivateKey
-		}
-		elasticRuntime := NewElasticRuntime(installationTmpFile.Name(), tileSpec.ArchiveDirectory, sshKey, tileSpec.CryptKey)
-		elasticRuntimeCloser = struct {
-			tileregistry.Tile
-			tileregistry.Closer
-		}{
-			elasticRuntime,
-			new(tileregistry.DoNothingCloser),
+			if iaas, hasKey := config.GetIaaS(); hasKey {
+				sshKey = iaas.SSHPrivateKey
+			}
+			elasticRuntime := NewElasticRuntime(tmpfile.FileRef.Name(), tileSpec.ArchiveDirectory, sshKey, tileSpec.CryptKey)
+			elasticRuntimeCloser = struct {
+				tileregistry.Tile
+				tileregistry.Closer
+			}{
+				elasticRuntime,
+				tmpfile,
+			}
 		}
 	}
 	return
