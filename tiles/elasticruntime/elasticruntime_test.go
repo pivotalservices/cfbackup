@@ -549,18 +549,16 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string, boshName
 					er.PersistentSystems = psOrig
 				})
 				Context("Backup", func() {
-					It("Should return error on empty list of persistence stores", func() {
+					It("Should return nil on empty list of persistence stores", func() {
 						err := er.Backup()
-						Ω(err).ShouldNot(BeNil())
-						Ω(err).Should(Equal(ErrEREmptyDBList))
+						Ω(err).Should(BeNil())
 					})
 				})
 
 				Context("Restore", func() {
-					It("Should return error on empty list of persistence stores", func() {
+					It("Should return nil on empty list of persistence stores", func() {
 						err := er.Restore()
-						Ω(err).ShouldNot(BeNil())
-						Ω(err).Should(Equal(ErrEREmptyDBList))
+						Ω(err).Should(BeNil())
 					})
 				})
 			})
