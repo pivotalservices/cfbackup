@@ -208,3 +208,24 @@ func (s *InstallationSettings) SetPGDumpUtilVersions() {
 	}
 	persistence.PGDmpRestoreBin = pgRestore
 }
+
+// FindJobInstanceCount find how many instances of a particular job
+func (s *InstallationSettings) FindJobInstanceCount(productID string, jobID string) int {
+	count := 0
+
+	for _, product := range s.Products {
+		identifier := product.Identifier
+		if identifier == productID {
+			for _, job := range product.Jobs {
+				if jobID == job.Identifier {
+					if job.Instances != nil {
+						count = job.Instances[0].Value
+					} else {
+						count = job.Partitions[0].InstanceCount + count
+					}
+				}
+			}
+		}
+	}
+	return count
+}
