@@ -11,6 +11,18 @@ import (
 )
 
 type (
+	//InstallationInfo - inteferface for gettting at insallation info
+	InstallationInfo interface {
+		FindPropertyValues(productName, jobName, identifier string) (propertyMap map[string]string, err error)
+		FindJobByProductAndJobName(productName, jobName string) (job Jobs, err error)
+		FindVMCredentialsByProductAndJob(productName, jobName string) (vmCredentials VMCredentials, err error)
+		FindIPsByProductAndJob(productName string, jobName string) (IPs []string, err error)
+		FindByProductID(id string) (productResponse Products, err error)
+		FindJobsByProductID(id string) []Jobs
+		FindCFPostgresJobs() (jobs []Jobs)
+		//GetBoshName() (boshName string)
+		//SetPGDumpUtilVersions()
+	}
 
 	//NFSBackup - this is a nfs backup object
 	NFSBackup struct {
