@@ -1,6 +1,8 @@
 package elasticruntime
 
 import (
+	"os"
+
 	"github.com/pivotalservices/cfbackup"
 	ghttp "github.com/pivotalservices/gtils/http"
 )
@@ -20,4 +22,9 @@ type (
 
 	//ElasticRuntimeBuilder -- an object that can build an elastic runtime pre-initialized
 	ElasticRuntimeBuilder struct{}
+
+	//TempFile -- a wrapper around temp files to make a closer
+	TempFile struct {
+		FileRef *os.File
+	}
 )

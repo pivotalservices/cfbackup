@@ -116,9 +116,17 @@ type (
 		Instance         Instances                `json:"instance"` //this element replaces Instances in 1.7. keeping both for compatibility
 		GUID             string                   `json:"guid"`
 		InstallationName string                   `json:"installation_name"`
-		Partitions       []map[string]interface{} `json:"partitions"`
+		Partitions       []Partition              `json:"partitions"`
 		Resources        []map[string]interface{} `json:"resources"`
 		VMCredentials    map[string]string        `json:"vm_credentials"`
+	}
+
+	//Partition partition for a job
+	Partition struct {
+		JobReference              string `json:"job_reference"`
+		InstallationName          string `json:"installation_name"`
+		InstanceCount             int    `json:"instance_count"`
+		AvailabilityZoneReference string `json:"availability_zone_reference"`
 	}
 
 	// VMCredentials contains property settings for a job

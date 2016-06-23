@@ -79,6 +79,10 @@ var _ = Describe("given a InstallationSettings object", func() {
 		checkInstallationSettingsPostgresInitialization("./fixtures/installation-settings-1-5.json", "/var/vcap/packages/postgres/bin/pg_dump", "/var/vcap/packages/postgres/bin/pg_restore")
 		checkInstallationSettingsPostgresInitialization("./fixtures/installation-settings-1-4.json", "/var/vcap/packages/postgres/bin/pg_dump", "/var/vcap/packages/postgres/bin/pg_restore")
 		checkInstallationSettingsPostgresInitialization("./fixtures/installation-settings-1-4-variant.json", "/var/vcap/packages/postgres/bin/pg_dump", "/var/vcap/packages/postgres/bin/pg_restore")
+
+		checkInstallationSettingsInstanceCount("./fixtures/installation-settings-1-6.json", "cf", "nfs_server", 1)
+		checkInstallationSettingsInstanceCount("./fixtures/installation-settings-1-6-aws.json", "cf", "nfs_server", 0)
+		checkInstallationSettingsInstanceCount("./fixtures/installation-settings-1-7.json", "cf", "nfs_server", 1)
 	})
 })
 
@@ -236,6 +240,20 @@ func checkInstallationSettingsPostgresInitialization(fixturePath, versionPGDump,
 		It("then it should target the proper vendored postgres utils", func() {
 			Ω(persistence.PGDmpDumpBin).Should(Equal(versionPGDump))
 			Ω(persistence.PGDmpRestoreBin).Should(Equal(versionPGRestore))
+		})
+	})
+}
+
+func checkInstallationSettingsInstanceCount(fixturePath, productID, jobID string, expectedCount int) {
+	Context(fmt.Sprintf("when called with a given %s fixture", fixturePath), func() {
+		var installationSettings InstallationSettings
+		BeforeEach(func() {
+			configParser := NewConfigurationParser(fixturePath)
+			installationSettings = configParser.InstallationSettings
+		})
+		It("then it should calculate the instance count", func() {
+			count := installationSettings.FindJobInstanceCount(productID, jobID)
+			Ω(count).Should(Equal(expectedCount))
 		})
 	})
 }
