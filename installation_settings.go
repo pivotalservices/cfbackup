@@ -63,6 +63,7 @@ func (s *InstallationSettings) FindVMCredentialsByProductAndJob(productName, job
 	var product Products
 	if product, err = s.FindByProductID(productName); err == nil {
 		vmCredentials, err = product.GetVMCredentialsByJob(jobName)
+		vmCredentials.SSLKey = s.Infrastructure.IaaSConfig.SSHPrivateKey
 	}
 	return
 }

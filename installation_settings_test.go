@@ -34,6 +34,7 @@ var _ = Describe("given a InstallationSettings object", func() {
 		checkInstallationSettingsIPMethods("./fixtures/installation-settings-1-4.json", "cf", "nfs_server", 1)
 		checkInstallationSettingsIPMethods("./fixtures/installation-settings-1-4-variant.json", "cf", "nfs_server", 1)
 
+		checkInstallationSettingsCredentialsMethods("./fixtures/installation-settings-1-6-aws.json", "cf", "nfs_server")
 		checkInstallationSettingsCredentialsMethods("./fixtures/installation-settings-1-7.json", "cf", "nfs_server")
 		checkInstallationSettingsCredentialsMethods("./fixtures/installation-settings-1-7-pgsql.json", "cf", "nfs_server")
 		checkInstallationSettingsCredentialsMethods("./fixtures/installation-settings-1-7-multiaz-unbalanced.json", "cf", "nfs_server")
@@ -122,8 +123,9 @@ func checkInstallationSettingsIPMethods(fixturePath string, productName string, 
 func checkInstallationSettingsCredentialsMethods(fixturePath string, productName string, jobName string) {
 	Context(fmt.Sprintf("when called with a given %s fixture", fixturePath), func() {
 		var installationSettings InstallationSettings
+		var configParser *ConfigurationParser
 		BeforeEach(func() {
-			configParser := NewConfigurationParser(fixturePath)
+			configParser = NewConfigurationParser(fixturePath)
 			installationSettings = configParser.InstallationSettings
 		})
 
@@ -132,7 +134,12 @@ func checkInstallationSettingsCredentialsMethods(fixturePath string, productName
 				It("then it should return vmcredentials for the job", func() {
 					vmcredentials, err := installationSettings.FindVMCredentialsByProductAndJob(productName, jobName)
 					Ω(err).ShouldNot(HaveOccurred())
+					iaas, hasKey := configParser.GetIaaS()
+					Ω(err).ShouldNot(HaveOccurred())
 					Ω(vmcredentials.UserID).ShouldNot(BeEmpty())
+					if hasKey {
+						Ω(vmcredentials.SSLKey).Should(Equal(iaas.SSHPrivateKey))
+					}
 					Ω(vmcredentials.Password + vmcredentials.SSLKey).ShouldNot(BeEmpty())
 				})
 			})
