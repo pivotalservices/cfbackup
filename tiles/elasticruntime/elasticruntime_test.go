@@ -8,7 +8,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/cloudfoundry-community/go-cfenv"
+	cfenv "github.com/cloudfoundry-community/go-cfenv"
 	"github.com/pivotalservices/cfbackup"
 	"github.com/pivotalservices/cfbackup/fakes"
 	. "github.com/pivotalservices/cfbackup/tiles/elasticruntime"
@@ -69,6 +69,35 @@ func (s mockDumper) Import(i io.Reader) (err error) {
 }
 
 var _ = Describe("ElasticRuntime", func() {
+	Describe("given: NewElasticRuntime", func() {
+		Context("when: called with an invalid file path to installation settings", func() {
+			It("then it should panic", func() {
+				Ω(func() {
+					NewElasticRuntime("invalid-file-path-asdgasdbkansdblkjaspdo;bjpaosdb", "./", ".", "", false)
+				}).Should(Panic())
+			})
+		})
+		Context("when: called with a skipnfs arg set to true", func() {
+			var skipNFS = true
+			var er *ElasticRuntime
+			BeforeEach(func() {
+				er = NewElasticRuntime("../../fixtures/installation-settings-1-7.json", "./", ".", "", skipNFS)
+			})
+			It("then: it should yield a elasticruntime that does not have a NFS system to be backedup/restored", func() {
+				Ω(er.SystemsInfo.SystemDumps[cfbackup.ERNfs]).Should(BeNil())
+			})
+		})
+		Context("when: called with a skipnfs arg set to false", func() {
+			var skipNFS = false
+			var er *ElasticRuntime
+			BeforeEach(func() {
+				er = NewElasticRuntime("../../fixtures/installation-settings-1-7.json", "./", ".", "", skipNFS)
+			})
+			It("then: it should yield a elasticruntime that will have a NFS system to be backedup/restored", func() {
+				Ω(er.SystemsInfo.SystemDumps[cfbackup.ERNfs]).ShouldNot(BeNil())
+			})
+		})
+	})
 	Describe("Elasic Runtime legacy (pre-1.6)", func() {
 		Describe("Elastic Runtime v1.4 file variant with getpassword IP index error", func() {
 			var installationSettingsFilePath = "../../fixtures/installation-settings-1-4-variant.json"
@@ -443,7 +472,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string, boshName
 	var elasticRuntime *ElasticRuntime
 	Describe("NewElasticRuntime", func() {
 		BeforeEach(func() {
-			elasticRuntime = NewElasticRuntime(installationSettingsFilePath, "", "", "")
+			elasticRuntime = NewElasticRuntime(installationSettingsFilePath, "", "", "", false)
 		})
 		Context("with valid installationSettings file", func() {
 			It("ReadAllUserCredentials should return nil error", func() {

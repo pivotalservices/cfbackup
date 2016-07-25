@@ -37,5 +37,6 @@ type (
 		CryptKey             string
 		ClearBoshManifest    bool
 		PluginArgs           string
+		SkipNFS              bool
 	}
 )

@@ -19,7 +19,7 @@ var _ = Describe("SystemsInfo", func() {
 		installationSettingsDefaultUpgradeAwsFile = "fixtures/installation-settings-1-6-aws.json"
 		sshKey = "valid key"
 		Context("Using a 1.6 vsphere installation settings file from a pre-1.6 postgresql upgrade", func() {
-			systemsInfo := NewSystemsInfo(installationSettingsPre16UpgradeVsphereFile, sshKey)
+			systemsInfo := NewSystemsInfo(installationSettingsPre16UpgradeVsphereFile, sshKey, false)
 			systemDumps := systemsInfo.SystemDumps
 
 			It("should have a systemDumps with the correct number of postgres dbs", func() {
@@ -37,7 +37,7 @@ var _ = Describe("SystemsInfo", func() {
 		})
 
 		Context("Using a 1.6 vsphere installation settings file from a default mysql/ha upgrade", func() {
-			systemsInfo := NewSystemsInfo(installationSettingsDefaultUpgradeVsphereFile, sshKey)
+			systemsInfo := NewSystemsInfo(installationSettingsDefaultUpgradeVsphereFile, sshKey, false)
 			systemDumps := systemsInfo.SystemDumps
 
 			It("should have a systemDumps with zero postgres dbs", func() {
@@ -55,7 +55,7 @@ var _ = Describe("SystemsInfo", func() {
 		})
 
 		Context("Using a 1.6 aws installation settings file from a default upgrade", func() {
-			systemsInfo := NewSystemsInfo(installationSettingsDefaultUpgradeAwsFile, sshKey)
+			systemsInfo := NewSystemsInfo(installationSettingsDefaultUpgradeAwsFile, sshKey, false)
 			systemDumps := systemsInfo.SystemDumps
 
 			It("should have a systemDumps with the correct number of postgres dbs", func() {
