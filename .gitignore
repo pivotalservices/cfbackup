@@ -29,3 +29,4 @@ _builds
 _projects
 _steps
 /vendor
+.wercker/

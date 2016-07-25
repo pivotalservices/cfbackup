@@ -1,8 +1,10 @@
 package cfbackup
 
+import "github.com/xchapter7x/lo"
+
 // NewSystemsInfo creates a map of SystemDumps that are configured
 // based on the installation settings fetched from ops manager
-func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo {
+func NewSystemsInfo(installationSettingsFile string, sshKey string, skipNFS bool) SystemsInfo {
 
 	configParser := NewConfigurationParser(installationSettingsFile)
 	installationSettings := configParser.InstallationSettings
@@ -72,7 +74,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 		SSHPrivateKey:     sshKey,
 		RemoteArchivePath: defaultRemoteArchivePath,
 	}
-	if installationSettings.FindJobInstanceCount("cf", "nfs_server") > 0 {
+	if installationSettings.FindJobInstanceCount("cf", "nfs_server") > 0 && !skipNFS {
 		systemDumps[ERNfs] = &NfsInfo{
 			SystemInfo: SystemInfo{
 				Product:           "cf",
@@ -82,6 +84,8 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 				RemoteArchivePath: nfsRemoteArchivePath,
 			},
 		}
+	} else {
+		lo.G.Debugf("no nfs will be set: instancecount: %v skipnfs: %v", installationSettings.FindJobInstanceCount("cf", "nfs_server"), skipNFS)
 	}
 
 	return SystemsInfo{
