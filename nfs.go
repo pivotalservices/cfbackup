@@ -11,9 +11,9 @@ import (
 )
 
 //NewNFSBackup - constructor for an nfsbackup object
-func NewNFSBackup(password, ip string, sslKey string, remoteArchivePath string) (nfs *NFSBackup, err error) {
+func NewNFSBackup(username, password, ip string, sslKey string, remoteArchivePath string) (nfs *NFSBackup, err error) {
 	config := command.SshConfig{
-		Username: NfsDefaultSSHUser,
+		Username: username,
 		Password: password,
 		Host:     ip,
 		Port:     22,
@@ -44,9 +44,9 @@ func (s *NFSBackup) Import(lfile io.Reader) (err error) {
 		err = s.Caller.Execute(ioutil.Discard, s.getRestoreCommand())
 	}
 	if err == nil {
-	    lo.G.Debug("backup from %s completed", s.RemoteOps.Path())
+		lo.G.Debug("backup from %s completed", s.RemoteOps.Path())
 	} else {
-	    lo.G.Debug("backup from %s completed with error %s", s.RemoteOps.Path(), err)
+		lo.G.Debug("backup from %s completed with error %s", s.RemoteOps.Path(), err)
 	}
 	s.RemoteOps.RemoveRemoteFile()
 	return

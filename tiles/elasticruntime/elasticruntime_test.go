@@ -70,6 +70,17 @@ func (s mockDumper) Import(i io.Reader) (err error) {
 
 var _ = Describe("ElasticRuntime", func() {
 	Describe("given: NewElasticRuntime", func() {
+		Context("when: calling ReadAllUserCredentials on the given elastic runtime", func() {
+			var skipNFS = false
+			var er *ElasticRuntime
+			BeforeEach(func() {
+				er = NewElasticRuntime("../../fixtures/installation-settings-1-7.json", "./", ".", "", skipNFS)
+				er.ReadAllUserCredentials()
+			})
+			It("then it should decorate the SystemInfo objects with their respective VcapUser values", func() {
+				Ω(er.SystemsInfo.SystemDumps[cfbackup.ERNfs].(*cfbackup.NfsInfo).VcapUser).To(Equal("fixture-value-that-will-not-be-anywhere-else-we-hope"))
+			})
+		})
 		Context("when: called with an invalid file path to installation settings", func() {
 			It("then it should panic", func() {
 				Ω(func() {

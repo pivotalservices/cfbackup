@@ -557,7 +557,7 @@
 						"identifier": "instances"
 					},
 					"vm_credentials": {
-						"identity": "vcap",
+						"identity": "fixture-value-that-will-not-be-anywhere-else-we-hope",
 						"salt": "4c6827270db94a33",
 						"password": "cf585115e53a4d97"
 					},

@@ -146,7 +146,7 @@ func (context *ElasticRuntime) readWriterArchive(dbInfo cfbackup.SystemDump, dat
 			if backupWriter, err = context.Writer(filepath); err == nil {
 				defer backupWriter.Close()
 				err = pb.Dump(backupWriter)
-				lo.G.Debug("Done backing up %s", dbInfo.Get(cfbackup.SDComponent))
+				lo.G.Debug("Done backing up ", dbInfo.Get(cfbackup.SDComponent), err)
 			}
 		}
 	}
@@ -218,6 +218,7 @@ func (context *ElasticRuntime) directorCredentialsValid() (ok bool) {
 			ok = true
 		} else {
 			ok = false
+			lo.G.Debug("Error connecting to server %v", err)
 			lo.G.Debug("Error connecting to director using %s, UserId-[%s] and Password[%s]", connectionURL, userId, password)
 		}
 	}

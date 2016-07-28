@@ -180,7 +180,7 @@ var _ = Describe("nfs", func() {
 				})
 
 				It("should return a nil error and a non-nil NFSBackup object", func() {
-					n, err := NewNFSBackup("pass", "0.0.0.0", "", "/var/somepath")
+					n, err := NewNFSBackup("vcap", "pass", "0.0.0.0", "", "/var/somepath")
 					Ω(err).Should(BeNil())
 					Ω(n).Should(BeAssignableToTypeOf(&NFSBackup{}))
 					Ω(n).ShouldNot(BeNil())
@@ -204,7 +204,7 @@ var _ = Describe("nfs", func() {
 				})
 
 				It("should return a nil error and a NFSBackup object that is nil", func() {
-					n, err := NewNFSBackup("pass", "0.0.0.0", "", "/var/somepath")
+					n, err := NewNFSBackup("vcap", "pass", "0.0.0.0", "", "/var/somepath")
 					Ω(err).ShouldNot(BeNil())
 					Ω(n).Should(BeNil())
 					Ω(n).Should(BeAssignableToTypeOf(&NFSBackup{}))
