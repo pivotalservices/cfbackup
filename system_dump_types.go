@@ -19,7 +19,7 @@ func (s *SystemInfo) Set(name string, val string) {
 
 //GetPersistanceBackup - the constructor for a new nfsinfo object
 func (s *NfsInfo) GetPersistanceBackup() (dumper PersistanceBackup, err error) {
-	return NewNFSBackup(s.Pass, s.Ip, s.SSHPrivateKey, s.RemoteArchivePath)
+	return NewNFSBackup(s.User, s.Pass, s.Ip, s.SSHPrivateKey, s.RemoteArchivePath)
 }
 
 //GetPersistanceBackup - the constructor for a new DirectorInfo object

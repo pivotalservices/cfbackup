@@ -23,8 +23,6 @@ const (
 	NfsDirPath string = "/var/vcap/store"
 	//NfsArchiveDir - this is the archive dir name
 	NfsArchiveDir string = "shared"
-	//NfsDefaultSSHUser - this is the default ssh user for nfs
-	NfsDefaultSSHUser string = "vcap"
 
 	//ERDefaultSystemUser - default user for system vms
 	ERDefaultSystemUser = "vcap"
@@ -82,7 +80,6 @@ const (
 	SDVcapUser string = "VcapUser"
 	//SDVcapPass --
 	SDVcapPass string = "VcapPass"
-	
 	//SDIdentifier
 	SDIdentifier string = "Identifier"
 )
