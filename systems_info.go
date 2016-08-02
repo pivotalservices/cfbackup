@@ -4,7 +4,7 @@ import "github.com/xchapter7x/lo"
 
 // NewSystemsInfo creates a map of SystemDumps that are configured
 // based on the installation settings fetched from ops manager
-func NewSystemsInfo(installationSettingsFile string, sshKey string, skipNFS bool) SystemsInfo {
+func NewSystemsInfo(installationSettingsFile string, sshKey string, nfs string) SystemsInfo {
 
 	configParser := NewConfigurationParser(installationSettingsFile)
 	installationSettings := configParser.InstallationSettings
@@ -74,7 +74,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string, skipNFS bool
 		SSHPrivateKey:     sshKey,
 		RemoteArchivePath: defaultRemoteArchivePath,
 	}
-	if installationSettings.FindJobInstanceCount("cf", "nfs_server") > 0 && !skipNFS {
+	if installationSettings.FindJobInstanceCount("cf", "nfs_server") > 0 && nfs != NFSBackupTypeNone {
 		systemDumps[ERNfs] = &NfsInfo{
 			SystemInfo: SystemInfo{
 				Product:           "cf",
@@ -83,9 +83,10 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string, skipNFS bool
 				SSHPrivateKey:     sshKey,
 				RemoteArchivePath: nfsRemoteArchivePath,
 			},
+			BackupType: nfs,
 		}
 	} else {
-		lo.G.Debugf("no nfs will be set: instancecount: %v skipnfs: %v", installationSettings.FindJobInstanceCount("cf", "nfs_server"), skipNFS)
+		lo.G.Debugf("no nfs will be set: instancecount: %v skipnfs: %v", installationSettings.FindJobInstanceCount("cf", "nfs_server"), nfs)
 	}
 
 	return SystemsInfo{

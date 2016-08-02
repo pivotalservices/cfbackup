@@ -133,14 +133,18 @@ var _ = Describe("nfs", func() {
 
 	Describe("NFSBackup", func() {
 		var nfs *NFSBackup
+		var mockedNFSExecutor *fakes.SuccessMockNFSExecuter
+		var backupType string
 
 		BeforeEach(func() {
-			nfs = &NFSBackup{}
+			nfs = &NFSBackup{BackupType: backupType}
 		})
 
-		Context("sucessfully calling Dump", func() {
+		Context("sucessfully calling Dump for full backup", func() {
 			BeforeEach(func() {
-				nfs.Caller = &fakes.SuccessMockNFSExecuter{}
+				mockedNFSExecutor = &fakes.SuccessMockNFSExecuter{}
+				nfs.Caller = mockedNFSExecutor
+				backupType = NFSBackupTypeFull
 			})
 
 			It("Should return nil error and a success message in the writer", func() {
@@ -148,6 +152,34 @@ var _ = Describe("nfs", func() {
 				err := nfs.Dump(&b)
 				Ω(err).Should(BeNil())
 				Ω(b.String()).Should(Equal(fakes.NfsSuccessString))
+			})
+
+			It("archives the nfs directory", func() {
+				var b bytes.Buffer
+				Expect(nfs.Dump(&b)).NotTo(HaveOccurred())
+
+				Expect(mockedNFSExecutor.ActualCommand).To(Equal("cd /var/vcap/store && tar cz shared"))
+			})
+		})
+
+		Context("sucessfully calling Dump for lite backup", func() {
+			BeforeEach(func() {
+				mockedNFSExecutor = &fakes.SuccessMockNFSExecuter{}
+				nfs.Caller = mockedNFSExecutor
+				backupType = NFSBackupTypeLite
+			})
+
+			It("Should return nil error and a success message in the writer", func() {
+				var b bytes.Buffer
+				err := nfs.Dump(&b)
+				Ω(err).Should(BeNil())
+				Ω(b.String()).Should(Equal(fakes.NfsSuccessString))
+			})
+
+			It("archives the nfs directory", func() {
+				var b bytes.Buffer
+				Expect(nfs.Dump(&b)).NotTo(HaveOccurred())
+				Expect(mockedNFSExecutor.ActualCommand).To(Equal("cd /var/vcap/store && tar cz --exclude=cc-resources shared"))
 			})
 		})
 
@@ -180,7 +212,7 @@ var _ = Describe("nfs", func() {
 				})
 
 				It("should return a nil error and a non-nil NFSBackup object", func() {
-					n, err := NewNFSBackup("vcap", "pass", "0.0.0.0", "", "/var/somepath")
+					n, err := NewNFSBackup("vcap", "pass", "0.0.0.0", "", "/var/somepath", NFSBackupTypeFull)
 					Ω(err).Should(BeNil())
 					Ω(n).Should(BeAssignableToTypeOf(&NFSBackup{}))
 					Ω(n).ShouldNot(BeNil())
@@ -204,7 +236,7 @@ var _ = Describe("nfs", func() {
 				})
 
 				It("should return a nil error and a NFSBackup object that is nil", func() {
-					n, err := NewNFSBackup("vcap", "pass", "0.0.0.0", "", "/var/somepath")
+					n, err := NewNFSBackup("vcap", "pass", "0.0.0.0", "", "/var/somepath", NFSBackupTypeFull)
 					Ω(err).ShouldNot(BeNil())
 					Ω(n).Should(BeNil())
 					Ω(n).Should(BeAssignableToTypeOf(&NFSBackup{}))

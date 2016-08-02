@@ -10,8 +10,14 @@ import (
 	"github.com/xchapter7x/lo"
 )
 
+const (
+	NFSBackupTypeFull = "full"
+	NFSBackupTypeLite = "lite"
+	NFSBackupTypeNone = "skip"
+)
+
 //NewNFSBackup - constructor for an nfsbackup object
-func NewNFSBackup(username, password, ip string, sslKey string, remoteArchivePath string) (nfs *NFSBackup, err error) {
+func NewNFSBackup(username, password, ip, sslKey, remoteArchivePath, backupType string) (nfs *NFSBackup, err error) {
 	config := command.SshConfig{
 		Username: username,
 		Password: password,
@@ -23,8 +29,9 @@ func NewNFSBackup(username, password, ip string, sslKey string, remoteArchivePat
 
 	if remoteExecuter, err = NfsNewRemoteExecuter(config); err == nil {
 		nfs = &NFSBackup{
-			Caller:    remoteExecuter,
-			RemoteOps: osutils.NewRemoteOperationsWithPath(config, remoteArchivePath),
+			Caller:     remoteExecuter,
+			RemoteOps:  osutils.NewRemoteOperationsWithPath(config, remoteArchivePath),
+			BackupType: backupType,
 		}
 	}
 	return
@@ -57,5 +64,9 @@ func (s *NFSBackup) getRestoreCommand() string {
 }
 
 func (s *NFSBackup) getDumpCommand() string {
+	if s.BackupType == NFSBackupTypeLite {
+		return fmt.Sprintf("cd %s && tar cz --exclude=cc-resources %s", NfsDirPath, NfsArchiveDir)
+	}
+
 	return fmt.Sprintf("cd %s && tar cz %s", NfsDirPath, NfsArchiveDir)
 }

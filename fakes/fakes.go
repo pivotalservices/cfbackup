@@ -205,10 +205,13 @@ var (
 )
 
 //SuccessMockNFSExecuter ---
-type SuccessMockNFSExecuter struct{}
+type SuccessMockNFSExecuter struct {
+	ActualCommand string
+}
 
 //Execute --
 func (s *SuccessMockNFSExecuter) Execute(dest io.Writer, cmd string) (err error) {
+	s.ActualCommand = cmd
 	io.Copy(dest, strings.NewReader(NfsSuccessString))
 	return
 }

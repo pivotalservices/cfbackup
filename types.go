@@ -26,8 +26,9 @@ type (
 
 	//NFSBackup - this is a nfs backup object
 	NFSBackup struct {
-		Caller    command.Executer
-		RemoteOps remoteOpsInterface
+		Caller     command.Executer
+		RemoteOps  remoteOpsInterface
+		BackupType string
 	}
 
 	//BackupContext - stores the base context information for a backup/restore
@@ -212,6 +213,7 @@ type (
 	//NfsInfo - a struct representing a nfs systemdump implementation
 	NfsInfo struct {
 		SystemInfo
+		BackupType string
 	}
 	//DirectorInfo - a struct representing a director systemdump implementation
 	DirectorInfo struct {

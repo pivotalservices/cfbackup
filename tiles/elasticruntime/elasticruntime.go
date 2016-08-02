@@ -16,13 +16,13 @@ import (
 )
 
 // NewElasticRuntime initializes an ElasticRuntime intance
-var NewElasticRuntime = func(jsonFile string, target string, sshKey string, cryptKey string, skipNFS bool) *ElasticRuntime {
+var NewElasticRuntime = func(jsonFile string, target string, sshKey string, cryptKey string, nfs string) *ElasticRuntime {
 
 	if _, err := os.Stat(jsonFile); err != nil {
 		lo.G.Error("installation settings not found: ", err)
 		lo.G.Panic("exiting program, cant work without a valid installation settings...")
 	}
-	systemsInfo := cfbackup.NewSystemsInfo(jsonFile, sshKey, skipNFS)
+	systemsInfo := cfbackup.NewSystemsInfo(jsonFile, sshKey, nfs)
 	context := &ElasticRuntime{
 		SSHPrivateKey:     sshKey,
 		JSONFile:          jsonFile,
