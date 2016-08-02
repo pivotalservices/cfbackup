@@ -24,7 +24,7 @@ func (s *ElasticRuntimeBuilder) New(tileSpec tileregistry.TileSpec) (elasticRunt
 			if iaas, hasKey := config.GetIaaS(); hasKey {
 				sshKey = iaas.SSHPrivateKey
 			}
-			elasticRuntime := NewElasticRuntime(tmpfile.FileRef.Name(), tileSpec.ArchiveDirectory, sshKey, tileSpec.CryptKey, tileSpec.SkipNFS)
+			elasticRuntime := NewElasticRuntime(tmpfile.FileRef.Name(), tileSpec.ArchiveDirectory, sshKey, tileSpec.CryptKey, tileSpec.NFS)
 			elasticRuntimeCloser = struct {
 				tileregistry.Tile
 				tileregistry.Closer

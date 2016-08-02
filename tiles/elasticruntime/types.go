@@ -18,7 +18,7 @@ type (
 		HTTPGateway       ghttp.HttpGateway
 		InstallationName  string
 		SSHPrivateKey     string
-		SkipNFS           bool
+		NFS               string
 	}
 
 	//ElasticRuntimeBuilder -- an object that can build an elastic runtime pre-initialized

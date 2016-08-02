@@ -71,41 +71,58 @@ func (s mockDumper) Import(i io.Reader) (err error) {
 var _ = Describe("ElasticRuntime", func() {
 	Describe("given: NewElasticRuntime", func() {
 		Context("when: calling ReadAllUserCredentials on the given elastic runtime", func() {
-			var skipNFS = false
+			var backupType = cfbackup.NFSBackupTypeFull
 			var er *ElasticRuntime
 			BeforeEach(func() {
-				er = NewElasticRuntime("../../fixtures/installation-settings-1-7.json", "./", ".", "", skipNFS)
+				er = NewElasticRuntime("../../fixtures/installation-settings-1-7.json", "./", ".", "", backupType)
 				er.ReadAllUserCredentials()
 			})
+
 			It("then it should decorate the SystemInfo objects with their respective VcapUser values", func() {
 				Ω(er.SystemsInfo.SystemDumps[cfbackup.ERNfs].(*cfbackup.NfsInfo).VcapUser).To(Equal("fixture-value-that-will-not-be-anywhere-else-we-hope"))
 			})
 		})
+
 		Context("when: called with an invalid file path to installation settings", func() {
 			It("then it should panic", func() {
 				Ω(func() {
-					NewElasticRuntime("invalid-file-path-asdgasdbkansdblkjaspdo;bjpaosdb", "./", ".", "", false)
+					NewElasticRuntime("invalid-file-path-asdgasdbkansdblkjaspdo;bjpaosdb", "./", ".", "", cfbackup.NFSBackupTypeFull)
 				}).Should(Panic())
 			})
 		})
-		Context("when: called with a skipnfs arg set to true", func() {
-			var skipNFS = true
+
+		Context("when: called with a nfs arg set to none", func() {
+			var backupType = cfbackup.NFSBackupTypeNone
 			var er *ElasticRuntime
 			BeforeEach(func() {
-				er = NewElasticRuntime("../../fixtures/installation-settings-1-7.json", "./", ".", "", skipNFS)
+				er = NewElasticRuntime("../../fixtures/installation-settings-1-7.json", "./", ".", "", backupType)
 			})
 			It("then: it should yield a elasticruntime that does not have a NFS system to be backedup/restored", func() {
 				Ω(er.SystemsInfo.SystemDumps[cfbackup.ERNfs]).Should(BeNil())
 			})
 		})
-		Context("when: called with a skipnfs arg set to false", func() {
-			var skipNFS = false
+
+		Context("when: called with a nfs arg set to full", func() {
+			var backupType = cfbackup.NFSBackupTypeFull
 			var er *ElasticRuntime
 			BeforeEach(func() {
-				er = NewElasticRuntime("../../fixtures/installation-settings-1-7.json", "./", ".", "", skipNFS)
+				er = NewElasticRuntime("../../fixtures/installation-settings-1-7.json", "./", ".", "", backupType)
 			})
 			It("then: it should yield a elasticruntime that will have a NFS system to be backedup/restored", func() {
 				Ω(er.SystemsInfo.SystemDumps[cfbackup.ERNfs]).ShouldNot(BeNil())
+				Ω(er.SystemsInfo.SystemDumps[cfbackup.ERNfs].(*cfbackup.NfsInfo).BackupType).Should(Equal(backupType))
+			})
+		})
+
+		Context("when: called with a nfs arg set to lite", func() {
+			var backupType = cfbackup.NFSBackupTypeLite
+			var er *ElasticRuntime
+			BeforeEach(func() {
+				er = NewElasticRuntime("../../fixtures/installation-settings-1-7.json", "./", ".", "", backupType)
+			})
+			It("then: it should yield a elasticruntime that has a minimal NFS to restore", func() {
+				Ω(er.SystemsInfo.SystemDumps[cfbackup.ERNfs]).ShouldNot(BeNil())
+				Ω(er.SystemsInfo.SystemDumps[cfbackup.ERNfs].(*cfbackup.NfsInfo).BackupType).Should(Equal(backupType))
 			})
 		})
 	})
@@ -483,7 +500,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string, boshName
 	var elasticRuntime *ElasticRuntime
 	Describe("NewElasticRuntime", func() {
 		BeforeEach(func() {
-			elasticRuntime = NewElasticRuntime(installationSettingsFilePath, "", "", "", false)
+			elasticRuntime = NewElasticRuntime(installationSettingsFilePath, "", "", "", cfbackup.NFSBackupTypeFull)
 		})
 		Context("with valid installationSettings file", func() {
 			It("ReadAllUserCredentials should return nil error", func() {
@@ -689,9 +706,8 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string, boshName
 				})
 
 				It("Should not panic", func() {
-					var err error
 					Ω(func() {
-						err = er.Backup()
+						er.Backup()
 					}).ShouldNot(Panic())
 				})
 			})
@@ -705,9 +721,8 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string, boshName
 				})
 
 				It("Should not panic", func() {
-					var err error
 					Ω(func() {
-						err = er.Restore()
+						er.Restore()
 					}).ShouldNot(Panic())
 				})
 			})
