@@ -74,7 +74,7 @@ func (s *SystemInfo) Error() (err error) {
 		s.Pass == "" ||
 		s.VcapUser == "" ||
 		s.VcapPass == "" {
-		err = fmt.Errorf("invalid or incomplete system info object: %+v", s)
+		err = fmt.Errorf("invalid or incomplete system info object: for %v and %v", s.Product, s.Component)
 	}
 	return
 }

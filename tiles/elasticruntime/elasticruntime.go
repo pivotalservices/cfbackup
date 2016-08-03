@@ -111,7 +111,7 @@ func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []cfbackup.CCJo
 func (context *ElasticRuntime) RunDbAction(dbInfoList []cfbackup.SystemDump, action int) (err error) {
 
 	for _, info := range dbInfoList {
-		lo.G.Debug(fmt.Sprintf("RunDbAction info: %+v", info))
+		lo.G.Debug(fmt.Sprintf("RunDbAction info: %v %v", info.Get("Product"), info.Get("Component")))
 
 		if err = info.Error(); err == nil {
 			err = context.readWriterArchive(info, context.TargetDir, action)
