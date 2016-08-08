@@ -171,7 +171,7 @@ func (context *OpsManager) oauthHTTPGet(urlString string) (resp *http.Response, 
 	lo.G.Debug("aquiring your token from: ", uaaURL, urlString)
 
 	if token, err = uaa.GetToken("https://"+uaaURL.Host+"/uaa", opsManagerUsername, opsManagerPassword, clientID, clientSecret); err == nil {
-		lo.G.Debug("your token", token, "https://"+uaaURL.Host+"/uaa")
+		lo.G.Debug("token acquired")
 		requestor := context.SettingsRequestor
 		resp, err = requestor.Get(ghttp.HttpRequestEntity{
 			Url:           urlString,
