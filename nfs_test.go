@@ -162,6 +162,27 @@ var _ = Describe("nfs", func() {
 			})
 		})
 
+		Context("sucessfully calling Dump for skipped backup", func() {
+			BeforeEach(func() {
+				mockedNFSExecutor = &fakes.SuccessMockNFSExecuter{}
+				nfs.Caller = mockedNFSExecutor
+				backupType = NFSBackupTypeNone
+			})
+
+			It("Should return nil error and a success message in the writer", func() {
+				var b bytes.Buffer
+				err := nfs.Dump(&b)
+				Ω(err).Should(BeNil())
+				Ω(b.String()).Should(Equal(fakes.NfsSuccessString))
+			})
+
+			It("archives only the buildpacks in the NFS directory", func() {
+				var b bytes.Buffer
+				Expect(nfs.Dump(&b)).NotTo(HaveOccurred())
+				Expect(mockedNFSExecutor.ActualCommand).To(Equal("cd /var/vcap/store && tar cz --include=*/cc-buildpacks/* shared/*"))
+			})
+		})
+
 		Context("sucessfully calling Dump for lite backup", func() {
 			BeforeEach(func() {
 				mockedNFSExecutor = &fakes.SuccessMockNFSExecuter{}
