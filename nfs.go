@@ -69,7 +69,7 @@ func (s *NFSBackup) getDumpCommand() string {
 	case NFSBackupTypeLite:
 		cmd = fmt.Sprintf("cd %s && tar cz --exclude=cc-resources %s", NfsDirPath, NfsArchiveDir)
 	case NFSBackupTypeNone:
-		cmd = fmt.Sprintf("cd %s && tar cz --include=*/cc-buildpacks/* %s/*", NfsDirPath, NfsArchiveDir)
+		cmd = fmt.Sprintf("cd %s && (find '%s/cc-buildpacks' -type f | tar cz -T -)", NfsDirPath, NfsArchiveDir)
 	case NFSBackupTypeFull:
 		cmd = fmt.Sprintf("cd %s && tar cz %s", NfsDirPath, NfsArchiveDir)
 	}

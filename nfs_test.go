@@ -179,7 +179,7 @@ var _ = Describe("nfs", func() {
 			It("archives only the buildpacks in the NFS directory", func() {
 				var b bytes.Buffer
 				Expect(nfs.Dump(&b)).NotTo(HaveOccurred())
-				Expect(mockedNFSExecutor.ActualCommand).To(Equal("cd /var/vcap/store && tar cz --include=*/cc-buildpacks/* shared/*"))
+				Expect(mockedNFSExecutor.ActualCommand).To(Equal("cd /var/vcap/store && (find 'shared/cc-buildpacks' -type f | tar cz -T -)"))
 			})
 		})
 
