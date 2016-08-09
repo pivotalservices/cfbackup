@@ -97,8 +97,9 @@ var _ = Describe("ElasticRuntime", func() {
 			BeforeEach(func() {
 				er = NewElasticRuntime("../../fixtures/installation-settings-1-7.json", "./", ".", "", backupType)
 			})
-			It("then: it should yield a elasticruntime that does not have a NFS system to be backedup/restored", func() {
-				Ω(er.SystemsInfo.SystemDumps[cfbackup.ERNfs]).Should(BeNil())
+			It("then: it should yield an elasticruntime that will have a nil NFS system", func() {
+				Ω(er.SystemsInfo.SystemDumps[cfbackup.ERNfs]).ShouldNot(BeNil())
+				Ω(er.SystemsInfo.SystemDumps[cfbackup.ERNfs].(*cfbackup.NfsInfo).BackupType).Should(Equal(backupType))
 			})
 		})
 

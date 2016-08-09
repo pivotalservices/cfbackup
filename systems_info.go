@@ -74,7 +74,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string, nfs string) 
 		SSHPrivateKey:     sshKey,
 		RemoteArchivePath: defaultRemoteArchivePath,
 	}
-	if installationSettings.FindJobInstanceCount("cf", "nfs_server") > 0 && nfs != NFSBackupTypeNone {
+	if installationSettings.FindJobInstanceCount("cf", "nfs_server") > 0 {
 		systemDumps[ERNfs] = &NfsInfo{
 			SystemInfo: SystemInfo{
 				Product:           "cf",

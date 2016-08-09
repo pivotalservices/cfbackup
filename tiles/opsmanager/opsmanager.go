@@ -216,7 +216,7 @@ func (context *OpsManager) importInstallationPart(url, filename, fieldname strin
 		}
 		filePath := path.Join(context.TargetDir, context.OpsmanagerBackupDir, filename)
 		bufferedReader := bufio.NewReader(backupReader)
-		lo.G.Debug("upload request", log.Data{"fieldname": fieldname, "filePath": filePath, "conn": conn})
+		lo.G.Debug("upload request", log.Data{"fieldname": fieldname, "filePath": filePath})
 		creds := map[string]string{
 			"password":   context.Password,
 			"passphrase": context.Passphrase,

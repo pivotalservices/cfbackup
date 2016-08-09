@@ -64,9 +64,15 @@ func (s *NFSBackup) getRestoreCommand() string {
 }
 
 func (s *NFSBackup) getDumpCommand() string {
-	if s.BackupType == NFSBackupTypeLite {
-		return fmt.Sprintf("cd %s && tar cz --exclude=cc-resources %s", NfsDirPath, NfsArchiveDir)
+	var cmd string
+	switch s.BackupType {
+	case NFSBackupTypeLite:
+		cmd = fmt.Sprintf("cd %s && tar cz --exclude=cc-resources %s", NfsDirPath, NfsArchiveDir)
+	case NFSBackupTypeNone:
+		cmd = fmt.Sprintf("cd %s && tar cz --include=*/cc-buildpacks/* %s/*", NfsDirPath, NfsArchiveDir)
+	case NFSBackupTypeFull:
+		cmd = fmt.Sprintf("cd %s && tar cz %s", NfsDirPath, NfsArchiveDir)
 	}
 
-	return fmt.Sprintf("cd %s && tar cz %s", NfsDirPath, NfsArchiveDir)
+	return cmd
 }
