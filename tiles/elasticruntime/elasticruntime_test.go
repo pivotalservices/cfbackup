@@ -92,7 +92,7 @@ var _ = Describe("ElasticRuntime", func() {
 		})
 
 		Context("when: called with a nfs arg set to none", func() {
-			var backupType = cfbackup.NFSBackupTypeNone
+			var backupType = cfbackup.NFSBackupTypeBP
 			var er *ElasticRuntime
 			BeforeEach(func() {
 				er = NewElasticRuntime("../../fixtures/installation-settings-1-7.json", "./", ".", "", backupType)

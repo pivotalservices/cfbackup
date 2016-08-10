@@ -13,7 +13,7 @@ import (
 const (
 	NFSBackupTypeFull = "full"
 	NFSBackupTypeLite = "lite"
-	NFSBackupTypeNone = "skip"
+	NFSBackupTypeBP   = "bp"
 )
 
 //NewNFSBackup - constructor for an nfsbackup object
@@ -68,7 +68,7 @@ func (s *NFSBackup) getDumpCommand() string {
 	switch s.BackupType {
 	case NFSBackupTypeLite:
 		cmd = fmt.Sprintf("cd %s && tar cz --exclude=cc-resources %s", NfsDirPath, NfsArchiveDir)
-	case NFSBackupTypeNone:
+	case NFSBackupTypeBP:
 		cmd = fmt.Sprintf("cd %s && (find '%s/cc-buildpacks' -type f | tar cz -T -)", NfsDirPath, NfsArchiveDir)
 	case NFSBackupTypeFull:
 		cmd = fmt.Sprintf("cd %s && tar cz %s", NfsDirPath, NfsArchiveDir)
