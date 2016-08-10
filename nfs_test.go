@@ -166,7 +166,7 @@ var _ = Describe("nfs", func() {
 			BeforeEach(func() {
 				mockedNFSExecutor = &fakes.SuccessMockNFSExecuter{}
 				nfs.Caller = mockedNFSExecutor
-				backupType = NFSBackupTypeNone
+				backupType = NFSBackupTypeBP
 			})
 
 			It("Should return nil error and a success message in the writer", func() {
