@@ -187,6 +187,7 @@ func (context *OpsManager) oauthHTTPGet(urlString string) (resp *http.Response, 
 
 // Restore performs a restore of a Pivotal Ops Manager instance
 func (context *OpsManager) Restore() (err error) {
+	lo.G.Info("Starting restore for Opsman")
 	err = context.importInstallation()
 	return
 }
