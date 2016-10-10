@@ -17,6 +17,7 @@ type (
 		Hostname            string
 		Username            string
 		Password            string
+		Token               string
 		Passphrase          string
 		TempestPassword     string
 		DbEncryptionKey     string

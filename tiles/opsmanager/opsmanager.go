@@ -21,7 +21,7 @@ import (
 )
 
 // NewOpsManager initializes an OpsManager instance
-var NewOpsManager = func(opsManagerHostname string, adminUsername string, adminPassword string, opsManagerUsername string, opsManagerPassword string, opsManagerPassphrase string, target string, cryptKey string) (context *OpsManager, err error) {
+var NewOpsManager = func(opsManagerHostname, adminUsername, adminPassword, adminToken, opsManagerUsername, opsManagerPassword, opsManagerPassphrase, target, cryptKey string) (context *OpsManager, err error) {
 	backupContext := cfbackup.NewBackupContext(target, cfenv.CurrentEnv(), cryptKey)
 	settingsHTTPRequestor := ghttp.NewHttpGateway()
 	settingsMultiHTTPRequestor := httpUploader(cfbackup.GetUploader(backupContext))
@@ -37,6 +37,7 @@ var NewOpsManager = func(opsManagerHostname string, adminUsername string, adminP
 		Hostname:            opsManagerHostname,
 		Username:            adminUsername,
 		Password:            adminPassword,
+		Token:               adminToken,
 		BackupContext:       backupContext,
 		LocalExecuter:       command.NewLocalExecuter(),
 		OpsmanagerBackupDir: OpsMgrBackupDir,
@@ -163,23 +164,29 @@ func (context *OpsManager) legacyHTTPGet(url string) (resp *http.Response, err e
 }
 
 func (context *OpsManager) oauthHTTPGet(urlString string) (resp *http.Response, err error) {
-	var token string
+	var token = context.Token
 	var uaaURL, _ = urllib.Parse(urlString)
 	var opsManagerUsername = context.Username
 	var opsManagerPassword = context.Password
 	var clientID = "opsman"
 	var clientSecret = ""
+
 	lo.G.Debug("aquiring your token from: ", uaaURL, urlString)
 
-	if token, err = uaa.GetToken("https://"+uaaURL.Host+"/uaa", opsManagerUsername, opsManagerPassword, clientID, clientSecret); err == nil {
+	if token == "" {
+		if token, err = uaa.GetToken("https://"+uaaURL.Host+"/uaa", opsManagerUsername, opsManagerPassword, clientID, clientSecret); err != nil {
+			return nil, err
+		}
 		lo.G.Debug("token acquired")
-		requestor := context.SettingsRequestor
-		resp, err = requestor.Get(ghttp.HttpRequestEntity{
-			Url:           urlString,
-			ContentType:   "application/octet-stream",
-			Authorization: "Bearer " + token,
-		})()
 	}
+
+	requestor := context.SettingsRequestor
+	resp, err = requestor.Get(ghttp.HttpRequestEntity{
+		Url:           urlString,
+		ContentType:   "application/octet-stream",
+		Authorization: "Bearer " + token,
+	})()
+
 	return
 }
 

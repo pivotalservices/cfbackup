@@ -30,6 +30,7 @@ type (
 		OpsManagerHost       string
 		AdminUser            string
 		AdminPass            string
+		AdminToken           string
 		OpsManagerUser       string
 		OpsManagerPass       string
 		OpsManagerPassphrase string
