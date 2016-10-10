@@ -32,6 +32,44 @@ var _ = Describe("OpsManager object", func() {
 	Describe("Given a GetInstallationSettings method", func() {
 		checkAuthorizationMechanismSupport("oauth", http.StatusOK, http.StatusOK, "Bearer")
 		checkAuthorizationMechanismSupport("oauth", http.StatusUnauthorized, http.StatusOK, "Basic")
+		Context("when calling against a ops manager with token override ", func() {
+			var err error
+			var httpTokenAcquiredManually = "foobar"
+			var installationSettings io.Reader
+			var server *testhttp.Server
+			tmpDir, _ := ioutil.TempDir("/tmp", "test")
+
+			BeforeEach(func() {
+				server = testhttp.NewTLSServer()
+				server.AppendHandlers(
+					testhttp.CombineHandlers(
+						testhttp.VerifyRequest("GET", "/api/installation_settings"),
+						testhttp.RespondWith(http.StatusOK, `{"something":"as an api call response"}`),
+					),
+				)
+
+				urlString, _ := url.Parse(server.URL())
+				fmt.Println(server.URL())
+				opsManager, _ := NewOpsManager(urlString.Host, "", "", httpTokenAcquiredManually, "opsUser", "opsPass", "opsPassphrase", tmpDir, "")
+				installationSettings, err = opsManager.GetInstallationSettings()
+			})
+
+			AfterEach(func() {
+				server.Close()
+				os.Remove(tmpDir)
+			})
+
+			It("then it should successfully call the ops manager api", func() {
+				Ω(err).ShouldNot(HaveOccurred())
+			})
+
+			It("then it should have recieved the proper authorization requests", func() {
+				reqArray := server.ReceivedRequests()
+				Ω(len(reqArray)).Should(Equal(1))
+				Ω(reqArray[0].Header["Authorization"][0]).Should(HavePrefix("Bearer"))
+				Ω(reqArray[0].Header["Authorization"][0]).Should(ContainSubstring(httpTokenAcquiredManually))
+			})
+		})
 
 		Context("when called on a properly initialized opsmanager", func() {
 			var (
@@ -367,7 +405,7 @@ var checkAuthorizationMechanismSupport = func(method string, oauthStatusCode, ap
 			server = opsfakes.NewFakeOpsManagerServer(testhttp.NewTLSServer(), oauthStatusCode, `{"something":"as a auth response"}`, apiStatusCode, `{"something":"as an api call response"}`)
 			urlString, _ := url.Parse(server.URL())
 			fmt.Println(server.URL())
-			opsManager, _ := NewOpsManager(urlString.Host, "user", "pass", "opsUser", "opsPass", "opsPassphrase", tmpDir, "")
+			opsManager, _ := NewOpsManager(urlString.Host, "user", "pass", "", "opsUser", "opsPass", "opsPassphrase", tmpDir, "")
 			installationSettings, err = opsManager.GetInstallationSettings()
 		})
 
