@@ -9,7 +9,7 @@ import (
 //New -- builds a new ops manager object pre initialized
 func (s *OpsManagerBuilder) New(tileSpec tileregistry.TileSpec) (opsManagerTileCloser tileregistry.TileCloser, err error) {
 	var opsManager *OpsManager
-	opsManager, err = NewOpsManager(tileSpec.OpsManagerHost, tileSpec.AdminUser, tileSpec.AdminPass, tileSpec.AdminToken, tileSpec.OpsManagerUser, tileSpec.OpsManagerPass, tileSpec.OpsManagerPassphrase, tileSpec.ArchiveDirectory, tileSpec.CryptKey)
+	opsManager, err = NewOpsManager(tileSpec.OpsManagerHost, tileSpec.AdminUser, tileSpec.AdminPass, tileSpec.AdminToken, tileSpec.OpsManagerUser, tileSpec.OpsManagerPass, tileSpec.ClientID, tileSpec.ClientSecret, tileSpec.OpsManagerPassphrase, tileSpec.ArchiveDirectory, tileSpec.CryptKey)
 	opsManager.ClearBoshManifest = tileSpec.ClearBoshManifest
 
 	if installationSettings, err := opsManager.GetInstallationSettings(); err == nil {

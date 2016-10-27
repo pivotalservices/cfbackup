@@ -21,7 +21,7 @@ import (
 )
 
 // NewOpsManager initializes an OpsManager instance
-var NewOpsManager = func(opsManagerHostname, adminUsername, adminPassword, adminToken, opsManagerUsername, opsManagerPassword, opsManagerPassphrase, target, cryptKey string) (context *OpsManager, err error) {
+var NewOpsManager = func(opsManagerHostname, adminUsername, adminPassword, adminToken, opsManagerUsername, opsManagerPassword, opsManagerPassphrase, clientID, clientSecret, target, cryptKey string) (context *OpsManager, err error) {
 	backupContext := cfbackup.NewBackupContext(target, cfenv.CurrentEnv(), cryptKey)
 	settingsHTTPRequestor := ghttp.NewHttpGateway()
 	settingsMultiHTTPRequestor := httpUploader(cfbackup.GetUploader(backupContext))
@@ -37,6 +37,8 @@ var NewOpsManager = func(opsManagerHostname, adminUsername, adminPassword, admin
 		Hostname:            opsManagerHostname,
 		Username:            adminUsername,
 		Password:            adminPassword,
+		ClientID:            clientID,
+		ClientSecret:        clientSecret,
 		Token:               adminToken,
 		BackupContext:       backupContext,
 		LocalExecuter:       command.NewLocalExecuter(),
@@ -168,13 +170,18 @@ func (context *OpsManager) oauthHTTPGet(urlString string) (resp *http.Response, 
 	var uaaURL, _ = urllib.Parse(urlString)
 	var opsManagerUsername = context.Username
 	var opsManagerPassword = context.Password
-	var clientID = "opsman"
-	var clientSecret = ""
+	var clientID = context.ClientID
+	var clientSecret = context.ClientSecret
+	var grantType = "password"
+
+	if clientID != "" {
+		grantType = "client_credentials"
+	}
 
 	lo.G.Debug("aquiring your token from: ", uaaURL, urlString)
 
 	if token == "" {
-		if token, err = uaa.GetToken("https://"+uaaURL.Host+"/uaa", opsManagerUsername, opsManagerPassword, clientID, clientSecret); err != nil {
+		if token, err = uaa.GetToken("https://"+uaaURL.Host+"/uaa", opsManagerUsername, opsManagerPassword, clientID, clientSecret, grantType); err != nil {
 			return nil, err
 		}
 		lo.G.Debug("token acquired")
