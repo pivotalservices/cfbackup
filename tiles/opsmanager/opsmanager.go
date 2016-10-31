@@ -181,11 +181,15 @@ func (context *OpsManager) oauthHTTPGet(urlString string) (resp *http.Response, 
 	var uaaURL, _ = urllib.Parse(urlString)
 	var opsManagerUsername = context.Username
 	var opsManagerPassword = context.Password
-	var clientID = context.ClientID
+	var clientID string
 	var clientSecret = context.ClientSecret
-	var grantType = "password"
+	var grantType string
 
-	if clientID != "" {
+	if context.ClientID == "" {
+		clientID = "opsman"
+		grantType = "password"
+	} else {
+		clientID = context.ClientID
 		grantType = "client_credentials"
 	}
 
