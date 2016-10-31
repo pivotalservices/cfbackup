@@ -34,6 +34,8 @@ type (
 		OpsManagerUser       string
 		OpsManagerPass       string
 		OpsManagerPassphrase string
+		ClientID             string
+		ClientSecret         string
 		ArchiveDirectory     string
 		CryptKey             string
 		ClearBoshManifest    bool

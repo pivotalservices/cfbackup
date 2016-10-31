@@ -18,6 +18,8 @@ type (
 		Username            string
 		Password            string
 		Token               string
+		ClientID            string
+		ClientSecret        string
 		Passphrase          string
 		TempestPassword     string
 		DbEncryptionKey     string

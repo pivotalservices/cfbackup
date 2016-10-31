@@ -50,7 +50,7 @@ var _ = Describe("OpsManager object", func() {
 
 				urlString, _ := url.Parse(server.URL())
 				fmt.Println(server.URL())
-				opsManager, _ := NewOpsManager(urlString.Host, "", "", httpTokenAcquiredManually, "opsUser", "opsPass", "opsPassphrase", tmpDir, "")
+				opsManager, _ := NewOpsManager(urlString.Host, "", "", httpTokenAcquiredManually, "opsUser", "opsPass", "opsPassphrase", "", "", tmpDir, "")
 				installationSettings, err = opsManager.GetInstallationSettings()
 			})
 
@@ -405,7 +405,7 @@ var checkAuthorizationMechanismSupport = func(method string, oauthStatusCode, ap
 			server = opsfakes.NewFakeOpsManagerServer(testhttp.NewTLSServer(), oauthStatusCode, `{"something":"as a auth response"}`, apiStatusCode, `{"something":"as an api call response"}`)
 			urlString, _ := url.Parse(server.URL())
 			fmt.Println(server.URL())
-			opsManager, _ := NewOpsManager(urlString.Host, "user", "pass", "", "opsUser", "opsPass", "opsPassphrase", tmpDir, "")
+			opsManager, _ := NewOpsManager(urlString.Host, "user", "pass", "", "opsUser", "opsPass", "opsPassphrase", "", "", tmpDir, "")
 			installationSettings, err = opsManager.GetInstallationSettings()
 		})
 
