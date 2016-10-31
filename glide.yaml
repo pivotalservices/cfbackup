@@ -5,19 +5,10 @@ import:
 - package: github.com/onsi/gomega
   subpackages:
   - ghttp
-- package: github.com/pivotalservices/gtils
-  subpackages:
-  - bosh
-  - command
-  - http
-  - log
-  - mock
-  - osutils
-  - persistence
-  - storage
-  - uaa
 - package: github.com/xchapter7x/goutil
   subpackages:
   - itertools
 - package: github.com/xchapter7x/lo
 - package: gopkg.in/yaml.v1
+- package: github.com/pivotalservices/gtils
+  version: ~0.1.57
