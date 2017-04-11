@@ -1,63 +1,128 @@
 hash: b652a04baf11c95fb9676c2eef6a8ce6d692dca9e67270ba55f7ffd61419d91b
-updated: 2016-10-31T12:27:25.065488703Z
+updated: 2017-04-11T17:58:06.501074861-04:00
 imports:
+- name: github.com/bmizerany/pat
+  version: c068ca2f0aacee5ac3681d68e4d0a003b7d1fd2c
 - name: github.com/cloudfoundry-community/go-cfenv
-  version: b4bebec47a425334d2a076cf99329464c9e611f3
+  version: f920e9562d5f951cbf11785728f67258c38a10d0
+- name: github.com/concourse/atc
+  version: ce21014d7ff19f99fbc294ff8a75fb9ab8aba2a0
+- name: github.com/enaml-ops/enaml
+  version: 4f847ee10b41afca41fe09fa839cb2f6ade06fb5
+  subpackages:
+  - enamlbosh
+- name: github.com/golang/protobuf
+  version: 2bba0603135d7d7f5cb73b2125beeda19c09f4ef
+  subpackages:
+  - proto
+- name: github.com/hashicorp/errwrap
+  version: 7554cd9344cec97297fa6649b055a8c98c2a1e55
+- name: github.com/hashicorp/go-multierror
+  version: ed905158d87462226a13fe39ddf685ea65f1c11f
 - name: github.com/kr/fs
   version: 2788f0dbd16903de03cb8186e5c7d97b69ad387b
 - name: github.com/mitchellh/mapstructure
-  version: 740c764bc6149d3f1806231418adb9f52c11bcbf
+  version: 53818660ed4955e899c0bcafa97299a388bd7c8e
 - name: github.com/onsi/ginkgo
-  version: 2c2e9bb47b4e44067024f29339588cac8b34dd12
-- name: github.com/onsi/gomega
-  version: 835b5e4242c715976b98ed6bc6ece1d9c7879f66
+  version: f40a49d81e5c12e90400620b6242fb29a8e7c9d9
   subpackages:
-  - ghttp
+  - config
+  - internal/codelocation
+  - internal/containernode
+  - internal/failer
+  - internal/leafnodes
+  - internal/remote
+  - internal/spec
+  - internal/spec_iterator
+  - internal/specrunner
+  - internal/suite
+  - internal/testingtproxy
+  - internal/writer
+  - reporters
+  - reporters/stenographer
+  - reporters/stenographer/support/go-colorable
+  - reporters/stenographer/support/go-isatty
   - types
+- name: github.com/onsi/gomega
+  version: 9b8c753e8dfb382618ba8fa19b4197b5dcb0434c
+  subpackages:
+  - format
+  - gbytes
+  - ghttp
   - internal/assertion
   - internal/asyncassertion
+  - internal/oraclematcher
   - internal/testingtsupport
   - matchers
-  - format
   - matchers/support/goraph/bipartitegraph
   - matchers/support/goraph/edge
   - matchers/support/goraph/node
   - matchers/support/goraph/util
+  - types
 - name: github.com/op/go-logging
   version: 970db520ece77730c7e4724c61121037378659d9
 - name: github.com/pivotal-golang/lager
-  version: 7639e31ce6622c55c15aa64144b85d5f4873d127
+  version: de8e9c6c6e474e5e3668aea1a9817bdb4ceeceb0
 - name: github.com/pivotalservices/gtils
   version: 65c0f332bafc62dc7e1824982ac31b5c21f927b2
   subpackages:
   - bosh
   - command
   - http
+  - http/fake
+  - log
+  - mock
   - osutils
   - persistence
   - storage
-  - log
-  - mock
   - uaa
+- name: github.com/pkg/errors
+  version: ff09b135c25aae272398c51a07235b90a75aa4f0
 - name: github.com/pkg/sftp
-  version: e84cc8c755ca39b7b64f510fe1fffc1b51f210a5
+  version: cb456b384cd3aae0ca1838cd59af8b6bb3363d67
 - name: github.com/rlmcpherson/s3gof3r
-  version: 39f5507f61031141057f3f880d9fb9eb97b8afd7
+  version: 864ae0bf7cf2e20c0002b7ea17f4d84fec1abc14
 - name: github.com/technoweenie/multipartstreamer
   version: a90a01d73ae432e2611d178c18367fbaa13e0154
+- name: github.com/tedsuo/rata
+  version: 0649c23705dfb45a9693b668c4fc1c0666f485d9
 - name: github.com/xchapter7x/goutil
   version: 046742e03686eda64c6ac938594120d7fb5b3ecc
   subpackages:
   - itertools
 - name: github.com/xchapter7x/lo
-  version: aa2602d0e8e8647f0ce7b53109b37040941915aa
+  version: e33b245fc7a8186582208abc2458c2691bff681c
 - name: golang.org/x/crypto
-  version: 89d9e62992539701a49a19c52ebb33e84cbbe80f
+  version: 9ef620b9ca2f82b55030ffd4f41327fa9e77a92c
   subpackages:
-  - ssh
   - curve25519
   - ed25519
   - ed25519/internal/edwards25519
+  - ssh
+- name: golang.org/x/net
+  version: d1e1b351919c6738fdeb9893d5c998b161464f0c
+  subpackages:
+  - context
+- name: golang.org/x/oauth2
+  version: 7fdf09982454086d5570c7db3e11f360194830ca
+  subpackages:
+  - internal
+- name: google.golang.org/appengine
+  version: 170382fa85b10b94728989dfcf6cc818b335c952
+  subpackages:
+  - internal
+  - internal/base
+  - internal/datastore
+  - internal/log
+  - internal/remote_api
+  - internal/urlfetch
+  - urlfetch
 - name: gopkg.in/yaml.v1
   version: 9f9df34309c04878acc86042b16630b0f696e1de
-testImports: []
+- name: gopkg.in/yaml.v2
+  version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
+testImports:
+- name: golang.org/x/sys
+  version: f3918c30c5c2cb527c0b071a27c35120a6c0719a
+  subpackages:
+  - unix
