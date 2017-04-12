@@ -15,6 +15,8 @@ import (
 	. "github.com/pivotalservices/cfbackup/tiles/elasticruntime"
 	"github.com/pivotalservices/gtils/osutils"
 
+	errwrap "github.com/pkg/errors"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -719,7 +721,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string, boshName
 				It("Should not return nil error", func() {
 					err := er.Backup()
 					Ω(err).ShouldNot(BeNil())
-					Ω(err).Should(Equal(ErrERDirectorCreds))
+					Ω(errwrap.Cause(err)).Should(Equal(ErrERDirectorCreds))
 				})
 
 				It("Should not panic", func() {
@@ -734,7 +736,7 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string, boshName
 				It("Should not return nil error", func() {
 					err := er.Restore()
 					Ω(err).ShouldNot(BeNil())
-					Ω(err).Should(Equal(ErrERDirectorCreds))
+					Ω(errwrap.Cause(err)).Should(Equal(ErrERDirectorCreds))
 				})
 
 				It("Should not panic", func() {

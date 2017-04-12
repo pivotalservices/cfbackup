@@ -18,6 +18,7 @@ type (
 		Result      string `json:"result"`
 	}
 	Bosh interface {
+		GetInfo() (io.ReadCloser, error)
 		GetCloudControllerVMSet(name string) (io.ReadCloser, error)
 		GetDeploymentManifest(deploymentName string) (io.Reader, error)
 		ChangeJobState(string, string, string, int, io.Reader) (int, error)

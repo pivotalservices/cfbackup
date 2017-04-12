@@ -44,6 +44,10 @@ var (
 
 type mockDirector struct{}
 
+func (s *mockDirector) GetInfo() (io.ReadCloser, error) {
+	return nil, nil
+}
+
 func (s *mockDirector) GetCloudControllerVMSet(name string) (io.ReadCloser, error) {
 	return os.Open("fixtures/deployment_vms.json")
 }
