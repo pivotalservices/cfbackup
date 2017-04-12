@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 
 	"io"
@@ -18,8 +19,6 @@ import (
 	"github.com/onsi/gomega/ghttp"
 
 	. "github.com/pivotalservices/cfbackup"
-
-	"github.com/pivotalservices/gtils/bosh"
 )
 
 var (
@@ -37,13 +36,17 @@ var (
 		CCJob{Job: "job2", Index: 1},
 		CCJob{Job: "job3", Index: 0},
 	}
-	task                    bosh.Task
-	doneTask                bosh.Task = bosh.Task{}
-	changeJobStateCount     int       = 0
-	retrieveTaskStatusCount int       = 0
+	task                    Task
+	doneTask                Task = Task{}
+	changeJobStateCount     int  = 0
+	retrieveTaskStatusCount int  = 0
 )
 
 type mockDirector struct{}
+
+func (s *mockDirector) GetCloudControllerVMSet(name string) (io.ReadCloser, error) {
+	return os.Open("fixtures/deployment_vms.json")
+}
 
 func (director *mockDirector) GetDeploymentManifest(deploymentName string) (io.Reader, error) {
 	if !getManifest {
@@ -60,13 +63,13 @@ func (director *mockDirector) ChangeJobState(deploymentName, jobName, state stri
 	return 1, nil
 }
 
-func (director *mockDirector) RetrieveTaskStatus(int) (*bosh.Task, error) {
+func (director *mockDirector) RetrieveTaskStatus(int) (*Task, error) {
 	if !getTaskStatus {
 		return nil, errors.New("")
 	}
 	retrieveTaskStatusCount++
 	if retrieveTaskStatusCount%2 == 0 {
-		return &bosh.Task{State: "processing"}, nil
+		return &Task{State: "processing"}, nil
 	}
 	return &task, nil
 }
@@ -76,7 +79,7 @@ var _ = Describe("ToggleCcJob", func() {
 	var cloudController *CloudController
 
 	BeforeEach(func() {
-		NewDirector = func(ip, username, password string, port int) (bosh.Bosh, error) {
+		NewDirector = func(ip, username, password string, port int) (Bosh, error) {
 			return &mockDirector{}, nil
 		}
 		var err error
@@ -100,7 +103,7 @@ var _ = Describe("ToggleCcJob", func() {
 			BeforeEach(func() {
 				changeJobState = true
 				changeJobStateCount = 0
-				task = bosh.Task{State: "done"}
+				task = Task{State: "done"}
 				retrieveTaskStatusCount = 0
 			})
 			It("Should return nil error", func() {
@@ -119,7 +122,7 @@ var _ = Describe("ToggleCcJob", func() {
 		Context("Task status is error", func() {
 			BeforeEach(func() {
 				changeJobState = true
-				task = bosh.Task{State: "error"}
+				task = Task{State: "error"}
 			})
 			It("Should return error", func() {
 				err := cloudController.Start()
@@ -157,7 +160,7 @@ var _ = Describe("ToggleCcJob", func() {
 
 		Context("when called using basic auth", func() {
 
-			var boshclient bosh.Bosh
+			var boshclient Bosh
 			var server *ghttp.Server
 			var err error
 			BeforeEach(func() {
@@ -202,7 +205,7 @@ var _ = Describe("ToggleCcJob", func() {
 		})
 
 		Context("When called with UAA Auth", func() {
-			var boshclient bosh.Bosh
+			var boshclient Bosh
 			var server *ghttp.Server
 			var err error
 			BeforeEach(func() {

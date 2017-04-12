@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"time"
 
 	cfenv "github.com/cloudfoundry-community/go-cfenv"
 	"github.com/pivotalservices/cfbackup"
@@ -69,6 +70,14 @@ func (s mockDumper) Import(i io.Reader) (err error) {
 }
 
 var _ = Describe("ElasticRuntime", func() {
+
+	var originalFrequency = cfbackup.TaskPingFreq
+	BeforeEach(func() {
+		cfbackup.TaskPingFreq = 1 * time.Millisecond
+	})
+	AfterEach(func() {
+		cfbackup.TaskPingFreq = originalFrequency
+	})
 	Describe("given: NewElasticRuntime", func() {
 		Context("when: calling ReadAllUserCredentials on the given elastic runtime", func() {
 			var backupType = cfbackup.NFSBackupTypeFull
@@ -598,14 +607,21 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string, boshName
 
 			Context("With empty list of stores", func() {
 				var psOrig []cfbackup.SystemDump
+
+				oldNewDirector := cfbackup.NewDirector
+
 				BeforeEach(func() {
+					oldNewDirector = cfbackup.NewDirector
+					cfbackup.NewDirector = fakes.NewFakeNoStoresDirector
 					psOrig = ps
 					er.PersistentSystems = []cfbackup.SystemDump{}
 				})
 
 				AfterEach(func() {
+					cfbackup.NewDirector = oldNewDirector
 					er.PersistentSystems = psOrig
 				})
+
 				Context("Backup", func() {
 					It("Should return nil on empty list of persistence stores", func() {
 						err := er.Backup()

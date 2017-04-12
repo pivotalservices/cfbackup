@@ -11,6 +11,19 @@ import (
 )
 
 type (
+	Task struct {
+		Id          int    `json:"id"`
+		State       string `json:"state"`
+		Description string `json:"description"`
+		Result      string `json:"result"`
+	}
+	Bosh interface {
+		GetCloudControllerVMSet(name string) (io.ReadCloser, error)
+		GetDeploymentManifest(deploymentName string) (io.Reader, error)
+		ChangeJobState(string, string, string, int, io.Reader) (int, error)
+		RetrieveTaskStatus(int) (*Task, error)
+	}
+
 	//InstallationInfo - inteferface for gettting at insallation info
 	InstallationInfo interface {
 		FindPropertyValues(productName, jobName, identifier string) (propertyMap map[string]string, err error)
