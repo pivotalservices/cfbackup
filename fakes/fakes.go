@@ -66,6 +66,10 @@ type mockDirector struct {
 	retrieveTaskStatusCount int
 }
 
+func (s *mockDirector) GetInfo() (io.ReadCloser, error) {
+	return nil, nil
+}
+
 func (s *mockDirector) GetCloudControllerVMSet(name string) (io.ReadCloser, error) {
 	if s.fakeErr != nil {
 		return nil, s.fakeErr

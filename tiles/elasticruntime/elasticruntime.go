@@ -10,7 +10,6 @@ import (
 
 	"github.com/cloudfoundry-community/go-cfenv"
 	"github.com/pivotalservices/cfbackup"
-	ghttp "github.com/pivotalservices/gtils/http"
 	"github.com/xchapter7x/lo"
 
 	errwrap "github.com/pkg/errors"
@@ -50,7 +49,17 @@ func (context *ElasticRuntime) backupRestore(action int) (err error) {
 		ccJobs []cfbackup.CCJob
 	)
 
-	if err = context.ReadAllUserCredentials(); err == nil && context.directorCredentialsValid() {
+	err = context.ReadAllUserCredentials()
+	if err != nil {
+		return errwrap.Wrap(err, "failed reading user credentials")
+	}
+
+	directorCredentialsValid, err := context.directorCredentialsValid()
+	if err != nil {
+		return errwrap.Wrap(err, "failed on check for valid director credentials")
+	}
+
+	if directorCredentialsValid {
 		lo.G.Debug("Retrieving All CC VMs")
 		manifest, erro := context.getManifest()
 		if err != nil {
@@ -203,31 +212,24 @@ func (context *ElasticRuntime) assignCredentials(installationSettings cfbackup.I
 	return
 }
 
-func (context *ElasticRuntime) directorCredentialsValid() (ok bool) {
+func (context *ElasticRuntime) directorCredentialsValid() (ok bool, err error) {
 	var directorInfo cfbackup.SystemDump
 
-	if directorInfo, ok = context.SystemsInfo.SystemDumps[cfbackup.ERDirector]; ok {
-		connectionURL := fmt.Sprintf(cfbackup.ERDirectorInfoURL, directorInfo.Get(cfbackup.SDIP))
-		gateway := context.HTTPGateway
-		userId := directorInfo.Get(cfbackup.SDUser)
-		password := directorInfo.Get(cfbackup.SDPass)
-		if gateway == nil {
-			gateway = ghttp.NewHttpGateway()
-		}
-		if _, err := gateway.Get(ghttp.HttpRequestEntity{
-			Url:         connectionURL,
-			Username:    userId,
-			Password:    password,
-			ContentType: "application/json",
-		})(); err == nil {
-			ok = true
-		} else {
-			ok = false
-			lo.G.Debug("Error connecting to server %v", err)
-			lo.G.Debug("Error connecting to director using %s, UserId-[%s] and Password[%s]", connectionURL, userId, password)
-		}
+	directorInfo, ok = context.SystemsInfo.SystemDumps[cfbackup.ERDirector]
+	if !ok {
+		return false, ErrERDirectorCreds
 	}
-	return
+
+	director, err := cfbackup.NewDirector(directorInfo.Get(cfbackup.SDIP), directorInfo.Get(cfbackup.SDUser), directorInfo.Get(cfbackup.SDPass), 25555)
+	if err != nil {
+		return false, errwrap.Wrap(err, "failed creating new director")
+	}
+
+	_, err = director.GetInfo()
+	if err != nil {
+		return false, errwrap.Wrap(err, "failed to get info from director")
+	}
+	return true, nil
 }
 
 func (context *ElasticRuntime) getManifest() (manifest string, err error) {

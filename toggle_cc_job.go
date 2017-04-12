@@ -36,8 +36,17 @@ type boshDirector struct {
 	port   int
 }
 
+func (s *boshDirector) GetInfo() (io.ReadCloser, error) {
+	endpoint := fmt.Sprintf(ERDirectorInfoURL, s.ip)
+	return s.get(endpoint)
+}
+
 func (s *boshDirector) GetCloudControllerVMSet(name string) (io.ReadCloser, error) {
 	endpoint := fmt.Sprintf("%s:%d/deployments/%s/vms", s.ip, s.port, name)
+	return s.get(endpoint)
+}
+
+func (s *boshDirector) get(endpoint string) (io.ReadCloser, error) {
 	req, err := s.client.NewRequest("GET", endpoint, nil)
 	if err != nil {
 		return nil, errwrap.Wrap(err, "failed creating request")
