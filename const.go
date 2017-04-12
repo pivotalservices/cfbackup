@@ -91,6 +91,14 @@ const (
 	ExportArchive
 )
 
+const (
+	BOSHError      int = 1
+	BOSHProcessing int = 2
+	BOSHDone       int = 3
+	BOSHQueued     int = 4
+)
+
+var Taskresult map[string]int = map[string]int{"error": BOSHError, "processing": BOSHProcessing, "done": BOSHDone, "queued": BOSHQueued}
 var (
 	//NfsNewRemoteExecuter - this is a function which is able to execute a remote command against the nfs server
 	NfsNewRemoteExecuter = command.NewRemoteExecutor

@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/enaml-ops/enaml/enamlbosh"
-	"github.com/pivotalservices/gtils/bosh"
 	errwrap "github.com/pkg/errors"
 )
 
@@ -26,7 +25,7 @@ type CloudControllerJobs []CCJob
 //CloudController - a struct representing a cloud controller
 type CloudController struct {
 	deploymentName   string
-	director         bosh.Bosh
+	director         Bosh
 	cloudControllers CloudControllerJobs
 	manifest         string
 }
@@ -35,6 +34,23 @@ type boshDirector struct {
 	client *enamlbosh.Client
 	ip     string
 	port   int
+}
+
+func (s *boshDirector) GetCloudControllerVMSet(name string) (io.ReadCloser, error) {
+	endpoint := fmt.Sprintf("%s:%d/deployments/%s/vms", s.ip, s.port, name)
+	req, err := s.client.NewRequest("GET", endpoint, nil)
+	if err != nil {
+		return nil, errwrap.Wrap(err, "failed creating request")
+	}
+	req.Header.Set("content-type", "application/json")
+	res, err := s.client.HTTPClient().Do(req)
+	if err != nil {
+		return nil, errwrap.Wrap(err, "failed calling http client")
+	}
+	if res.StatusCode != 200 {
+		return nil, fmt.Errorf("unsuccessful status code in response: %v ", res.StatusCode)
+	}
+	return res.Body, nil
 }
 
 func (s *boshDirector) GetDeploymentManifest(name string) (io.Reader, error) {
@@ -68,7 +84,7 @@ func (s *boshDirector) ChangeJobState(deployment, job, state string, index int, 
 	return retrieveTaskId(res)
 }
 
-func (s *boshDirector) RetrieveTaskStatus(id int) (*bosh.Task, error) {
+func (s *boshDirector) RetrieveTaskStatus(id int) (*Task, error) {
 	endpoint := fmt.Sprintf("%s:%d/tasks/%d", s.ip, s.port, id)
 	req, err := s.client.NewRequest("GET", endpoint, nil)
 	if err != nil {
@@ -82,11 +98,11 @@ func (s *boshDirector) RetrieveTaskStatus(id int) (*bosh.Task, error) {
 	return retrieveTaskStatus(res)
 }
 
-func retrieveTaskStatus(resp *http.Response) (task *bosh.Task, err error) {
+func retrieveTaskStatus(resp *http.Response) (task *Task, err error) {
 	if resp.StatusCode != 200 {
 		return nil, errors.New("unsuccessfull status code response")
 	}
-	task = &bosh.Task{}
+	task = &Task{}
 	defer resp.Body.Close()
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -115,11 +131,11 @@ func retrieveTaskId(resp *http.Response) (taskId int, err error) {
 }
 
 //NewDirector - a function representing a constructor for a director object
-var NewDirector = func(ip, username, password string, port int) (bosh.Bosh, error) {
+var NewDirector = func(ip, username, password string, port int) (Bosh, error) {
 	return newBoshDirector(ip, username, password, port)
 }
 
-func newBoshDirector(ip, username, password string, port int) (bosh.Bosh, error) {
+func newBoshDirector(ip, username, password string, port int) (Bosh, error) {
 	client, err := enamlbosh.NewClient(username, password, ip, port, true)
 	if err != nil {
 		return nil, errwrap.Wrap(err, "failed creating bosh client")
@@ -176,20 +192,20 @@ func (c *CloudController) waitUntilDone(taskID int) (err error) {
 	if err != nil {
 		return
 	}
-	switch bosh.TASKRESULT[result.State] {
-	case bosh.ERROR:
+
+	switch Taskresult[result.State] {
+	case BOSHError:
 		err = fmt.Errorf("Task %d process failed", taskID)
 		return
-	case bosh.QUEUED:
+	case BOSHQueued:
 		err = c.waitUntilDone(taskID)
 		return
-	case bosh.PROCESSING:
+	case BOSHProcessing:
 		err = c.waitUntilDone(taskID)
 		return
-	case bosh.DONE:
+	case BOSHDone:
 		return
 	default:
-		err = bosh.ErrorTaskResultUnknown
-		return
+		return errors.New("unkown task result error")
 	}
 }

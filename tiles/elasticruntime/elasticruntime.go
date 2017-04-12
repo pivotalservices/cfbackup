@@ -11,7 +11,6 @@ import (
 	"github.com/cloudfoundry-community/go-cfenv"
 	"github.com/pivotalservices/cfbackup"
 	ghttp "github.com/pivotalservices/gtils/http"
-	"github.com/pivotalservices/gtils/log"
 	"github.com/xchapter7x/lo"
 
 	errwrap "github.com/pkg/errors"
@@ -87,31 +86,30 @@ func (context *ElasticRuntime) backupRestore(action int) (err error) {
 
 func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []cfbackup.CCJob, err error) {
 
+	var jsonObj []cfbackup.VMObject
 	lo.G.Debug("Entering getAllCloudControllerVMs() function")
 	directorInfo := context.SystemsInfo.SystemDumps[cfbackup.ERDirector]
-	connectionURL := fmt.Sprintf(ERVmsURL, directorInfo.Get(cfbackup.SDIP), context.InstallationName)
-	lo.G.Debug("getAllCloudControllerVMs() function", log.Data{"connectionURL": connectionURL, "directorInfo": directorInfo})
-	gateway := context.HTTPGateway
-	if gateway == nil {
-		gateway = ghttp.NewHttpGateway()
-	}
-	lo.G.Debug("Retrieving CC vms")
-	if resp, err := gateway.Get(ghttp.HttpRequestEntity{
-		Url:         connectionURL,
-		Username:    directorInfo.Get(cfbackup.SDUser),
-		Password:    directorInfo.Get(cfbackup.SDPass),
-		ContentType: "application/json",
-	})(); err == nil {
-		var jsonObj []cfbackup.VMObject
 
-		lo.G.Debug("Unmarshalling CC vms")
-		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
-		if err = json.Unmarshal(body, &jsonObj); err == nil {
-			ccvms, err = cfbackup.GetCCVMs(jsonObj)
-		}
+	director, err := cfbackup.NewDirector(directorInfo.Get(cfbackup.SDIP), directorInfo.Get(cfbackup.SDUser), directorInfo.Get(cfbackup.SDPass), 25555)
+	if err != nil {
+		return nil, errwrap.Wrap(err, "failed creating new director")
 	}
-	return
+
+	body, err := director.GetCloudControllerVMSet(context.InstallationName)
+	defer body.Close()
+	if err != nil {
+		return nil, errwrap.Wrap(err, "failed to get cloud controller vm set")
+	}
+	bodyBytes, err := ioutil.ReadAll(body)
+	if err != nil {
+		return nil, errwrap.Wrap(err, "failed to read response body")
+	}
+
+	err = json.Unmarshal(bodyBytes, &jsonObj)
+	if err != nil {
+		return nil, errwrap.Wrap(err, "failed to unmarshal response body")
+	}
+	return cfbackup.GetCCVMs(jsonObj)
 }
 
 //RunDbAction - run a db action dump/import against a list of systemdump types

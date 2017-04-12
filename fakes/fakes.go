@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/pivotalservices/cfbackup"
-	"github.com/pivotalservices/gtils/bosh"
 	"github.com/pivotalservices/gtils/command"
 	ghttp "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/log"
@@ -32,7 +31,20 @@ var (
 )
 
 //NewFakeDirector ---
-func NewFakeDirector(ip, username, password string, port int) (bosh.Bosh, error) {
+func NewFakeNoStoresDirector(ip, username, password string, port int) (cfbackup.Bosh, error) {
+	return &mockDirector{
+		noStores:                true,
+		getManifest:             true,
+		manifest:                strings.NewReader("manifest"),
+		changeJobState:          true,
+		changeJobStateCount:     0,
+		getTaskStatus:           true,
+		retrieveTaskStatusCount: 0,
+	}, nil
+}
+
+//NewFakeDirector ---
+func NewFakeDirector(ip, username, password string, port int) (cfbackup.Bosh, error) {
 	return &mockDirector{
 		getManifest:             true,
 		manifest:                strings.NewReader("manifest"),
@@ -44,12 +56,26 @@ func NewFakeDirector(ip, username, password string, port int) (bosh.Bosh, error)
 }
 
 type mockDirector struct {
+	noStores                bool
+	fakeErr                 error
 	getManifest             bool
 	manifest                io.Reader
 	changeJobStateCount     int
 	changeJobState          bool
 	getTaskStatus           bool
 	retrieveTaskStatusCount int
+}
+
+func (s *mockDirector) GetCloudControllerVMSet(name string) (io.ReadCloser, error) {
+	if s.fakeErr != nil {
+		return nil, s.fakeErr
+	}
+
+	if s.noStores {
+		rdr, err := os.Open("../../fixtures/deployment_vms_nostores.json")
+		return rdr, err
+	}
+	return os.Open("../../fixtures/deployment_vms.json")
 }
 
 func (director *mockDirector) GetDeploymentManifest(deploymentName string) (io.Reader, error) {
@@ -67,15 +93,15 @@ func (director *mockDirector) ChangeJobState(deploymentName, jobName, state stri
 	return 1, nil
 }
 
-func (director *mockDirector) RetrieveTaskStatus(int) (task *bosh.Task, err error) {
+func (director *mockDirector) RetrieveTaskStatus(int) (task *cfbackup.Task, err error) {
 	if !director.getTaskStatus {
 		return nil, errors.New("")
 	}
 	director.retrieveTaskStatusCount++
 	if director.retrieveTaskStatusCount%2 == 0 {
-		return &bosh.Task{State: "processing"}, nil
+		return &cfbackup.Task{State: "processing"}, nil
 	}
-	return task, nil
+	return &cfbackup.Task{State: "done"}, nil
 }
 
 //MockHTTPGateway --
