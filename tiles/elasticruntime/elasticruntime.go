@@ -13,6 +13,8 @@ import (
 	ghttp "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/log"
 	"github.com/xchapter7x/lo"
+
+	errwrap "github.com/pkg/errors"
 )
 
 // NewElasticRuntime initializes an ElasticRuntime intance
@@ -57,7 +59,12 @@ func (context *ElasticRuntime) backupRestore(action int) (err error) {
 		}
 		if ccJobs, err = context.getAllCloudControllerVMs(); err == nil {
 			directorInfo := context.SystemsInfo.SystemDumps[cfbackup.ERDirector]
-			cloudController := cfbackup.NewCloudController(directorInfo.Get(cfbackup.SDIP), directorInfo.Get(cfbackup.SDUser), directorInfo.Get(cfbackup.SDPass), context.InstallationName, manifest, ccJobs)
+			var cloudController *cfbackup.CloudController
+			cloudController, err = cfbackup.NewCloudController(directorInfo.Get(cfbackup.SDIP), directorInfo.Get(cfbackup.SDUser), directorInfo.Get(cfbackup.SDPass), context.InstallationName, manifest, ccJobs)
+			if err != nil {
+				return errwrap.Wrap(err, "failed creating new cloud controller")
+			}
+
 			lo.G.Debug("Setting up CC jobs")
 			defer cloudController.Start()
 			cloudController.Stop()
@@ -227,7 +234,10 @@ func (context *ElasticRuntime) directorCredentialsValid() (ok bool) {
 
 func (context *ElasticRuntime) getManifest() (manifest string, err error) {
 	directorInfo, _ := context.SystemsInfo.SystemDumps[cfbackup.ERDirector]
-	director := cfbackup.NewDirector(directorInfo.Get(cfbackup.SDIP), directorInfo.Get(cfbackup.SDUser), directorInfo.Get(cfbackup.SDPass), 25555)
+	director, err := cfbackup.NewDirector(directorInfo.Get(cfbackup.SDIP), directorInfo.Get(cfbackup.SDUser), directorInfo.Get(cfbackup.SDPass), 25555)
+	if err != nil {
+		return "", errwrap.Wrap(err, "failed creating new director")
+	}
 	mfs, err := director.GetDeploymentManifest(context.InstallationName)
 	if err != nil {
 		return

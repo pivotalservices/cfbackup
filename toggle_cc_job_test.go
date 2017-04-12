@@ -2,27 +2,37 @@ package cfbackup_test
 
 import (
 	"errors"
+	"fmt"
+	"net"
+	"net/http"
+	"net/url"
+	"strconv"
+
 	"io"
 	"strings"
 	"time"
 
-	. "github.com/pivotalservices/cfbackup"
-
+	"github.com/enaml-ops/enaml/enamlbosh"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/ghttp"
+
+	. "github.com/pivotalservices/cfbackup"
+
 	"github.com/pivotalservices/gtils/bosh"
 )
 
 var (
-	getManifest    bool                = true
-	getTaskStatus  bool                = true
-	changeJobState bool                = true
-	manifest       io.Reader           = strings.NewReader("manifest")
-	ip             string              = "10.10.10.10"
-	username       string              = "test"
-	password       string              = "test"
-	deploymentName string              = "deployment"
-	ccjobs         CloudControllerJobs = CloudControllerJobs{
+	originalNewDirector                     = NewDirector
+	getManifest         bool                = true
+	getTaskStatus       bool                = true
+	changeJobState      bool                = true
+	manifest            io.Reader           = strings.NewReader("manifest")
+	ip                  string              = "10.10.10.10"
+	username            string              = "test"
+	password            string              = "test"
+	deploymentName      string              = "deployment"
+	ccjobs              CloudControllerJobs = CloudControllerJobs{
 		CCJob{Job: "job1", Index: 0},
 		CCJob{Job: "job2", Index: 1},
 		CCJob{Job: "job3", Index: 0},
@@ -62,13 +72,20 @@ func (director *mockDirector) RetrieveTaskStatus(int) (*bosh.Task, error) {
 }
 
 var _ = Describe("ToggleCcJob", func() {
-	NewDirector = func(ip, username, password string, port int) bosh.Bosh {
-		return &mockDirector{}
-	}
 	TaskPingFreq = time.Millisecond
-	var (
-		cloudController *CloudController = NewCloudController(ip, username, password, deploymentName, "manifest", ccjobs)
-	)
+	var cloudController *CloudController
+
+	BeforeEach(func() {
+		NewDirector = func(ip, username, password string, port int) (bosh.Bosh, error) {
+			return &mockDirector{}, nil
+		}
+		var err error
+		cloudController, err = NewCloudController(ip, username, password, deploymentName, "manifest", ccjobs)
+		Expect(err).ShouldNot(HaveOccurred())
+	})
+	AfterEach(func() {
+		NewDirector = originalNewDirector
+	})
 	Describe("Toggle All jobs", func() {
 		Context("Change Job State failed", func() {
 			BeforeEach(func() {
@@ -107,6 +124,128 @@ var _ = Describe("ToggleCcJob", func() {
 			It("Should return error", func() {
 				err := cloudController.Start()
 				Ω(err).ShouldNot(BeNil())
+			})
+		})
+	})
+
+	Describe("NewDirector", func() {
+
+		const tokenResponse = `{
+  "access_token":"abcdef01234567890",
+  "token_type":"bearer",
+  "refresh_token":"0987654321fedcba",
+  "expires_in":3599,
+  "scope":"opsman.user uaa.admin scim.read opsman.admin scim.write",
+  "jti":"foo"
+}`
+
+		const basicAuthBoshInfo = `{"name":"enaml-bosh","uuid":"31631ff9-ac41-4eba-a944-04c820633e7f","version":"1.3232.2.0 (00000000)","user":null,"cpi":"aws_cpi","user_authentication":{"type":"basic","options":{}},"features":{"dns":{"status":false,"extras":{"domain_name":null}},"compiled_package_cache":{"status":false,"extras":{"provider":null}},"snapshots":{"status":false}}}`
+		const uaaBoshInfo = `{"name":"enaml-bosh","uuid":"9604f9ae-70bf-4c13-8d4d-69ff7f7f091b","version":"1.3232.2.0 (00000000)","user":null,"cpi":"aws_cpi","user_authentication":{"type":"uaa","options":{"url":"%s"}},"features":{"dns":{"status":false,"extras":{"domain_name":null}},"compiled_package_cache":{"status":false,"extras":{"provider":null}},"snapshots":{"status":false}}}`
+
+		var (
+			manifestName        = "my-manifest"
+			userControl         = "my-user"
+			passControl         = "my-pass"
+			controlResponseBody = enamlbosh.BoshTask{
+				ID:          1180,
+				State:       "processing",
+				Description: "run errand acceptance_tests from deployment cf-warden",
+				Timestamp:   1447033291,
+				User:        "admin",
+			}
+		)
+
+		Context("when called using basic auth", func() {
+
+			var boshclient bosh.Bosh
+			var server *ghttp.Server
+			var err error
+			BeforeEach(func() {
+				server = ghttp.NewTLSServer()
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", "/info"),
+						ghttp.RespondWith(http.StatusOK, basicAuthBoshInfo),
+					),
+					ghttp.CombineHandlers(
+						ghttp.VerifyBasicAuth(userControl, passControl),
+						ghttp.VerifyRequest("GET", fmt.Sprintf("/deployments/%s", manifestName)),
+						ghttp.RespondWithJSONEncoded(http.StatusOK, controlResponseBody),
+					),
+				)
+
+				u, _ := url.Parse(server.URL())
+				host, port, _ := net.SplitHostPort(u.Host)
+				host = u.Scheme + "://" + host
+				portInt, _ := strconv.Atoi(port)
+				boshclient, err = originalNewDirector(host, userControl, passControl, portInt)
+				Expect(err).ShouldNot(HaveOccurred())
+			})
+
+			AfterEach(func() {
+				server.Close()
+			})
+
+			It("should return a successful response body", func() {
+				body, err := boshclient.GetDeploymentManifest(manifestName)
+				Ω(err).ShouldNot(HaveOccurred())
+				Ω(body).ShouldNot(BeNil())
+			})
+
+			It("should include the token in future requests", func() {
+				boshclient.GetDeploymentManifest(manifestName)
+				lastReq := server.ReceivedRequests()[len(server.ReceivedRequests())-1]
+				_, _, hasBasicAuth := lastReq.BasicAuth()
+				Ω(hasBasicAuth).Should(BeTrue())
+				Ω(lastReq.Header["Authorization"]).Should(ConsistOf("Basic bXktdXNlcjpteS1wYXNz"))
+			})
+		})
+
+		Context("When called with UAA Auth", func() {
+			var boshclient bosh.Bosh
+			var server *ghttp.Server
+			var err error
+			BeforeEach(func() {
+				server = ghttp.NewTLSServer()
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", "/info"),
+						ghttp.RespondWith(http.StatusOK, fmt.Sprintf(uaaBoshInfo, server.URL())),
+					),
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("POST", "/oauth/token"),
+						ghttp.RespondWith(http.StatusOK, tokenResponse, http.Header{
+							"Content-Type": []string{"application/json"}}),
+					),
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", fmt.Sprintf("/deployments/%s", manifestName)),
+						ghttp.RespondWith(http.StatusOK, "[]"),
+					),
+				)
+				u, _ := url.Parse(server.URL())
+				host, port, _ := net.SplitHostPort(u.Host)
+				host = u.Scheme + "://" + host
+				portInt, _ := strconv.Atoi(port)
+				boshclient, err = originalNewDirector(host, userControl, passControl, portInt)
+				Expect(err).ShouldNot(HaveOccurred())
+			})
+
+			AfterEach(func() {
+				server.Close()
+			})
+
+			It("should return a successful response body", func() {
+				body, err := boshclient.GetDeploymentManifest(manifestName)
+				Ω(err).ShouldNot(HaveOccurred())
+				Ω(body).ShouldNot(BeNil())
+			})
+
+			It("should include the token in future requests", func() {
+				boshclient.GetDeploymentManifest(manifestName)
+				lastReq := server.ReceivedRequests()[len(server.ReceivedRequests())-1]
+				_, _, hasBasicAuth := lastReq.BasicAuth()
+				Ω(hasBasicAuth).Should(BeFalse())
+				Ω(lastReq.Header["Authorization"]).Should(ConsistOf("Bearer abcdef01234567890"))
 			})
 		})
 	})

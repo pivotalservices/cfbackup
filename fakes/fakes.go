@@ -32,7 +32,7 @@ var (
 )
 
 //NewFakeDirector ---
-func NewFakeDirector(ip, username, password string, port int) bosh.Bosh {
+func NewFakeDirector(ip, username, password string, port int) (bosh.Bosh, error) {
 	return &mockDirector{
 		getManifest:             true,
 		manifest:                strings.NewReader("manifest"),
@@ -40,7 +40,7 @@ func NewFakeDirector(ip, username, password string, port int) bosh.Bosh {
 		changeJobStateCount:     0,
 		getTaskStatus:           true,
 		retrieveTaskStatusCount: 0,
-	}
+	}, nil
 }
 
 type mockDirector struct {
