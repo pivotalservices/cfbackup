@@ -36,21 +36,28 @@ type boshDirector struct {
 	port   int
 }
 
+//GetInfo -- calls info endpoint on targetted bosh director
 func (s *boshDirector) GetInfo() (io.ReadCloser, error) {
 	endpoint := fmt.Sprintf(ERDirectorInfoURL, s.ip)
 	return s.get(endpoint)
 }
 
+//GetCloudControllerVMSet - returns a list of vm objects from your targetted
+//bosh director and given deployment
 func (s *boshDirector) GetCloudControllerVMSet(name string) (io.ReadCloser, error) {
 	endpoint := fmt.Sprintf("%s:%d/deployments/%s/vms", s.ip, s.port, name)
 	return s.get(endpoint)
 }
 
+//GetDeploymentManifest -- returns the deployment manifest for the given
+//deployment on the targetted bosh director
 func (s *boshDirector) GetDeploymentManifest(name string) (io.ReadCloser, error) {
 	endpoint := fmt.Sprintf("%s:%d/deployments/%s", s.ip, s.port, name)
 	return s.get(endpoint)
 }
 
+//ChangeJobState -- will alter the state of the given job on the given
+//deployment. this can be used to start or stop a vm
 func (s *boshDirector) ChangeJobState(deployment, job, state string, index int, manifest io.Reader) (int, error) {
 	endpoint := fmt.Sprintf("%s:%d/deployments/%s/jobs/%s/%d?state=%s", s.ip, s.port, deployment, job, index, state)
 	req, err := s.client.NewRequest("PUT", endpoint, manifest)
@@ -65,6 +72,8 @@ func (s *boshDirector) ChangeJobState(deployment, job, state string, index int, 
 	return retrieveTaskId(res)
 }
 
+//RetrieveTaskStatus - returns a task object containing the status for a given
+//task id
 func (s *boshDirector) RetrieveTaskStatus(id int) (*Task, error) {
 	endpoint := fmt.Sprintf("%s:%d/tasks/%d", s.ip, s.port, id)
 	data, err := s.get(endpoint)
