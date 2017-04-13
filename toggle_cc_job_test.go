@@ -3,6 +3,7 @@ package cfbackup_test
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"net/url"
@@ -26,7 +27,7 @@ var (
 	getManifest         bool                = true
 	getTaskStatus       bool                = true
 	changeJobState      bool                = true
-	manifest            io.Reader           = strings.NewReader("manifest")
+	manifest            io.ReadCloser       = ioutil.NopCloser(strings.NewReader("manifest"))
 	ip                  string              = "10.10.10.10"
 	username            string              = "test"
 	password            string              = "test"
@@ -52,7 +53,7 @@ func (s *mockDirector) GetCloudControllerVMSet(name string) (io.ReadCloser, erro
 	return os.Open("fixtures/deployment_vms.json")
 }
 
-func (director *mockDirector) GetDeploymentManifest(deploymentName string) (io.Reader, error) {
+func (director *mockDirector) GetDeploymentManifest(deploymentName string) (io.ReadCloser, error) {
 	if !getManifest {
 		return nil, errors.New("")
 	}

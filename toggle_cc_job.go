@@ -46,37 +46,9 @@ func (s *boshDirector) GetCloudControllerVMSet(name string) (io.ReadCloser, erro
 	return s.get(endpoint)
 }
 
-func (s *boshDirector) get(endpoint string) (io.ReadCloser, error) {
-	req, err := s.client.NewRequest("GET", endpoint, nil)
-	if err != nil {
-		return nil, errwrap.Wrap(err, "failed creating request")
-	}
-	req.Header.Set("content-type", "application/json")
-	res, err := s.client.HTTPClient().Do(req)
-	if err != nil {
-		return nil, errwrap.Wrap(err, "failed calling http client")
-	}
-	if res.StatusCode != 200 {
-		return nil, fmt.Errorf("unsuccessful status code in response: %v ", res.StatusCode)
-	}
-	return res.Body, nil
-}
-
-func (s *boshDirector) GetDeploymentManifest(name string) (io.Reader, error) {
+func (s *boshDirector) GetDeploymentManifest(name string) (io.ReadCloser, error) {
 	endpoint := fmt.Sprintf("%s:%d/deployments/%s", s.ip, s.port, name)
-	req, err := s.client.NewRequest("GET", endpoint, nil)
-	if err != nil {
-		return nil, errwrap.Wrap(err, "failed creating request")
-	}
-	req.Header.Set("content-type", "text/yaml")
-	res, err := s.client.HTTPClient().Do(req)
-	if err != nil {
-		return nil, errwrap.Wrap(err, "failed calling http client")
-	}
-	if res.StatusCode != 200 {
-		return nil, fmt.Errorf("unsuccessful status code in response: %v ", res.StatusCode)
-	}
-	return res.Body, nil
+	return s.get(endpoint)
 }
 
 func (s *boshDirector) ChangeJobState(deployment, job, state string, index int, manifest io.Reader) (int, error) {
@@ -95,30 +67,39 @@ func (s *boshDirector) ChangeJobState(deployment, job, state string, index int, 
 
 func (s *boshDirector) RetrieveTaskStatus(id int) (*Task, error) {
 	endpoint := fmt.Sprintf("%s:%d/tasks/%d", s.ip, s.port, id)
+	data, err := s.get(endpoint)
+	if err != nil {
+		return nil, errwrap.Wrap(err, "failed on get request")
+	}
+
+	return retrieveTaskStatus(data)
+}
+
+func (s *boshDirector) get(endpoint string) (io.ReadCloser, error) {
 	req, err := s.client.NewRequest("GET", endpoint, nil)
 	if err != nil {
 		return nil, errwrap.Wrap(err, "failed creating request")
 	}
-	req.Header.Set("content-type", "text/yaml")
+	req.Header.Set("content-type", "application/json")
 	res, err := s.client.HTTPClient().Do(req)
 	if err != nil {
 		return nil, errwrap.Wrap(err, "failed calling http client")
 	}
-	return retrieveTaskStatus(res)
+	if res.StatusCode != 200 {
+		return nil, fmt.Errorf("unsuccessful status code in response: %v ", res.StatusCode)
+	}
+	return res.Body, nil
 }
 
-func retrieveTaskStatus(resp *http.Response) (task *Task, err error) {
-	if resp.StatusCode != 200 {
-		return nil, errors.New("unsuccessfull status code response")
-	}
+func retrieveTaskStatus(data io.ReadCloser) (task *Task, err error) {
+	defer data.Close()
 	task = &Task{}
-	defer resp.Body.Close()
-	data, err := ioutil.ReadAll(resp.Body)
+	dbytes, err := ioutil.ReadAll(data)
 	if err != nil {
-		return nil, errwrap.Wrap(err, "unable to read response body")
+		return nil, errwrap.Wrap(err, "unable to read from data")
 	}
 
-	err = json.Unmarshal(data, task)
+	err = json.Unmarshal(dbytes, task)
 	if err != nil {
 		return nil, errwrap.Wrap(err, "unable to unmarshal response body")
 	}

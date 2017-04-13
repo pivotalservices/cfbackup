@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
@@ -35,7 +36,7 @@ func NewFakeNoStoresDirector(ip, username, password string, port int) (cfbackup.
 	return &mockDirector{
 		noStores:                true,
 		getManifest:             true,
-		manifest:                strings.NewReader("manifest"),
+		manifest:                ioutil.NopCloser(strings.NewReader("manifest")),
 		changeJobState:          true,
 		changeJobStateCount:     0,
 		getTaskStatus:           true,
@@ -47,7 +48,7 @@ func NewFakeNoStoresDirector(ip, username, password string, port int) (cfbackup.
 func NewFakeDirector(ip, username, password string, port int) (cfbackup.Bosh, error) {
 	return &mockDirector{
 		getManifest:             true,
-		manifest:                strings.NewReader("manifest"),
+		manifest:                ioutil.NopCloser(strings.NewReader("manifest")),
 		changeJobState:          true,
 		changeJobStateCount:     0,
 		getTaskStatus:           true,
@@ -59,7 +60,7 @@ type mockDirector struct {
 	noStores                bool
 	fakeErr                 error
 	getManifest             bool
-	manifest                io.Reader
+	manifest                io.ReadCloser
 	changeJobStateCount     int
 	changeJobState          bool
 	getTaskStatus           bool
@@ -82,7 +83,7 @@ func (s *mockDirector) GetCloudControllerVMSet(name string) (io.ReadCloser, erro
 	return os.Open("../../fixtures/deployment_vms.json")
 }
 
-func (director *mockDirector) GetDeploymentManifest(deploymentName string) (io.Reader, error) {
+func (director *mockDirector) GetDeploymentManifest(deploymentName string) (io.ReadCloser, error) {
 	if !director.getManifest {
 		return nil, errors.New("")
 	}
