@@ -9,6 +9,8 @@ import:
   subpackages:
   - itertools
 - package: github.com/xchapter7x/lo
+- package: github.com/enaml-ops/enaml
+  version: ^0.0.18
 - package: gopkg.in/yaml.v1
 - package: github.com/pivotalservices/gtils
   version: ~0.1.58
