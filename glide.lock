@@ -1,5 +1,5 @@
-hash: b652a04baf11c95fb9676c2eef6a8ce6d692dca9e67270ba55f7ffd61419d91b
-updated: 2017-04-11T17:58:06.501074861-04:00
+hash: 8be8a50c0e5e7d7a2285e0829645eb2f0b2c9a58014380686b18e202bca00407
+updated: 2017-04-13T10:17:15.522919302+01:00
 imports:
 - name: github.com/bmizerany/pat
   version: c068ca2f0aacee5ac3681d68e4d0a003b7d1fd2c
@@ -24,7 +24,7 @@ imports:
 - name: github.com/mitchellh/mapstructure
   version: 53818660ed4955e899c0bcafa97299a388bd7c8e
 - name: github.com/onsi/ginkgo
-  version: f40a49d81e5c12e90400620b6242fb29a8e7c9d9
+  version: 13c94a130ef24c498bdb2d8d3873cf7790925dcf
   subpackages:
   - config
   - internal/codelocation
@@ -44,7 +44,7 @@ imports:
   - reporters/stenographer/support/go-isatty
   - types
 - name: github.com/onsi/gomega
-  version: 9b8c753e8dfb382618ba8fa19b4197b5dcb0434c
+  version: 334b8f472b3af5d541c5642701c1e29e2126f486
   subpackages:
   - format
   - gbytes
@@ -64,7 +64,7 @@ imports:
 - name: github.com/pivotal-golang/lager
   version: de8e9c6c6e474e5e3668aea1a9817bdb4ceeceb0
 - name: github.com/pivotalservices/gtils
-  version: 65c0f332bafc62dc7e1824982ac31b5c21f927b2
+  version: 935b450816267597de397b3da4bf3363be2f430c
   subpackages:
   - bosh
   - command
