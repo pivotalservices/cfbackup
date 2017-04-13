@@ -240,11 +240,11 @@ func (context *ElasticRuntime) getManifest() (manifest string, err error) {
 	}
 	mfs, err := director.GetDeploymentManifest(context.InstallationName)
 	if err != nil {
-		return
+		return "", errwrap.Wrap(err, fmt.Sprintf("failed on GetDeploymentManifest for %s", context.InstallationName))
 	}
 	data, err := ioutil.ReadAll(mfs)
 	if err != nil {
-		return
+		return "", errwrap.Wrap(err, "failed reading response body")
 	}
 	return string(data), nil
 }
