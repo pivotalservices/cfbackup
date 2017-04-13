@@ -27,7 +27,7 @@ const (
 	//ERDefaultSystemUser - default user for system vms
 	ERDefaultSystemUser = "vcap"
 	//ERDirectorInfoURL - url format for a director info endpoint
-	ERDirectorInfoURL = "https://%s:25555/info"
+	ERDirectorInfoURL = "%s:25555/info"
 	//ERBackupDir - default er backup dir
 	ERBackupDir = "elasticruntime"
 	//ERVmsURL - url format for a vms url
