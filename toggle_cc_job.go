@@ -36,14 +36,52 @@ type boshDirector struct {
 	port   int
 }
 
+//GetInfo -- calls info endpoint on targetted bosh director
 func (s *boshDirector) GetInfo() (io.ReadCloser, error) {
 	endpoint := fmt.Sprintf(ERDirectorInfoURL, s.ip)
 	return s.get(endpoint)
 }
 
+//GetCloudControllerVMSet - returns a list of vm objects from your targetted
+//bosh director and given deployment
 func (s *boshDirector) GetCloudControllerVMSet(name string) (io.ReadCloser, error) {
 	endpoint := fmt.Sprintf("%s:%d/deployments/%s/vms", s.ip, s.port, name)
 	return s.get(endpoint)
+}
+
+//GetDeploymentManifest -- returns the deployment manifest for the given
+//deployment on the targetted bosh director
+func (s *boshDirector) GetDeploymentManifest(name string) (io.ReadCloser, error) {
+	endpoint := fmt.Sprintf("%s:%d/deployments/%s", s.ip, s.port, name)
+	return s.get(endpoint)
+}
+
+//ChangeJobState -- will alter the state of the given job on the given
+//deployment. this can be used to start or stop a vm
+func (s *boshDirector) ChangeJobState(deployment, job, state string, index int, manifest io.Reader) (int, error) {
+	endpoint := fmt.Sprintf("%s:%d/deployments/%s/jobs/%s/%d?state=%s", s.ip, s.port, deployment, job, index, state)
+	req, err := s.client.NewRequest("PUT", endpoint, manifest)
+	if err != nil {
+		return 0, errwrap.Wrap(err, "failed creating request")
+	}
+	req.Header.Set("content-type", "text/yaml")
+	res, err := s.client.HTTPClient().Do(req)
+	if err != nil {
+		return 0, errwrap.Wrap(err, "failed calling http client")
+	}
+	return retrieveTaskId(res)
+}
+
+//RetrieveTaskStatus - returns a task object containing the status for a given
+//task id
+func (s *boshDirector) RetrieveTaskStatus(id int) (*Task, error) {
+	endpoint := fmt.Sprintf("%s:%d/tasks/%d", s.ip, s.port, id)
+	data, err := s.get(endpoint)
+	if err != nil {
+		return nil, errwrap.Wrap(err, "failed on get request")
+	}
+
+	return retrieveTaskStatus(data)
 }
 
 func (s *boshDirector) get(endpoint string) (io.ReadCloser, error) {
@@ -62,63 +100,15 @@ func (s *boshDirector) get(endpoint string) (io.ReadCloser, error) {
 	return res.Body, nil
 }
 
-func (s *boshDirector) GetDeploymentManifest(name string) (io.Reader, error) {
-	endpoint := fmt.Sprintf("%s:%d/deployments/%s", s.ip, s.port, name)
-	req, err := s.client.NewRequest("GET", endpoint, nil)
-	if err != nil {
-		return nil, errwrap.Wrap(err, "failed creating request")
-	}
-	req.Header.Set("content-type", "text/yaml")
-	res, err := s.client.HTTPClient().Do(req)
-	if err != nil {
-		return nil, errwrap.Wrap(err, "failed calling http client")
-	}
-	if res.StatusCode != 200 {
-		return nil, fmt.Errorf("unsuccessful status code in response: %v ", res.StatusCode)
-	}
-	return res.Body, nil
-}
-
-func (s *boshDirector) ChangeJobState(deployment, job, state string, index int, manifest io.Reader) (int, error) {
-	endpoint := fmt.Sprintf("%s:%d/deployments/%s/jobs/%s/%d?state=%s", s.ip, s.port, deployment, job, index, state)
-	req, err := s.client.NewRequest("PUT", endpoint, manifest)
-	if err != nil {
-		return 0, errwrap.Wrap(err, "failed creating request")
-	}
-	req.Header.Set("content-type", "text/yaml")
-	res, err := s.client.HTTPClient().Do(req)
-	if err != nil {
-		return 0, errwrap.Wrap(err, "failed calling http client")
-	}
-	return retrieveTaskId(res)
-}
-
-func (s *boshDirector) RetrieveTaskStatus(id int) (*Task, error) {
-	endpoint := fmt.Sprintf("%s:%d/tasks/%d", s.ip, s.port, id)
-	req, err := s.client.NewRequest("GET", endpoint, nil)
-	if err != nil {
-		return nil, errwrap.Wrap(err, "failed creating request")
-	}
-	req.Header.Set("content-type", "text/yaml")
-	res, err := s.client.HTTPClient().Do(req)
-	if err != nil {
-		return nil, errwrap.Wrap(err, "failed calling http client")
-	}
-	return retrieveTaskStatus(res)
-}
-
-func retrieveTaskStatus(resp *http.Response) (task *Task, err error) {
-	if resp.StatusCode != 200 {
-		return nil, errors.New("unsuccessfull status code response")
-	}
+func retrieveTaskStatus(data io.ReadCloser) (task *Task, err error) {
+	defer data.Close()
 	task = &Task{}
-	defer resp.Body.Close()
-	data, err := ioutil.ReadAll(resp.Body)
+	dbytes, err := ioutil.ReadAll(data)
 	if err != nil {
-		return nil, errwrap.Wrap(err, "unable to read response body")
+		return nil, errwrap.Wrap(err, "unable to read from data")
 	}
 
-	err = json.Unmarshal(data, task)
+	err = json.Unmarshal(dbytes, task)
 	if err != nil {
 		return nil, errwrap.Wrap(err, "unable to unmarshal response body")
 	}
