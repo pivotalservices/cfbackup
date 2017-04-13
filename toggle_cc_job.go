@@ -141,6 +141,11 @@ func retrieveTaskId(resp *http.Response) (taskId int, err error) {
 
 //NewDirector - a function representing a constructor for a director object
 var NewDirector = func(ip, username, password string, port int) (Bosh, error) {
+	// Check if a scheme is present (RFC 3986, section 3.1).
+	// If not, prepend "//" to use the network-path reference format (section 4.2).
+	if !regexp.MustCompile(`^([a-zA-Z][-+.a-zA-Z0-9]+:)?//`).MatchString(ip) {
+		ip = "https://" + ip
+	}
 	return newBoshDirector(ip, username, password, port)
 }
 
