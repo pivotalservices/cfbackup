@@ -130,7 +130,10 @@ func retrieveTaskId(resp *http.Response) (taskId int, err error) {
 }
 
 //NewDirector - a function representing a constructor for a director object
-var NewDirector = func(ip, username, password string, port int) (Bosh, error) {
+//go:generate counterfeiter -o fakes/fake_director_creator.go . DirectorCreator
+type DirectorCreator func(ip, username, password string, port int) (Bosh, error)
+
+var NewDirector DirectorCreator = func(ip, username, password string, port int) (Bosh, error) {
 	// Check if a scheme is present (RFC 3986, section 3.1).
 	// If not, prepend "//" to use the network-path reference format (section 4.2).
 	if !regexp.MustCompile(`^([a-zA-Z][-+.a-zA-Z0-9]+:)?//`).MatchString(ip) {

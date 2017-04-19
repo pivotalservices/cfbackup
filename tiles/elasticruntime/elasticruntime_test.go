@@ -17,6 +17,8 @@ import (
 
 	errwrap "github.com/pkg/errors"
 
+	"bytes"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -679,6 +681,68 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string, boshName
 						Ω(err).ShouldNot(BeNil())
 						Ω(err).Should(Equal(ErrERDBBackup))
 					})
+				})
+			})
+
+			Context("when it fails to create a director", func() {
+				var directorCreator *fakes.FakeDirectorCreator
+
+				BeforeEach(func() {
+					directorCreator = new(fakes.FakeDirectorCreator)
+					cfbackup.NewDirector = directorCreator.Spy
+
+					directorCreator.Returns(nil, fmt.Errorf("dave"))
+				})
+
+				It("fails", func() {
+					err := er.Backup()
+					Expect(err).To(HaveOccurred())
+				})
+			})
+
+			Context("when it fails to fetch vms", func() {
+				var directorCreator *fakes.FakeDirectorCreator
+				var fakeDirector *fakes.FakeBosh
+
+				BeforeEach(func() {
+					fakeDirector = new(fakes.FakeBosh)
+					fakeDirector.GetDeploymentManifestReturns(ioutil.NopCloser(bytes.NewBufferString("foo")), nil)
+					fakeDirector.GetCloudControllerVMSetReturns(nil, fmt.Errorf("unable to get vms"))
+
+					directorCreator = new(fakes.FakeDirectorCreator)
+					cfbackup.NewDirector = directorCreator.Spy
+
+					directorCreator.Returns(fakeDirector, nil)
+				})
+
+				It("fails", func() {
+					err := er.Backup()
+					Expect(err).To(HaveOccurred())
+				})
+			})
+
+			Context("when it fails to stop the cloud controller", func() {
+				var directorCreator *fakes.FakeDirectorCreator
+				var fakeDirector *fakes.FakeBosh
+
+				BeforeEach(func() {
+					fixture, err := os.Open("../../fixtures/deployment_vms.json")
+					Expect(err).NotTo(HaveOccurred())
+
+					fakeDirector = new(fakes.FakeBosh)
+					fakeDirector.GetDeploymentManifestReturns(ioutil.NopCloser(bytes.NewBufferString("foo")), nil)
+					fakeDirector.GetCloudControllerVMSetReturns(fixture, nil)
+					fakeDirector.ChangeJobStateReturns(0, fmt.Errorf("foo"))
+
+					directorCreator = new(fakes.FakeDirectorCreator)
+					cfbackup.NewDirector = directorCreator.Spy
+
+					directorCreator.Returns(fakeDirector, nil)
+				})
+
+				It("fails", func() {
+					err := er.Backup()
+					Expect(err).To(HaveOccurred())
 				})
 			})
 

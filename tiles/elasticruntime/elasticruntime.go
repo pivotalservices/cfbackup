@@ -75,8 +75,13 @@ func (context *ElasticRuntime) backupRestore(action int) (err error) {
 
 			lo.G.Debug("Setting up CC jobs")
 			defer cloudController.Start()
-			cloudController.Stop()
+			if err := cloudController.Stop(); err != nil {
+				return errwrap.Wrap(err, "failed to stop cloud controller")
+			}
+		} else {
+			return errwrap.Wrap(err, "failed getting VMs")
 		}
+
 		lo.G.Debug("Running db action")
 		if len(context.PersistentSystems) > 0 {
 			err = context.RunDbAction(context.PersistentSystems, action)
@@ -105,10 +110,11 @@ func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []cfbackup.CCJo
 	}
 
 	body, err := director.GetCloudControllerVMSet(context.InstallationName)
-	defer body.Close()
 	if err != nil {
 		return nil, errwrap.Wrap(err, "failed to get cloud controller vm set")
 	}
+	defer body.Close()
+
 	bodyBytes, err := ioutil.ReadAll(body)
 	if err != nil {
 		return nil, errwrap.Wrap(err, "failed to read response body")
