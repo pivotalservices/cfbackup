@@ -10,6 +10,7 @@ import (
 	"github.com/xchapter7x/goutil"
 )
 
+//go:generate counterfeiter -o fakes/fake_bosh.go . Bosh
 type (
 	Task struct {
 		Id          int    `json:"id"`
