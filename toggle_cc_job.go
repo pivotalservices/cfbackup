@@ -6,9 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/http"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
@@ -69,7 +67,8 @@ func (s *boshDirector) ChangeJobState(deployment, job, state string, index int, 
 	if err != nil {
 		return 0, errwrap.Wrap(err, "failed calling http client")
 	}
-	return retrieveTaskId(res)
+	task, err := retrieveTaskStatus(res.Body)
+	return task.Id, err
 }
 
 //RetrieveTaskStatus - returns a task object containing the status for a given
@@ -113,20 +112,6 @@ func retrieveTaskStatus(data io.ReadCloser) (task *Task, err error) {
 		return nil, errwrap.Wrap(err, "unable to unmarshal response body")
 	}
 	return task, nil
-}
-
-func retrieveTaskId(resp *http.Response) (taskId int, err error) {
-	if resp.StatusCode != 302 {
-		return 0, errors.New("unsuccessfull status code response")
-	}
-	redirectUrls := resp.Header["Location"]
-	if redirectUrls == nil || len(redirectUrls) < 1 {
-		err = errors.New("Could not find redirect url for bosh tasks")
-		return
-	}
-	regex := regexp.MustCompile(`^.*tasks/`)
-	idString := regex.ReplaceAllString(redirectUrls[0], "")
-	return strconv.Atoi(idString)
 }
 
 //NewDirector - a function representing a constructor for a director object
