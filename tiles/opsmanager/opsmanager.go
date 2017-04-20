@@ -145,7 +145,7 @@ func (context *OpsManager) saveHTTPResponse(url string, dest io.Writer) (err err
 
 	if resp, err = context.oauthHTTPGet(url); err != nil {
 		lo.G.Info("falling back to basic auth for legacy system")
-		lo.G.Debug(err)
+		lo.G.Debug("error: ", err)
 		resp, err = context.legacyHTTPGet(url)
 	}
 
