@@ -1,5 +1,5 @@
-hash: 645c56c7e8712b99b2e069fc72d6d47d88f1aec58ef46cb8396fc75938622ff8
-updated: 2017-04-13T12:18:20.656006405+01:00
+hash: 731d9e7e1750d651561bdf9e86ccfa0239e358d8066e84342e3acb0585f7ff97
+updated: 2017-04-20T14:51:53.972332542-04:00
 imports:
 - name: github.com/bmizerany/pat
   version: c068ca2f0aacee5ac3681d68e4d0a003b7d1fd2c
@@ -12,7 +12,7 @@ imports:
   subpackages:
   - enamlbosh
 - name: github.com/golang/protobuf
-  version: 2bba0603135d7d7f5cb73b2125beeda19c09f4ef
+  version: 2402d76f3d41f928c7902a765dfc872356dd3aad
   subpackages:
   - proto
 - name: github.com/hashicorp/errwrap
@@ -60,11 +60,11 @@ imports:
   - matchers/support/goraph/util
   - types
 - name: github.com/op/go-logging
-  version: 970db520ece77730c7e4724c61121037378659d9
+  version: dfaf3dff9b631bc4236201d90d41ee0de9202889
 - name: github.com/pivotal-golang/lager
-  version: de8e9c6c6e474e5e3668aea1a9817bdb4ceeceb0
+  version: 95b2ada4cdf781bdcf07e5207879e034ac8c5314
 - name: github.com/pivotalservices/gtils
-  version: 935b450816267597de397b3da4bf3363be2f430c
+  version: 809646825d7e4beecbdca7a92839107c6fd2f141
   subpackages:
   - command
   - http
@@ -78,9 +78,9 @@ imports:
 - name: github.com/pkg/errors
   version: ff09b135c25aae272398c51a07235b90a75aa4f0
 - name: github.com/pkg/sftp
-  version: cb456b384cd3aae0ca1838cd59af8b6bb3363d67
+  version: 8a7343c6ed99a2934aea9c08c923c11df775b6db
 - name: github.com/rlmcpherson/s3gof3r
-  version: 864ae0bf7cf2e20c0002b7ea17f4d84fec1abc14
+  version: b574ee38528c51c2c8652b79e71245817c59bd61
 - name: github.com/technoweenie/multipartstreamer
   version: a90a01d73ae432e2611d178c18367fbaa13e0154
 - name: github.com/tedsuo/rata
@@ -90,7 +90,7 @@ imports:
   subpackages:
   - itertools
 - name: github.com/xchapter7x/lo
-  version: e33b245fc7a8186582208abc2458c2691bff681c
+  version: aa2602d0e8e8647f0ce7b53109b37040941915aa
 - name: golang.org/x/crypto
   version: 9ef620b9ca2f82b55030ffd4f41327fa9e77a92c
   subpackages:
