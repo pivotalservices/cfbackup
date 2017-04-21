@@ -13,4 +13,4 @@ import:
   version: ^0.0.18
 - package: gopkg.in/yaml.v1
 - package: github.com/pivotalservices/gtils
-  version: ~0.1.59
+  version: 0.1.60
