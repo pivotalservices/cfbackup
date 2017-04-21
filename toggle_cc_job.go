@@ -68,7 +68,14 @@ func (s *boshDirector) ChangeJobState(deployment, job, state string, index int, 
 		return 0, errwrap.Wrap(err, "failed calling http client")
 	}
 	task, err := retrieveTaskStatus(res.Body)
-	return task.Id, err
+	if err != nil {
+		return 0, errwrap.Wrap(err, "failed retrieving task from response body")
+	}
+
+	if task == nil {
+		return 0, fmt.Errorf("invalid task returned is: %v", task)
+	}
+	return task.Id, nil
 }
 
 //RetrieveTaskStatus - returns a task object containing the status for a given
@@ -105,6 +112,9 @@ func retrieveTaskStatus(data io.ReadCloser) (task *Task, err error) {
 	dbytes, err := ioutil.ReadAll(data)
 	if err != nil {
 		return nil, errwrap.Wrap(err, "unable to read from data")
+	}
+	if len(dbytes) <= 0 {
+		return nil, fmt.Errorf("empty dataset returned from read")
 	}
 
 	err = json.Unmarshal(dbytes, task)
