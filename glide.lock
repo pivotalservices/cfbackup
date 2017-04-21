@@ -1,5 +1,5 @@
-hash: 731d9e7e1750d651561bdf9e86ccfa0239e358d8066e84342e3acb0585f7ff97
-updated: 2017-04-20T14:51:53.972332542-04:00
+hash: 21e270f7705e64fb8b027bde18292ad6c082dde90719f43a333b78a94a545cc2
+updated: 2017-04-21T12:06:27.752780259-04:00
 imports:
 - name: github.com/bmizerany/pat
   version: c068ca2f0aacee5ac3681d68e4d0a003b7d1fd2c
@@ -24,7 +24,7 @@ imports:
 - name: github.com/mitchellh/mapstructure
   version: 53818660ed4955e899c0bcafa97299a388bd7c8e
 - name: github.com/onsi/ginkgo
-  version: f40a49d81e5c12e90400620b6242fb29a8e7c9d9
+  version: 6adbc2648389a46e8ff0e96d07a07a9a9eb432de
   subpackages:
   - config
   - internal/codelocation
@@ -64,7 +64,7 @@ imports:
 - name: github.com/pivotal-golang/lager
   version: 95b2ada4cdf781bdcf07e5207879e034ac8c5314
 - name: github.com/pivotalservices/gtils
-  version: 809646825d7e4beecbdca7a92839107c6fd2f141
+  version: 92fbb15a9e8347eb7cd60fdb1fd80847ae989f34
   subpackages:
   - command
   - http
