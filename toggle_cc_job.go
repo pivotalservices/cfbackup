@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -67,15 +69,15 @@ func (s *boshDirector) ChangeJobState(deployment, job, state string, index int, 
 	if err != nil {
 		return 0, errwrap.Wrap(err, "failed calling http client")
 	}
-	task, err := retrieveTaskStatus(res.Body)
+	taskID, err := retrieveTaskID(res)
 	if err != nil {
-		return 0, errwrap.Wrap(err, "failed retrieving task from response body")
+		return 0, errwrap.Wrap(err, "failed retrieving taskid from response body")
 	}
 
-	if task == nil {
-		return 0, fmt.Errorf("invalid task returned is: %v", task)
+	if taskID == 0 {
+		return 0, fmt.Errorf("invalid taskid returned. value is: %v", taskID)
 	}
-	return task.Id, nil
+	return taskID, nil
 }
 
 //RetrieveTaskStatus - returns a task object containing the status for a given
@@ -104,6 +106,19 @@ func (s *boshDirector) get(endpoint string) (io.ReadCloser, error) {
 		return nil, fmt.Errorf("unsuccessful status code in response: %v ", res.StatusCode)
 	}
 	return res.Body, nil
+}
+
+func retrieveTaskID(resp *http.Response) (taskId int, err error) {
+	if resp.StatusCode != 302 && resp.StatusCode != 200 {
+		return 0, fmt.Errorf("unsuccessfull status code response: %v", resp.StatusCode)
+	}
+	redirectUrl := resp.Request.URL.String()
+	if redirectUrl == "" {
+		return 0, fmt.Errorf("Could not find redirect url for bosh tasks: %v", redirectUrl)
+	}
+	regex := regexp.MustCompile(`^.*tasks/`)
+	idString := regex.ReplaceAllString(redirectUrl, "")
+	return strconv.Atoi(idString)
 }
 
 func retrieveTaskStatus(data io.ReadCloser) (task *Task, err error) {
