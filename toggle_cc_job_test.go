@@ -88,7 +88,7 @@ var _ = Describe("ToggleCcJob", func() {
 			return &mockDirector{}, nil
 		}
 		var err error
-		cloudController, err = NewCloudController(ip, username, password, deploymentName, "manifest", ccjobs)
+		cloudController, err = NewCloudController(ip, username, password, deploymentName, []byte(`manifest`), ccjobs)
 		Expect(err).ShouldNot(HaveOccurred())
 	})
 	AfterEach(func() {

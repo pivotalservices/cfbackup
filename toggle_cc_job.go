@@ -1,6 +1,7 @@
 package cfbackup
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,7 +10,6 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/enaml-ops/enaml/enamlbosh"
@@ -27,7 +27,7 @@ type CloudController struct {
 	deploymentName   string
 	director         Bosh
 	cloudControllers CloudControllerJobs
-	manifest         string
+	manifest         []byte
 }
 
 type boshDirector struct {
@@ -165,7 +165,7 @@ func newBoshDirector(ip, username, password string, port int) (Bosh, error) {
 }
 
 //NewCloudController - a function representing a constructor for a cloud controller
-func NewCloudController(ip, username, password, deploymentName, manifest string, cloudControllers CloudControllerJobs) (*CloudController, error) {
+func NewCloudController(ip, username, password, deploymentName string, manifest []byte, cloudControllers CloudControllerJobs) (*CloudController, error) {
 	director, err := NewDirector(ip, username, password, 25555)
 	if err != nil {
 		return nil, errwrap.Wrap(err, "failed creating new director")
@@ -191,7 +191,8 @@ func (c *CloudController) Stop() error {
 
 func (c *CloudController) toggleController(state string) error {
 	for _, ccjob := range c.cloudControllers {
-		taskID, err := c.director.ChangeJobState(c.deploymentName, ccjob.Job, state, ccjob.Index, strings.NewReader(c.manifest))
+		reqBody := bytes.NewReader(c.manifest)
+		taskID, err := c.director.ChangeJobState(c.deploymentName, ccjob.Job, state, ccjob.Index, reqBody)
 		if err != nil {
 			return err
 		}

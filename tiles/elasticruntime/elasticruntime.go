@@ -242,21 +242,21 @@ func (context *ElasticRuntime) directorCredentialsValid() (ok bool, err error) {
 	return true, nil
 }
 
-func (context *ElasticRuntime) getManifest() (manifest string, err error) {
+func (context *ElasticRuntime) getManifest() (manifest []byte, err error) {
 	directorInfo, _ := context.SystemsInfo.SystemDumps[cfbackup.ERDirector]
 	director, err := cfbackup.NewDirector(directorInfo.Get(cfbackup.SDIP), directorInfo.Get(cfbackup.SDUser), directorInfo.Get(cfbackup.SDPass), 25555)
 	if err != nil {
-		return "", errwrap.Wrap(err, "failed creating new director")
+		return nil, errwrap.Wrap(err, "failed creating new director")
 	}
 	mfs, err := director.GetDeploymentManifest(context.InstallationName)
 	if err != nil {
-		return "", errwrap.Wrap(err, fmt.Sprintf("failed on GetDeploymentManifest for %s", context.InstallationName))
+		return nil, errwrap.Wrap(err, fmt.Sprintf("failed on GetDeploymentManifest for %s", context.InstallationName))
 	}
 	data, err := ioutil.ReadAll(mfs)
 	if err != nil {
-		return "", errwrap.Wrap(err, "failed reading response body")
+		return nil, errwrap.Wrap(err, "failed reading response body")
 	}
-	return string(data), nil
+	return data, nil
 }
 
 func (context *ElasticRuntime) getDeploymentName(installationSettings cfbackup.InstallationSettings) (deploymentName string, err error) {
