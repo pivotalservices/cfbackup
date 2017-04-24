@@ -124,6 +124,10 @@ func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []cfbackup.CCJo
 	if err != nil {
 		return nil, errwrap.Wrap(err, "failed to unmarshal response body")
 	}
+
+	if len(jsonObj) <= 0 {
+		return nil, fmt.Errorf("no vm objects found: %v bytes: %v", jsonObj, string(bodyBytes))
+	}
 	return cfbackup.GetCCVMs(jsonObj)
 }
 

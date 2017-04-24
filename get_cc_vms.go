@@ -37,7 +37,7 @@ func (s *CloudControllerDeploymentParser) setupAndRun(jsonObj []VMObject) (err e
 	var ccjobs = make([]CCJob, 0)
 
 	for _, vmObject := range jsonObj {
-		if strings.Contains(vmObject.Job, "cloud_controller-partition") {
+		if strings.Contains(vmObject.Job, "cloud_controller-") {
 			ccJob := CCJob{
 				Job:   vmObject.Job,
 				Index: vmObject.Index,
@@ -47,7 +47,7 @@ func (s *CloudControllerDeploymentParser) setupAndRun(jsonObj []VMObject) (err e
 	}
 
 	if len(ccjobs) == 0 {
-		return fmt.Errorf("no cc jobs found")
+		return fmt.Errorf("no cc jobs found in: %v", jsonObj)
 	}
 	s.vms = ccjobs
 	return nil
