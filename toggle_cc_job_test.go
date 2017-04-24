@@ -60,7 +60,7 @@ func (director *mockDirector) GetDeploymentManifest(deploymentName string) (io.R
 	return manifest, nil
 }
 
-func (director *mockDirector) ChangeJobState(deploymentName, jobName, state string, index int, manifest io.Reader) (int, error) {
+func (director *mockDirector) ChangeJobState(deploymentName, jobName, state string, index int) (int, error) {
 	changeJobStateCount++
 	if !changeJobState {
 		return 0, errors.New("")
@@ -88,7 +88,7 @@ var _ = Describe("ToggleCcJob", func() {
 			return &mockDirector{}, nil
 		}
 		var err error
-		cloudController, err = NewCloudController(ip, username, password, deploymentName, []byte(`manifest`), ccjobs)
+		cloudController, err = NewCloudController(ip, username, password, deploymentName, ccjobs)
 		Expect(err).ShouldNot(HaveOccurred())
 	})
 	AfterEach(func() {

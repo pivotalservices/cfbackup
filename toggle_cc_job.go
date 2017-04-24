@@ -1,7 +1,6 @@
 package cfbackup
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -27,7 +26,6 @@ type CloudController struct {
 	deploymentName   string
 	director         Bosh
 	cloudControllers CloudControllerJobs
-	manifest         []byte
 }
 
 type boshDirector struct {
@@ -58,9 +56,9 @@ func (s *boshDirector) GetDeploymentManifest(name string) (io.ReadCloser, error)
 
 //ChangeJobState -- will alter the state of the given job on the given
 //deployment. this can be used to start or stop a vm
-func (s *boshDirector) ChangeJobState(deployment, job, state string, index int, manifest io.Reader) (int, error) {
+func (s *boshDirector) ChangeJobState(deployment, job, state string, index int) (int, error) {
 	endpoint := fmt.Sprintf("%s:%d/deployments/%s/jobs/%s/%d?state=%s", s.ip, s.port, deployment, job, index, state)
-	req, err := s.client.NewRequest("PUT", endpoint, manifest)
+	req, err := s.client.NewRequest("PUT", endpoint, nil)
 	if err != nil {
 		return 0, errwrap.Wrap(err, "failed creating request")
 	}
@@ -165,7 +163,7 @@ func newBoshDirector(ip, username, password string, port int) (Bosh, error) {
 }
 
 //NewCloudController - a function representing a constructor for a cloud controller
-func NewCloudController(ip, username, password, deploymentName string, manifest []byte, cloudControllers CloudControllerJobs) (*CloudController, error) {
+func NewCloudController(ip, username, password, deploymentName string, cloudControllers CloudControllerJobs) (*CloudController, error) {
 	director, err := NewDirector(ip, username, password, 25555)
 	if err != nil {
 		return nil, errwrap.Wrap(err, "failed creating new director")
@@ -175,7 +173,6 @@ func NewCloudController(ip, username, password, deploymentName string, manifest 
 		deploymentName:   deploymentName,
 		director:         director,
 		cloudControllers: cloudControllers,
-		manifest:         manifest,
 	}, nil
 }
 
@@ -190,16 +187,21 @@ func (c *CloudController) Stop() error {
 }
 
 func (c *CloudController) toggleController(state string) error {
+	if len(c.cloudControllers) <= 0 {
+		return fmt.Errorf("no cloudcontroller vms found to toggle")
+	}
+
 	for _, ccjob := range c.cloudControllers {
-		reqBody := bytes.NewReader(c.manifest)
-		taskID, err := c.director.ChangeJobState(c.deploymentName, ccjob.Job, state, ccjob.Index, reqBody)
+		taskID, err := c.director.ChangeJobState(c.deploymentName, ccjob.Job, state, ccjob.Index)
 		if err != nil {
-			return err
+			return errwrap.Wrap(err, "failed calling ChangeJobState")
 		}
+
 		err = c.waitUntilDone(taskID)
 		if err != nil {
-			return err
+			return errwrap.Wrap(err, "failed calling waitUntilDone")
 		}
+
 	}
 	return nil
 }

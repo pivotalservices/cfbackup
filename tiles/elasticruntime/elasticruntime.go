@@ -61,14 +61,10 @@ func (context *ElasticRuntime) backupRestore(action int) (err error) {
 
 	if directorCredentialsValid {
 		lo.G.Debug("Retrieving All CC VMs")
-		manifest, erro := context.getManifest()
-		if err != nil {
-			return erro
-		}
 		if ccJobs, err = context.getAllCloudControllerVMs(); err == nil {
 			directorInfo := context.SystemsInfo.SystemDumps[cfbackup.ERDirector]
 			var cloudController *cfbackup.CloudController
-			cloudController, err = cfbackup.NewCloudController(directorInfo.Get(cfbackup.SDIP), directorInfo.Get(cfbackup.SDUser), directorInfo.Get(cfbackup.SDPass), context.InstallationName, manifest, ccJobs)
+			cloudController, err = cfbackup.NewCloudController(directorInfo.Get(cfbackup.SDIP), directorInfo.Get(cfbackup.SDUser), directorInfo.Get(cfbackup.SDPass), context.InstallationName, ccJobs)
 			if err != nil {
 				return errwrap.Wrap(err, "failed creating new cloud controller")
 			}
@@ -240,23 +236,6 @@ func (context *ElasticRuntime) directorCredentialsValid() (ok bool, err error) {
 		return false, errwrap.Wrap(err, "failed to get info from director")
 	}
 	return true, nil
-}
-
-func (context *ElasticRuntime) getManifest() (manifest []byte, err error) {
-	directorInfo, _ := context.SystemsInfo.SystemDumps[cfbackup.ERDirector]
-	director, err := cfbackup.NewDirector(directorInfo.Get(cfbackup.SDIP), directorInfo.Get(cfbackup.SDUser), directorInfo.Get(cfbackup.SDPass), 25555)
-	if err != nil {
-		return nil, errwrap.Wrap(err, "failed creating new director")
-	}
-	mfs, err := director.GetDeploymentManifest(context.InstallationName)
-	if err != nil {
-		return nil, errwrap.Wrap(err, fmt.Sprintf("failed on GetDeploymentManifest for %s", context.InstallationName))
-	}
-	data, err := ioutil.ReadAll(mfs)
-	if err != nil {
-		return nil, errwrap.Wrap(err, "failed reading response body")
-	}
-	return data, nil
 }
 
 func (context *ElasticRuntime) getDeploymentName(installationSettings cfbackup.InstallationSettings) (deploymentName string, err error) {

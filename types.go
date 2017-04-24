@@ -22,7 +22,7 @@ type (
 		GetInfo() (io.ReadCloser, error)
 		GetCloudControllerVMSet(name string) (io.ReadCloser, error)
 		GetDeploymentManifest(deploymentName string) (io.ReadCloser, error)
-		ChangeJobState(string, string, string, int, io.Reader) (int, error)
+		ChangeJobState(string, string, string, int) (int, error)
 		RetrieveTaskStatus(int) (*Task, error)
 	}
 
