@@ -46,14 +46,13 @@ type FakeBosh struct {
 		result1 io.ReadCloser
 		result2 error
 	}
-	ChangeJobStateStub        func(string, string, string, int, io.Reader) (int, error)
+	ChangeJobStateStub        func(string, string, string, int) (int, error)
 	changeJobStateMutex       sync.RWMutex
 	changeJobStateArgsForCall []struct {
 		arg1 string
 		arg2 string
 		arg3 string
 		arg4 int
-		arg5 io.Reader
 	}
 	changeJobStateReturns struct {
 		result1 int
@@ -225,7 +224,7 @@ func (fake *FakeBosh) GetDeploymentManifestReturnsOnCall(i int, result1 io.ReadC
 	}{result1, result2}
 }
 
-func (fake *FakeBosh) ChangeJobState(arg1 string, arg2 string, arg3 string, arg4 int, arg5 io.Reader) (int, error) {
+func (fake *FakeBosh) ChangeJobState(arg1 string, arg2 string, arg3 string, arg4 int) (int, error) {
 	fake.changeJobStateMutex.Lock()
 	ret, specificReturn := fake.changeJobStateReturnsOnCall[len(fake.changeJobStateArgsForCall)]
 	fake.changeJobStateArgsForCall = append(fake.changeJobStateArgsForCall, struct {
@@ -233,12 +232,11 @@ func (fake *FakeBosh) ChangeJobState(arg1 string, arg2 string, arg3 string, arg4
 		arg2 string
 		arg3 string
 		arg4 int
-		arg5 io.Reader
-	}{arg1, arg2, arg3, arg4, arg5})
-	fake.recordInvocation("ChangeJobState", []interface{}{arg1, arg2, arg3, arg4, arg5})
+	}{arg1, arg2, arg3, arg4})
+	fake.recordInvocation("ChangeJobState", []interface{}{arg1, arg2, arg3, arg4})
 	fake.changeJobStateMutex.Unlock()
 	if fake.ChangeJobStateStub != nil {
-		return fake.ChangeJobStateStub(arg1, arg2, arg3, arg4, arg5)
+		return fake.ChangeJobStateStub(arg1, arg2, arg3, arg4)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
@@ -252,10 +250,10 @@ func (fake *FakeBosh) ChangeJobStateCallCount() int {
 	return len(fake.changeJobStateArgsForCall)
 }
 
-func (fake *FakeBosh) ChangeJobStateArgsForCall(i int) (string, string, string, int, io.Reader) {
+func (fake *FakeBosh) ChangeJobStateArgsForCall(i int) (string, string, string, int) {
 	fake.changeJobStateMutex.RLock()
 	defer fake.changeJobStateMutex.RUnlock()
-	return fake.changeJobStateArgsForCall[i].arg1, fake.changeJobStateArgsForCall[i].arg2, fake.changeJobStateArgsForCall[i].arg3, fake.changeJobStateArgsForCall[i].arg4, fake.changeJobStateArgsForCall[i].arg5
+	return fake.changeJobStateArgsForCall[i].arg1, fake.changeJobStateArgsForCall[i].arg2, fake.changeJobStateArgsForCall[i].arg3, fake.changeJobStateArgsForCall[i].arg4
 }
 
 func (fake *FakeBosh) ChangeJobStateReturns(result1 int, result2 error) {

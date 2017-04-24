@@ -90,7 +90,7 @@ func (director *mockDirector) GetDeploymentManifest(deploymentName string) (io.R
 	return director.manifest, nil
 }
 
-func (director *mockDirector) ChangeJobState(deploymentName, jobName, state string, index int, manifest io.Reader) (int, error) {
+func (director *mockDirector) ChangeJobState(deploymentName, jobName, state string, index int) (int, error) {
 	director.changeJobStateCount++
 	if !director.changeJobState {
 		return 0, errors.New("")
