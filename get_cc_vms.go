@@ -32,12 +32,17 @@ func (s *CloudControllerDeploymentParser) Parse(jsonObj []VMObject) ([]CCJob, er
 	return s.vms, err
 }
 
+func isValidCCJobName(jobName string) bool {
+	return strings.Contains(jobName, "cloud_controller") &&
+		!strings.Contains(jobName, "cloud_controller_worker")
+}
+
 func (s *CloudControllerDeploymentParser) setupAndRun(jsonObj []VMObject) (err error) {
 
 	var ccjobs = make([]CCJob, 0)
 
 	for _, vmObject := range jsonObj {
-		if strings.Contains(vmObject.Job, "cloud_controller-") {
+		if isValidCCJobName(vmObject.Job) {
 			ccJob := CCJob{
 				Job:   vmObject.Job,
 				Index: vmObject.Index,
