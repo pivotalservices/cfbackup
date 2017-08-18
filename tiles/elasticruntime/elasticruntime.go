@@ -70,7 +70,17 @@ func (context *ElasticRuntime) backupRestore(action int) (err error) {
 			}
 
 			lo.G.Debug("Setting up CC jobs")
-			defer cloudController.Start()
+			defer func() {
+				startingError := cloudController.Start()
+				if startingError != nil {
+					if err != nil {
+						err = errwrap.Wrapf(err, "Starting CC also failed: %v", startingError)
+					} else {
+						err = startingError
+					}
+				}
+			}()
+
 			if err := cloudController.Stop(); err != nil {
 				return errwrap.Wrap(err, "failed to stop cloud controller")
 			}

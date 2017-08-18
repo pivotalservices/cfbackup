@@ -746,6 +746,69 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string, boshName
 				})
 			})
 
+			Context("when it fails to start the cloud controller", func() {
+				var directorCreator *fakes.FakeDirectorCreator
+				var fakeDirector *fakes.FakeBosh
+
+				BeforeEach(func() {
+					fixture, err := os.Open("../../fixtures/deployment_vms.json")
+					Expect(err).NotTo(HaveOccurred())
+
+					fakeDirector = new(fakes.FakeBosh)
+					fakeDirector.GetDeploymentManifestReturns(ioutil.NopCloser(bytes.NewBufferString("foo")), nil)
+					fakeDirector.GetCloudControllerVMSetReturns(fixture, nil)
+					fakeDirector.ChangeJobStateStub = func(_ string, _ string, state string, _ int) (int, error) {
+						if state == "started" {
+							return 0, fmt.Errorf("starting error")
+						} else {
+							return 0, nil
+						}
+					}
+					fakeDirector.RetrieveTaskStatusReturns(&cfbackup.Task{State: "done"}, nil)
+					directorCreator = new(fakes.FakeDirectorCreator)
+					cfbackup.NewDirector = directorCreator.Spy
+
+					directorCreator.Returns(fakeDirector, nil)
+				})
+
+				It("fails", func() {
+					err := er.Backup()
+					Expect(err).To(HaveOccurred())
+					Expect(err).To(MatchError(ContainSubstring("starting error")))
+				})
+			})
+
+			Context("when it fails to both stop and start the cloud controller", func() {
+				var directorCreator *fakes.FakeDirectorCreator
+				var fakeDirector *fakes.FakeBosh
+
+				BeforeEach(func() {
+					fixture, err := os.Open("../../fixtures/deployment_vms.json")
+					Expect(err).NotTo(HaveOccurred())
+
+					fakeDirector = new(fakes.FakeBosh)
+					fakeDirector.GetDeploymentManifestReturns(ioutil.NopCloser(bytes.NewBufferString("foo")), nil)
+					fakeDirector.GetCloudControllerVMSetReturns(fixture, nil)
+					fakeDirector.ChangeJobStateStub = func(_ string, _ string, state string, _ int) (int, error) {
+						if state == "started" {
+							return 0, fmt.Errorf("starting error")
+						} else {
+							return 0, fmt.Errorf("stopping error")
+						}
+					}
+					directorCreator = new(fakes.FakeDirectorCreator)
+					cfbackup.NewDirector = directorCreator.Spy
+
+					directorCreator.Returns(fakeDirector, nil)
+				})
+
+				It("fails", func() {
+					err := er.Backup()
+					Expect(err).To(HaveOccurred())
+					Expect(err).To(MatchError(ContainSubstring("starting error")))
+					Expect(err).To(MatchError(ContainSubstring("stopping error")))
+				})
+			})
 		})
 
 		Context("with invalid properties", func() {
