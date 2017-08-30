@@ -69,8 +69,9 @@ func (context *ElasticRuntime) backupRestore(action int) (err error) {
 				return errwrap.Wrap(err, "failed creating new cloud controller")
 			}
 
-			lo.G.Debug("Setting up CC jobs")
+			lo.G.Debug("Stopping CC jobs")
 			defer func() {
+				lo.G.Debug("Starting CC jobs")
 				startingError := cloudController.Start()
 				if startingError != nil {
 					if err != nil {

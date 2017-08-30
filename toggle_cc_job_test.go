@@ -82,9 +82,12 @@ func (director *mockDirector) RetrieveTaskStatus(int) (*Task, error) {
 var _ = Describe("ToggleCcJob", func() {
 	TaskPingFreq = time.Millisecond
 	var cloudController *CloudController
+	var newDirectorCallCount int
 
 	BeforeEach(func() {
+		newDirectorCallCount = 0
 		NewDirector = func(ip, username, password string, port int) (Bosh, error) {
+			newDirectorCallCount++
 			return &mockDirector{}, nil
 		}
 		var err error
@@ -122,6 +125,14 @@ var _ = Describe("ToggleCcJob", func() {
 			It("Should Call retriveTaskStatus 5 times with retries when task is processing", func() {
 				cloudController.Start()
 				Ω(retrieveTaskStatusCount).Should(Equal(5))
+			})
+
+			It("should create a new director for each toggle invocation", func() {
+				newDirectorCallCount = 0
+				cloudController.Start()
+				cloudController.Start()
+				cloudController.Start()
+				Expect(newDirectorCallCount).To(Equal(3))
 			})
 		})
 		Context("Task status is error", func() {

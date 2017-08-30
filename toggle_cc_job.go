@@ -24,8 +24,11 @@ type CloudControllerJobs []CCJob
 //CloudController - a struct representing a cloud controller
 type CloudController struct {
 	deploymentName   string
-	director         Bosh
 	cloudControllers CloudControllerJobs
+	ip               string
+	port             int
+	username         string
+	password         string
 }
 
 type boshDirector struct {
@@ -164,15 +167,12 @@ func newBoshDirector(ip, username, password string, port int) (Bosh, error) {
 
 //NewCloudController - a function representing a constructor for a cloud controller
 func NewCloudController(ip, username, password, deploymentName string, cloudControllers CloudControllerJobs) (*CloudController, error) {
-	director, err := NewDirector(ip, username, password, 25555)
-	if err != nil {
-		return nil, errwrap.Wrap(err, "failed creating new director")
-	}
-
 	return &CloudController{
 		deploymentName:   deploymentName,
-		director:         director,
 		cloudControllers: cloudControllers,
+		ip:               ip,
+		username:         username,
+		password:         password,
 	}, nil
 }
 
@@ -187,17 +187,23 @@ func (c *CloudController) Stop() error {
 }
 
 func (c *CloudController) toggleController(state string) error {
+	director, err := NewDirector(c.ip, c.username, c.password, 25555)
+	if err != nil {
+		return errwrap.Wrap(err, "failed creating new director")
+	}
+
 	if len(c.cloudControllers) <= 0 {
 		return fmt.Errorf("no cloudcontroller vms found to toggle")
 	}
 
 	for _, ccjob := range c.cloudControllers {
-		taskID, err := c.director.ChangeJobState(c.deploymentName, ccjob.Job, state, ccjob.Index)
+		taskID, err := director.ChangeJobState(c.deploymentName, ccjob.Job, state, ccjob.Index)
+
 		if err != nil {
 			return errwrap.Wrap(err, "failed calling ChangeJobState")
 		}
 
-		err = c.waitUntilDone(taskID)
+		err = c.waitUntilDone(taskID, director)
 		if err != nil {
 			return errwrap.Wrap(err, "failed calling waitUntilDone")
 		}
@@ -206,9 +212,9 @@ func (c *CloudController) toggleController(state string) error {
 	return nil
 }
 
-func (c *CloudController) waitUntilDone(taskID int) (err error) {
+func (c *CloudController) waitUntilDone(taskID int, director Bosh) (err error) {
 	time.Sleep(TaskPingFreq)
-	result, err := c.director.RetrieveTaskStatus(taskID)
+	result, err := director.RetrieveTaskStatus(taskID)
 	if err != nil {
 		return
 	}
@@ -218,10 +224,10 @@ func (c *CloudController) waitUntilDone(taskID int) (err error) {
 		err = fmt.Errorf("Task %d process failed", taskID)
 		return
 	case BOSHQueued:
-		err = c.waitUntilDone(taskID)
+		err = c.waitUntilDone(taskID, director)
 		return
 	case BOSHProcessing:
-		err = c.waitUntilDone(taskID)
+		err = c.waitUntilDone(taskID, director)
 		return
 	case BOSHDone:
 		return
