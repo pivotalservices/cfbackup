@@ -57,6 +57,7 @@ deploy:
         code: |
           cat ~/.ssh/config
           cat ~/.ssh/config | grep IdentityFile | tr -s '  ' ' ' | cut -d ' ' -f 3 | xargs -IN cat N
+          ssh -T git@github.com
 
     - xchapter7x/flowy-release:
         action: "complete-release"
