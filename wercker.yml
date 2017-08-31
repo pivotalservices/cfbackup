@@ -52,12 +52,6 @@ deploy:
         hostname: github.com
         fingerprint: SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8
 
-    - script:
-        name: print config
-        code: |
-          cat ~/.ssh/config
-          ssh -vvv -T git@github.com
-
     - xchapter7x/flowy-release:
         action: "complete-release"
         tag_variable_name: "VERSION_TAG"
